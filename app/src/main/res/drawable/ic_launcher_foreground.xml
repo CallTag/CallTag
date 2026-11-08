@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lambang "#" CallTag. Latar teal didefinisikan di mipmap/adaptive-icon.
+     Empat goresan: dua garis miring vertikal + dua horizontal naik ke kanan. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:pathData="M42,36 L38,72"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="7"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M60,36 L56,72"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="7"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M34,46.5 L74,43.5"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="7"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M34,63 L74,60"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="7"
+        android:strokeLineCap="round" />
+</vector>

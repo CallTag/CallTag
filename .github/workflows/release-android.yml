@@ -1,0 +1,181 @@
+name: Release Android APK & AAB
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: "Tipe kenaikan versi manual (auto, patch, minor, major)"
+        required: false
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  auto-tag:
+    name: Auto-Tag (Semantic Versioning)
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.semver.outputs.tag_name }}
+      version_name: ${{ steps.semver.outputs.version_name }}
+      version_code: ${{ steps.semver.outputs.version_code }}
+    steps:
+      - name: Checkout Repository (Full History & Tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Calculate & Push Next Semantic Version Tag
+        id: semver
+        env:
+          INPUT_BUMP: ${{ github.event.inputs.bump_type || 'auto' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          LATEST_TAG=$(git tag -l "v[0-9]*.[0-9]*.[0-9]*" --sort=-v:refname | head -n 1)
+
+          if [ -z "$LATEST_TAG" ]; then
+            NEXT_VERSION="1.0.0"
+            NEXT_TAG="v1.0.0"
+            VERSION_CODE=10000
+            echo "Belum ada tag sebelumnya. Menggunakan tag awal $NEXT_TAG"
+          else
+            VERSION_RAW="${LATEST_TAG#v}"
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_RAW"
+            MAJOR=${MAJOR:-1}
+            MINOR=${MINOR:-0}
+            PATCH=${PATCH:-0}
+
+            LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
+            BUMP="$INPUT_BUMP"
+
+            if [ "$BUMP" = "auto" ]; then
+              if echo "$LAST_COMMIT_MSG" | grep -qE "^(feat|fix|chore|refactor)(\(.+\))?!:|BREAKING CHANGE:"; then
+                BUMP="major"
+              elif echo "$LAST_COMMIT_MSG" | grep -qE "^feat(\(.+\))?:"; then
+                BUMP="minor"
+              else
+                BUMP="patch"
+              fi
+            fi
+
+            case "$BUMP" in
+              major)
+                MAJOR=$((MAJOR + 1))
+                MINOR=0
+                PATCH=0
+                ;;
+              minor)
+                MINOR=$((MINOR + 1))
+                PATCH=0
+                ;;
+              *)
+                PATCH=$((PATCH + 1))
+                ;;
+            esac
+
+            NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+            NEXT_TAG="v${NEXT_VERSION}"
+            VERSION_CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
+          fi
+
+          if git rev-parse "$NEXT_TAG" >/dev/null 2>&1; then
+            echo "Tag $NEXT_TAG sudah ada, melewati git tag push."
+          else
+            git tag -a "$NEXT_TAG" -m "Release $NEXT_TAG"
+            git push origin "$NEXT_TAG"
+          fi
+
+          echo "tag_name=$NEXT_TAG" >> "$GITHUB_OUTPUT"
+          echo "version_name=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+          echo "Berhasil menyiapkan rilis: $NEXT_TAG (versionName=$NEXT_VERSION, versionCode=$VERSION_CODE)"
+
+  build-and-release:
+    name: Build & Release APK + AAB
+    needs: auto-tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository at Release Tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.auto-tag.outputs.tag_name }}
+          fetch-depth: 0
+
+      - name: Setup JDK 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Gradle Cache
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant Execute Permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Decode Keystore from GitHub Secrets (With Fallback)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > "${GITHUB_WORKSPACE}/release.keystore"
+            echo "KEYSTORE_FILE=${GITHUB_WORKSPACE}/release.keystore" >> "$GITHUB_ENV"
+            echo "Release keystore berhasil didekode untuk produksi."
+          else
+            echo "Secret KEYSTORE_BASE64 belum diatur. Build menggunakan fallback debug signing."
+          fi
+
+      - name: Build Signed APK & AAB (assembleRelease & bundleRelease)
+        env:
+          VERSION_NAME: ${{ needs.auto-tag.outputs.version_name }}
+          VERSION_CODE: ${{ needs.auto-tag.outputs.version_code }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          ./gradlew assembleRelease bundleRelease \
+            -PversionName="${VERSION_NAME}" \
+            -PversionCode="${VERSION_CODE}" \
+            --stacktrace
+
+      - name: Prepare Release Artifacts (app-release.apk & app-release.aab)
+        run: |
+          mkdir -p release-assets
+          if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
+            cp "app/build/outputs/apk/release/app-release.apk" "release-assets/app-release.apk"
+          elif [ -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
+            cp "app/build/outputs/apk/release/app-release-unsigned.apk" "release-assets/app-release.apk"
+          fi
+
+          if [ -f "app/build/outputs/bundle/release/app-release.aab" ]; then
+            cp "app/build/outputs/bundle/release/app-release.aab" "release-assets/app-release.aab"
+          fi
+
+          ls -lh release-assets/
+
+      - name: Create GitHub Release & Upload APK + AAB
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.auto-tag.outputs.tag_name }}
+          name: "CallTag Android ${{ needs.auto-tag.outputs.tag_name }}"
+          generate_release_notes: true
+          files: |
+            release-assets/app-release.apk
+            release-assets/app-release.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

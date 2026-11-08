@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CallTag Indonesia</string>
+    <string name="notification_channel_caller_id">Deteksi Caller ID &amp; Peringatan Scam</string>
+    <string name="notification_channel_desc">Menampilkan peringatan tingkat tinggi saat ada panggilan masuk dari Pinjol Ilegal, Penipu APK, CS Palsu, atau Judi Online.</string>
+</resources>
