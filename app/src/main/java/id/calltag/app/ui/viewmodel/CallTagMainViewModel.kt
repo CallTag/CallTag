@@ -46,7 +46,7 @@ class CallTagMainViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     // Layar 1: Home Lookup & Riwayat Panggilan
-    private val _searchQuery = MutableStateFlow("+6281299887766")
+    private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private val _lookupState = MutableStateFlow<UiLoadState<FullPhoneLookupResult>>(UiLoadState.Idle)
@@ -110,7 +110,7 @@ class CallTagMainViewModel(
     private val _officialChannels = MutableStateFlow(OfflineSeedData.getInitialOfficialChannels())
     val officialChannels: StateFlow<List<OfficialChannelDto>> = _officialChannels.asStateFlow()
 
-    private val _lastReportedPhoneForCopy = MutableStateFlow("+6281299887766")
+    private val _lastReportedPhoneForCopy = MutableStateFlow("")
     val lastReportedPhoneForCopy: StateFlow<String> = _lastReportedPhoneForCopy.asStateFlow()
 
     // Layar 4: Spam Guard & Offline Delta Sync
@@ -130,7 +130,6 @@ class CallTagMainViewModel(
     val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
 
     init {
-        performPhoneLookup("+6281299887766")
         refreshCacheStats()
         loadOfficialChannels()
     }

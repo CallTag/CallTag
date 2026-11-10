@@ -70,8 +70,8 @@ object CallTagRadius {
  * hanya untuk teks umum agar ukuran tidak dikarang per layar.
  */
 object CallTagType {
-    /** 24sp ExtraBold — judul utama satu layar (maksimal satu per layar). */
-    val display: TextUnit = 24.sp
+    /** 30sp Bold — judul utama satu layar (maksimal satu per layar). */
+    val display: TextUnit = 30.sp
 
     /** 20sp ExtraBold — judul kartu utama. */
     val titleLarge: TextUnit = 20.sp

@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -35,6 +34,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
@@ -57,6 +58,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,12 +71,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import id.calltag.app.data.local.entity.CallScreeningLog
 import id.calltag.app.data.repository.FullPhoneLookupResult
 import id.calltag.app.ui.components.CallerIdOverlayCard
+import id.calltag.app.ui.components.ScreenIntro
 import id.calltag.app.ui.theme.CallTagDesign
 import id.calltag.app.ui.theme.CallTagRadius
 import id.calltag.app.ui.theme.CallTagSpacing
@@ -164,6 +166,7 @@ fun HomeScreen(
         item {
             SearchPanel(
                 searchQuery = searchQuery,
+                isLoading = lookupState is UiLoadState.Loading,
                 onQueryChange = viewModel::updateSearchQuery,
                 onClearQuery = { viewModel.updateSearchQuery("") },
                 onSearch = {
@@ -211,7 +214,7 @@ fun HomeScreen(
             }
         }
 
-        item {
+        if (lookupState !is UiLoadState.Idle) item {
             when (val state = lookupState) {
                 is UiLoadState.Idle -> Unit
                 is UiLoadState.Loading -> LookupLoadingCard()
@@ -255,116 +258,114 @@ fun HomeScreen(
  * tegas, sehingga mata membaca satu kontrol bukan dua. Nomor contoh dipisah
  * dengan garis putus agar jelas itu bukan input.
  */
+// Bidang dan tombol kini disusun vertikal agar nomor tetap terbaca pada layar kecil.
 @Composable
 private fun SearchPanel(
     searchQuery: String,
+    isLoading: Boolean,
     onQueryChange: (String) -> Unit,
     onClearQuery: () -> Unit,
     onSearch: () -> Unit,
     onSampleChipClick: (String) -> Unit
 ) {
     val colors = CallTagDesign.colors
+    val canSearch = searchQuery.isNotBlank() && !isLoading
 
     Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.sm)) {
-        Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xxs)) {
-            Text(
-                text = "Siapa yang menelepon?",
-                color = colors.textPrimary,
-                fontSize = CallTagType.display,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = (-0.5).sp,
-                lineHeight = 29.sp
-            )
-            Text(
-                text = "Cek reputasi nomor asing sebelum Anda angkat.",
-                color = colors.textSecondary,
-                fontSize = CallTagType.body
-            )
-        }
-
-        Row(
+        Surface(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs),
-            verticalAlignment = Alignment.CenterVertically
+            shape = RoundedCornerShape(CallTagRadius.lg),
+            color = colors.brandContainer
         ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = onQueryChange,
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                shape = RoundedCornerShape(CallTagRadius.md),
-                placeholder = {
-                    Text(
-                        text = "08xx atau +628xx",
-                        color = colors.textSecondary,
-                        fontSize = CallTagType.body
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = null,
-                        tint = colors.textSecondary
-                    )
-                },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = onClearQuery) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Hapus nomor",
-                                tint = colors.textSecondary
-                            )
-                        }
-                    }
-                },
-                textStyle = CallTagDesign.monoStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.textPrimary
-                ),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Phone,
-                    imeAction = ImeAction.Search
-                ),
-                keyboardActions = KeyboardActions(onSearch = { onSearch() }),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = colors.brandPrimary,
-                    unfocusedBorderColor = colors.borderStrong,
-                    focusedContainerColor = colors.surfaceCard,
-                    unfocusedContainerColor = colors.surfaceCard
-                )
-            )
-
-            Button(
-                onClick = onSearch,
-                modifier = Modifier
-                    .heightIn(min = CallTagTouch.action)
-                    .height(CallTagTouch.action),
-                shape = RoundedCornerShape(CallTagRadius.md),
-                contentPadding = PaddingValues(horizontal = CallTagSpacing.lg),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colors.brandPrimary,
-                    contentColor = colors.onBrand
-                )
+            Column(
+                modifier = Modifier.padding(CallTagSpacing.lg),
+                verticalArrangement = Arrangement.spacedBy(CallTagSpacing.lg)
             ) {
-                Text(
-                    text = "Cari",
-                    fontSize = CallTagType.subtitle,
-                    fontWeight = FontWeight.Bold
+                ScreenIntro(
+                    eyebrow = "CEK NOMOR",
+                    title = "Siapa yang\nmenelepon?",
+                    description = "Kenali reputasi nomor asing dari laporan komunitas."
                 )
+                Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.sm)) {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = onQueryChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        shape = RoundedCornerShape(CallTagRadius.md),
+                        label = { Text("Nomor telepon") },
+                        placeholder = {
+                            Text(
+                                text = "08xx atau +628xx",
+                                style = CallTagDesign.monoStyle(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = colors.textSecondary
+                                )
+                            )
+                        },
+                        trailingIcon = {
+                            if (searchQuery.isNotEmpty()) {
+                                IconButton(onClick = onClearQuery) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Hapus nomor",
+                                        tint = colors.textSecondary
+                                    )
+                                }
+                            }
+                        },
+                        textStyle = CallTagDesign.monoStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.textPrimary
+                        ),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Phone,
+                            imeAction = ImeAction.Search
+                        ),
+                        keyboardActions = KeyboardActions(onSearch = { if (canSearch) onSearch() }),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = colors.brandPrimary,
+                            unfocusedBorderColor = colors.borderStrong,
+                            focusedLabelColor = colors.brandPrimary,
+                            unfocusedLabelColor = colors.textSecondary,
+                            focusedContainerColor = colors.surfaceCard,
+                            unfocusedContainerColor = colors.surfaceCard
+                        )
+                    )
+                    Button(
+                        onClick = onSearch,
+                        enabled = canSearch,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = CallTagTouch.action),
+                        shape = RoundedCornerShape(CallTagRadius.md),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colors.brandSolid,
+                            contentColor = colors.onBrand
+                        )
+                    ) {
+                        Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(CallTagSpacing.xs))
+                        Text(
+                            text = if (isLoading) "Memeriksa nomor…" else "Cek nomor",
+                            fontSize = CallTagType.subtitle,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
-
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs),
-            contentPadding = PaddingValues(top = CallTagSpacing.xxs)
-        ) {
-            items(QUICK_SAMPLE_CHIPS) { chip ->
-                SampleChip(
-                    label = chip.tagLabel,
-                    onClick = { onSampleChipClick(chip.phone) }
-                )
+        Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xxs)) {
+            Text(
+                text = "Coba nomor contoh",
+                color = colors.textSecondary,
+                fontSize = CallTagType.label,
+                fontWeight = FontWeight.SemiBold
+            )
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
+                items(QUICK_SAMPLE_CHIPS) { chip ->
+                    SampleChip(label = chip.tagLabel, onClick = { onSampleChipClick(chip.phone) })
+                }
             }
         }
     }
@@ -374,23 +375,23 @@ private fun SearchPanel(
 private fun SampleChip(label: String, onClick: () -> Unit) {
     val colors = CallTagDesign.colors
     Surface(
-        modifier = Modifier
-            .clip(RoundedCornerShape(CallTagRadius.pill))
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(CallTagRadius.pill),
+        onClick = onClick,
+        shape = RoundedCornerShape(CallTagRadius.md),
         color = colors.surfaceCard,
         border = BorderStroke(1.dp, colors.borderSubtle)
     ) {
-        Text(
-            text = label,
-            modifier = Modifier.padding(
-                horizontal = CallTagSpacing.sm,
-                vertical = CallTagSpacing.xs
-            ),
-            color = colors.textSecondary,
-            fontSize = CallTagType.label,
-            fontWeight = FontWeight.SemiBold
-        )
+        Box(
+            modifier = Modifier.heightIn(min = CallTagTouch.action)
+                .padding(horizontal = CallTagSpacing.sm, vertical = CallTagSpacing.xs),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = label,
+                color = colors.textPrimary,
+                fontSize = CallTagType.label,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
     }
 }
 
@@ -465,7 +466,7 @@ private fun CallerIdStatusBar(
                     shape = RoundedCornerShape(CallTagRadius.sm),
                     contentPadding = PaddingValues(horizontal = CallTagSpacing.md),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.brandPrimary,
+                        containerColor = colors.brandSolid,
                         contentColor = colors.onBrand
                     )
                 ) {
@@ -500,7 +501,7 @@ private fun CallerProfileResultCard(
     val badgeColor = CallTagDesign.reputationBadgeColor(pt.reputationLevel)
     val containerColor = CallTagDesign.reputationContainerColor(pt.reputationLevel)
     val statusText = CallTagDesign.reputationLabel(pt.reputationLevel)
-    val initials = CallTagDesign.callerInitials(pt.topCommunityLabel, pt.reputationLevel)
+    var detailsExpanded by rememberSaveable(pt.phoneE164) { mutableStateOf(false) }
 
     val hashtags = remember(pt.tagsSummary, pt.topCommunityLabel, result.categoryBreakdown) {
         CallTagDesign.extractHashtagList(
@@ -509,246 +510,160 @@ private fun CallerProfileResultCard(
             categoryBreakdown = result.categoryBreakdown
         )
     }
-
     val isCleanNoReports = pt.reputationLevel.equals("CLEAN", ignoreCase = true) && pt.uniqueReporters == 0
-    val displayTitle = if (isCleanNoReports) "Belum Ada Laporan Spam" else pt.topCommunityLabel
+    val displayTitle = if (isCleanNoReports) "Belum ada laporan spam" else pt.topCommunityLabel
 
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(CallTagRadius.lg),
-        colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
-        border = BorderStroke(1.dp, colors.borderSubtle),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        color = colors.surfaceCard,
+        border = BorderStroke(1.dp, colors.borderSubtle)
     ) {
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .drawBehind {
-                    drawRect(
-                        color = badgeColor,
-                        size = Size(4.dp.toPx(), size.height)
-                    )
-                }
+                .drawBehind { drawRect(color = badgeColor, size = Size(4.dp.toPx(), size.height)) }
+                .padding(CallTagSpacing.lg),
+            verticalArrangement = Arrangement.spacedBy(CallTagSpacing.md)
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                // Baris status ringkas di atas.
+            // Baris status ringkas di atas.
+            Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
+                Text(
+                    text = "HASIL PEMERIKSAAN",
+                    color = colors.textSecondary,
+                    fontSize = CallTagType.caption,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.8.sp
+                )
+                // Identitas nomor.
+                Text(
+                    text = pt.phoneE164,
+                    style = CallTagDesign.monoStyle(
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.textPrimary
+                    )
+                )
+                Text(
+                    text = displayTitle,
+                    color = colors.textPrimary,
+                    fontSize = CallTagType.title,
+                    fontWeight = FontWeight.Bold
+                )
+                if (pt.carrier.isNotBlank()) {
+                    Text(text = pt.carrier, color = colors.textSecondary, fontSize = CallTagType.bodySmall)
+                }
+                TagChip(text = if (isCleanNoReports) "Belum ada laporan" else statusText, fg = badgeColor, bg = containerColor)
+            }
+
+            // Skor risiko — angka wajib monospace.
+            Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = CallTagSpacing.lg + 4.dp,
-                            end = CallTagSpacing.lg,
-                            top = CallTagSpacing.sm,
-                            bottom = CallTagSpacing.sm
-                        ),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = "Skor risiko", color = colors.textPrimary, fontSize = CallTagType.body, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = "${pt.uniqueReporters} pelapor",
+                            color = colors.textSecondary,
+                            fontSize = CallTagType.label
+                        )
+                    }
                     Text(
-                        text = statusText.uppercase(),
-                        color = badgeColor,
-                        fontSize = CallTagType.caption,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 0.8.sp
-                    )
-                    Text(
-                        text = if (pt.uniqueReporters > 0) {
-                            "${pt.uniqueReporters} pelapor"
-                        } else {
-                            "Tidak ada laporan"
-                        },
-                        color = colors.textSecondary,
-                        fontSize = CallTagType.caption,
-                        fontWeight = FontWeight.SemiBold
+                        text = "${pt.spamScore.toInt()} / 100",
+                        style = CallTagDesign.monoStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold, color = badgeColor)
                     )
                 }
+                LinearProgressIndicator(
+                    progress = { (pt.spamScore.toFloat() / 100f).coerceIn(0f, 1f) },
+                    modifier = Modifier.fillMaxWidth().height(CallTagSpacing.xs).clip(RoundedCornerShape(CallTagRadius.pill)),
+                    color = badgeColor,
+                    trackColor = colors.surfaceSubtle
+                )
+                if (isCleanNoReports) {
+                    Text(
+                        text = "Belum ada laporan bukan jaminan nomor aman.",
+                        color = colors.textSecondary,
+                        fontSize = CallTagType.bodySmall
+                    )
+                }
+            }
 
-                Column(
-                    modifier = Modifier.padding(
-                        start = CallTagSpacing.lg + 4.dp,
-                        end = CallTagSpacing.lg,
-                        bottom = CallTagSpacing.lg
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(CallTagSpacing.lg)
+            // Aksi: satu primer, satu sekunder.
+            Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
+                Button(
+                    onClick = onReportThisPhone,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = CallTagTouch.action),
+                    shape = RoundedCornerShape(CallTagRadius.md),
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.brandSolid, contentColor = colors.onBrand)
                 ) {
-                    // Identitas nomor.
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.Top,
-                        horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.sm)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(52.dp)
-                                .clip(CircleShape)
-                                .background(containerColor)
-                                .border(1.dp, badgeColor.copy(alpha = 0.35f), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = initials,
-                                color = badgeColor,
-                                fontSize = 19.sp,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-                        }
-
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
-                            Text(
-                                text = displayTitle,
-                                color = colors.textPrimary,
-                                fontSize = CallTagType.title,
-                                fontWeight = FontWeight.ExtraBold,
-                                lineHeight = 21.sp,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = pt.phoneE164,
-                                style = CallTagDesign.monoStyle(
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colors.textPrimary
-                                )
-                            )
-                            Text(
-                                text = pt.carrier,
-                                color = colors.textSecondary,
-                                fontSize = CallTagType.caption,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-
-                    // Skor risiko — angka wajib monospace.
-                    Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.Bottom
-                        ) {
-                            Text(
-                                text = "Skor risiko",
-                                color = colors.textSecondary,
-                                fontSize = CallTagType.label,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Text(
-                                text = "${pt.spamScore.toInt()}",
-                                style = CallTagDesign.monoStyle(
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = badgeColor
-                                )
-                            )
-                        }
-                        LinearProgressIndicator(
-                            progress = { (pt.spamScore.toFloat() / 100f).coerceIn(0.03f, 1f) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(6.dp)
-                                .clip(RoundedCornerShape(3.dp)),
-                            color = badgeColor,
-                            trackColor = colors.surfaceSubtle
-                        )
-                    }
-
-                    HorizontalDivider(color = colors.borderSubtle)
-
-                    // Awan #Tag komunitas.
-                    Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
+                    Text(text = "Beri #Tag / lapor nomor", fontSize = CallTagType.body, fontWeight = FontWeight.Bold)
+                }
+                OutlinedButton(
+                    onClick = onShowOverlayPreview,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = CallTagTouch.action),
+                    shape = RoundedCornerShape(CallTagRadius.md),
+                    border = BorderStroke(1.dp, colors.borderStrong)
+                ) {
+                    Text(text = "Lihat tampilan telepon", color = colors.textPrimary, fontSize = CallTagType.body, fontWeight = FontWeight.SemiBold)
+                }
+            }
+            HorizontalDivider(color = colors.borderSubtle)
+            Surface(
+                onClick = { detailsExpanded = !detailsExpanded },
+                color = colors.surfaceCard,
+                shape = RoundedCornerShape(CallTagRadius.sm)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().heightIn(min = CallTagTouch.action),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)
+                ) {
+                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xxs)) {
                         Text(
-                            text = "#Tag Komunitas · ${hashtags.size}",
+                            text = if (detailsExpanded) "Tutup rincian komunitas" else "Lihat rincian komunitas",
                             color = colors.textPrimary,
-                            fontSize = CallTagType.label,
+                            fontSize = CallTagType.body,
                             fontWeight = FontWeight.Bold
                         )
-
-                        if (hashtags.isEmpty()) {
-                            TagChip(
-                                text = "#BelumAdaLaporanSpam",
-                                fg = colors.cleanEmerald,
-                                bg = colors.cleanEmeraldContainer
-                            )
-                        } else {
-                            FlowRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs),
-                                verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)
-                            ) {
-                                hashtags.forEach { tag ->
-                                    TagChip(
-                                        text = tag,
-                                        fg = badgeColor,
-                                        bg = containerColor,
-                                        maxWidth = 210.dp
-                                    )
-                                }
-                            }
+                        Text(
+                            text = "${hashtags.size} #Tag · ${result.recentReports.size} catatan",
+                            color = colors.textSecondary,
+                            fontSize = CallTagType.label
+                        )
+                    }
+                    Icon(
+                        imageVector = if (detailsExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = null,
+                        tint = colors.brandPrimary
+                    )
+                }
+            }
+            if (detailsExpanded) {
+                // Awan #Tag komunitas.
+                Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
+                    Text(text = "#Tag komunitas", color = colors.textPrimary, fontSize = CallTagType.subtitle, fontWeight = FontWeight.Bold)
+                    if (hashtags.isEmpty()) {
+                        Text(text = "Belum ada #Tag untuk nomor ini.", color = colors.textSecondary, fontSize = CallTagType.bodySmall)
+                    } else {
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs),
+                            verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)
+                        ) {
+                            hashtags.forEach { tag -> TagChip(text = tag, fg = badgeColor, bg = containerColor) }
                         }
                     }
-
-                    // Catatan pengguna lain.
-                    if (result.recentReports.isNotEmpty()) {
-                        Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
-                            Text(
-                                text = "Catatan Pengguna Lain",
-                                color = colors.textPrimary,
-                                fontSize = CallTagType.label,
-                                fontWeight = FontWeight.Bold
-                            )
-                            result.recentReports.take(3).forEach { rep ->
-                                ReportNote(
-                                    tag = rep.tagName,
-                                    callType = friendlyCallType(rep.callType),
-                                    comment = rep.comment
-                                )
-                            }
-                        }
+                }
+                // Catatan pengguna lain.
+                Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.sm)) {
+                    Text(text = "Catatan pengguna lain", color = colors.textPrimary, fontSize = CallTagType.subtitle, fontWeight = FontWeight.Bold)
+                    if (result.recentReports.isEmpty()) {
+                        Text(text = "Belum ada catatan untuk nomor ini.", color = colors.textSecondary, fontSize = CallTagType.bodySmall)
                     }
-
-                    // Aksi: satu primer, satu sekunder.
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)
-                    ) {
-                        Button(
-                            onClick = onReportThisPhone,
-                            modifier = Modifier
-                                .weight(1f)
-                                .heightIn(min = CallTagTouch.action),
-                            shape = RoundedCornerShape(CallTagRadius.md),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = colors.brandPrimary,
-                                contentColor = colors.onBrand
-                            )
-                        ) {
-                            Text(
-                                text = "Beri #Tag / Lapor",
-                                fontSize = CallTagType.label,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-
-                        OutlinedButton(
-                            onClick = onShowOverlayPreview,
-                            modifier = Modifier
-                                .weight(1f)
-                                .heightIn(min = CallTagTouch.action),
-                            shape = RoundedCornerShape(CallTagRadius.md),
-                            border = BorderStroke(1.dp, colors.borderStrong)
-                        ) {
-                            Text(
-                                text = "Tampilan Telepon",
-                                color = colors.textPrimary,
-                                fontSize = CallTagType.label,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
+                    result.recentReports.forEach { rep ->
+                        ReportNote(tag = rep.tagName, callType = friendlyCallType(rep.callType), comment = rep.comment)
                     }
                 }
             }
@@ -757,24 +672,14 @@ private fun CallerProfileResultCard(
 }
 
 @Composable
-private fun TagChip(text: String, fg: Color, bg: Color, maxWidth: Dp = Dp.Unspecified) {
-    Surface(
-        modifier = if (maxWidth == Dp.Unspecified) Modifier else Modifier.widthIn(max = maxWidth),
-        shape = RoundedCornerShape(CallTagRadius.pill),
-        color = bg,
-        border = BorderStroke(1.dp, fg.copy(alpha = 0.3f))
-    ) {
+private fun TagChip(text: String, fg: Color, bg: Color) {
+    Surface(shape = RoundedCornerShape(CallTagRadius.sm), color = bg) {
         Text(
             text = text,
-            modifier = Modifier.padding(
-                horizontal = CallTagSpacing.sm,
-                vertical = 6.dp
-            ),
+            modifier = Modifier.padding(horizontal = CallTagSpacing.sm, vertical = CallTagSpacing.xs),
             color = fg,
             fontSize = CallTagType.label,
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -783,39 +688,15 @@ private fun TagChip(text: String, fg: Color, bg: Color, maxWidth: Dp = Dp.Unspec
 private fun ReportNote(tag: String, callType: String, comment: String) {
     val colors = CallTagDesign.colors
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, colors.borderSubtle, RoundedCornerShape(CallTagRadius.sm))
-            .padding(CallTagSpacing.sm),
-        verticalArrangement = Arrangement.spacedBy(3.dp)
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xxs)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "#$tag",
-                modifier = Modifier.weight(1f),
-                color = colors.textPrimary,
-                fontSize = CallTagType.label,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = callType,
-                color = colors.textSecondary,
-                fontSize = CallTagType.caption
-            )
-        }
+        Text(text = "#$tag", color = colors.textPrimary, fontSize = CallTagType.body, fontWeight = FontWeight.Bold)
+        Text(text = callType, color = colors.textSecondary, fontSize = CallTagType.label)
         if (comment.isNotBlank()) {
-            Text(
-                text = comment,
-                color = colors.textSecondary,
-                fontSize = CallTagType.label,
-                lineHeight = 17.sp
-            )
+            Text(text = comment, color = colors.textSecondary, fontSize = CallTagType.body, lineHeight = 21.sp)
         }
+        HorizontalDivider(modifier = Modifier.padding(top = CallTagSpacing.xs), color = colors.borderSubtle)
     }
 }
 

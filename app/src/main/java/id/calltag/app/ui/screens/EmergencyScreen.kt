@@ -42,12 +42,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import id.calltag.app.data.local.entity.EmergencyContact
+import id.calltag.app.ui.components.ScreenIntro
 import id.calltag.app.ui.theme.CallTagDesign
 import id.calltag.app.ui.theme.CallTagRadius
 import id.calltag.app.ui.theme.CallTagSpacing
@@ -105,151 +105,113 @@ fun EmergencyScreen(
         ),
         verticalArrangement = Arrangement.spacedBy(CallTagSpacing.md)
     ) {
+        item {
+            ScreenIntro(
+                eyebrow = "Direktori darurat",
+                title = "Bantuan saat dibutuhkan.",
+                description = "Pilih layanan untuk membuka nomor di aplikasi telepon."
+            )
+        }
+
         // 1. Panggilan cepat nomor darurat nasional.
         item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(CallTagRadius.lg),
-                colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
-                border = BorderStroke(1.dp, colors.borderSubtle),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(CallTagSpacing.lg),
-                    verticalArrangement = Arrangement.spacedBy(CallTagSpacing.sm)
-                ) {
+            Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
+                nationalNumbers.firstOrNull { it.shortCode == "112" }?.let { contact ->
+                    NationalHotlineButton(
+                        contact = contact,
+                        onClick = { dialNumber(context, contact.primaryPhone) },
+                        modifier = Modifier.fillMaxWidth(),
+                        prominent = true
+                    )
+                }
+                nationalNumbers.filterNot { it.shortCode == "112" }.chunked(2).forEach { rowItems ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Top
+                        horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)
                     ) {
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xxs)
-                        ) {
-                            Text(
-                                text = "Panggilan Darurat",
-                                color = colors.textPrimary,
-                                fontSize = CallTagType.titleLarge,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-                            Text(
-                                text = "Ketuk nomor untuk langsung menelepon, 24 jam.",
-                                color = colors.textSecondary,
-                                fontSize = CallTagType.bodySmall
+                        rowItems.forEach { contact ->
+                            NationalHotlineButton(
+                                contact = contact,
+                                onClick = { dialNumber(context, contact.primaryPhone) },
+                                modifier = Modifier.weight(1f)
                             )
                         }
-
-                        // Lencana status offline — menegaskan fitur ini tetap jalan tanpa sinyal.
-                        Surface(
-                            shape = RoundedCornerShape(CallTagRadius.pill),
-                            color = colors.cleanEmeraldContainer,
-                            border = BorderStroke(1.dp, colors.cleanEmerald.copy(alpha = 0.3f))
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(
-                                    horizontal = CallTagSpacing.xs,
-                                    vertical = 4.dp
-                                ),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = null,
-                                    tint = colors.cleanEmerald,
-                                    modifier = Modifier.size(12.dp)
-                                )
-                                Text(
-                                    text = "Siap offline",
-                                    color = colors.cleanEmerald,
-                                    fontSize = CallTagType.caption,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
+                        if (rowItems.size == 1) Box(modifier = Modifier.weight(1f))
                     }
-
-                    nationalNumbers.chunked(2).forEach { rowItems ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)
-                        ) {
-                            rowItems.forEach { contact ->
-                                NationalHotlineButton(
-                                    contact = contact,
-                                    onClick = { dialNumber(context, contact.primaryPhone) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                            if (rowItems.size == 1) {
-                                Box(modifier = Modifier.weight(1f))
-                            }
-                        }
-                    }
+                }
+                // Lencana status offline — direktori tetap bisa dibaca tanpa internet.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xxs)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = colors.brandPrimary,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = "Direktori tersedia offline",
+                        color = colors.textSecondary,
+                        fontSize = CallTagType.label
+                    )
                 }
             }
         }
 
         // 2. Filter posko daerah (Damkar, Kepolisian, IGD RS).
         item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(CallTagRadius.lg),
-                colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
-                border = BorderStroke(1.dp, colors.borderSubtle),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(CallTagSpacing.lg),
-                    verticalArrangement = Arrangement.spacedBy(CallTagSpacing.sm)
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xxs)) {
-                        Text(
-                            text = "Posko Darurat Daerah",
-                            color = colors.textPrimary,
-                            fontSize = CallTagType.title,
-                            fontWeight = FontWeight.Bold
+            Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.sm)) {
+                Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xxs)) {
+                    Text(
+                        text = "Cari posko daerah",
+                        color = colors.textPrimary,
+                        fontSize = CallTagType.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Telepon atau WhatsApp layanan di kota Anda.",
+                        color = colors.textSecondary,
+                        fontSize = CallTagType.bodySmall
+                    )
+                }
+                Text("Kota", color = colors.textPrimary, fontSize = CallTagType.label, fontWeight = FontWeight.Bold)
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
+                    items(cityOptions) { (cityKey, cityLabel) ->
+                        FilterChipPill(
+                            label = cityLabel,
+                            selected = selectedCity == cityKey,
+                            onClick = {
+                                viewModel.setEmergencyFilter(
+                                    province = selectedProvince,
+                                    city = cityKey,
+                                    agencyType = selectedAgencyType
+                                )
+                            }
                         )
-                        Text(
-                            text = "Telepon atau WhatsApp Damkar, Polres, dan IGD RS terdekat.",
-                            color = colors.textSecondary,
-                            fontSize = CallTagType.bodySmall
-                        )
-                    }
-
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
-                        items(cityOptions) { (cityKey, cityLabel) ->
-                            FilterChipPill(
-                                label = cityLabel,
-                                selected = selectedCity == cityKey,
-                                onClick = {
-                                    viewModel.setEmergencyFilter(
-                                        province = selectedProvince,
-                                        city = cityKey,
-                                        agencyType = selectedAgencyType
-                                    )
-                                }
-                            )
-                        }
-                    }
-
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
-                        items(agencyOptions) { (agencyKey, agencyLabel) ->
-                            FilterChipPill(
-                                label = agencyLabel,
-                                selected = selectedAgencyType == agencyKey,
-                                onClick = {
-                                    viewModel.setEmergencyFilter(
-                                        province = selectedProvince,
-                                        city = selectedCity,
-                                        agencyType = agencyKey
-                                    )
-                                }
-                            )
-                        }
                     }
                 }
+                Text("Jenis layanan", color = colors.textPrimary, fontSize = CallTagType.label, fontWeight = FontWeight.Bold)
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
+                    items(agencyOptions) { (agencyKey, agencyLabel) ->
+                        FilterChipPill(
+                            label = agencyLabel,
+                            selected = selectedAgencyType == agencyKey,
+                            onClick = {
+                                viewModel.setEmergencyFilter(
+                                    province = selectedProvince,
+                                    city = selectedCity,
+                                    agencyType = agencyKey
+                                )
+                            }
+                        )
+                    }
+                }
+                Text(
+                    text = "${localDirectory.size} posko dalam direktori",
+                    color = colors.textSecondary,
+                    fontSize = CallTagType.label
+                )
             }
         }
 
@@ -282,22 +244,23 @@ fun EmergencyScreen(
 private fun NationalHotlineButton(
     contact: EmergencyContact,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    prominent: Boolean = false
 ) {
     val colors = CallTagDesign.colors
     val isUrgentRed = contact.shortCode in listOf("112", "113", "119")
     // Latar tombol memakai token *Solid, bukan warna teks semantik: warna teks
     // dibuat terang di mode gelap agar terbaca, sehingga tidak layak jadi latar.
-    val bgColor = if (isUrgentRed) colors.dangerSolid else colors.brandSolid
-    val fgColor = if (bgColor.luminance() > 0.5f) Color(0xFF14181A) else Color.White
+    val bgColor = if (isUrgentRed) colors.dangerSolid else colors.surfaceCard
+    val fgColor = if (isUrgentRed) Color.White else colors.textPrimary
     val shortTitle = when (contact.shortCode) {
         "112" -> "Darurat Terpadu"
-        "110" -> "Kepolisian RI"
-        "113" -> "Pemadam (Damkar)"
-        "119" -> "Ambulans Medis"
+        "110" -> "Kepolisian"
+        "113" -> "Damkar"
+        "119" -> "Ambulans"
         "115" -> "SAR / Bencana"
         "123" -> "Gangguan PLN"
-        "14080" -> "Darurat Jalan Tol"
+        "14080" -> "Jalan tol"
         else -> contact.name.substringBefore("(").trim()
     }
 
@@ -305,6 +268,7 @@ private fun NationalHotlineButton(
         onClick = onClick,
         modifier = modifier.heightIn(min = CallTagTouch.emergency),
         shape = RoundedCornerShape(CallTagRadius.md),
+        border = if (isUrgentRed) null else BorderStroke(1.dp, colors.borderSubtle),
         contentPadding = PaddingValues(
             horizontal = CallTagSpacing.sm,
             vertical = CallTagSpacing.xs
@@ -323,7 +287,7 @@ private fun NationalHotlineButton(
                 Text(
                     text = if (contact.shortCode == "119") "118/119" else contact.shortCode,
                     style = CallTagDesign.monoStyle(
-                        fontSize = 20.sp,
+                        fontSize = if (prominent) 30.sp else 20.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = fgColor
                     )
@@ -331,16 +295,15 @@ private fun NationalHotlineButton(
                 Text(
                     text = shortTitle,
                     color = fgColor.copy(alpha = 0.92f),
-                    fontSize = CallTagType.caption,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
+                    fontSize = if (prominent) CallTagType.body else CallTagType.label,
+                    fontWeight = FontWeight.Medium
                 )
             }
             Icon(
                 imageVector = Icons.Default.Call,
                 contentDescription = null,
                 tint = fgColor.copy(alpha = 0.9f),
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(if (prominent) 26.dp else 18.dp)
             )
         }
     }
@@ -353,12 +316,12 @@ private fun FilterChipPill(
     onClick: () -> Unit
 ) {
     val colors = CallTagDesign.colors
-    val bg = if (selected) colors.brandPrimary else colors.surfaceCard
+    val bg = if (selected) colors.brandSolid else colors.surfaceCard
     val fg = if (selected) colors.onBrand else colors.textPrimary
 
     Surface(
         modifier = Modifier
-            .heightIn(min = CallTagTouch.compact)
+            .heightIn(min = CallTagTouch.action)
             .clip(RoundedCornerShape(CallTagRadius.pill))
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(CallTagRadius.pill),
@@ -410,10 +373,10 @@ private fun LocalEmergencyAgencyCard(
             modifier = Modifier.padding(CallTagSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(CallTagSpacing.sm)
         ) {
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs),
+                verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xxs)
             ) {
                 Surface(
                     shape = RoundedCornerShape(CallTagRadius.pill),
@@ -492,7 +455,7 @@ private fun LocalEmergencyAgencyCard(
                     shape = RoundedCornerShape(CallTagRadius.md),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (agencyIsDamkar) colors.dangerSolid else colors.brandSolid,
-                        contentColor = Color.White
+                        contentColor = if (agencyIsDamkar) Color.White else colors.onBrand
                     )
                 ) {
                     Icon(
@@ -518,7 +481,7 @@ private fun LocalEmergencyAgencyCard(
                         border = BorderStroke(1.dp, colors.cleanEmerald)
                     ) {
                         Text(
-                            text = "WhatsApp Posko",
+                            text = "WhatsApp",
                             color = colors.cleanEmerald,
                             fontSize = CallTagType.label,
                             fontWeight = FontWeight.Bold

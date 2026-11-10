@@ -30,7 +30,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,21 +76,23 @@ fun MainScaffold(
     val colors = CallTagDesign.colors
     val isDarkMode by viewModel.isDarkMode.collectAsState()
 
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
-    var prefilledReportPhone by remember { mutableStateOf("") }
+    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+    var prefilledReportPhone by rememberSaveable { mutableStateOf("") }
+
+    var reportRequestId by rememberSaveable { mutableIntStateOf(0) }
+    val tabStateHolder = rememberSaveableStateHolder()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = colors.backgroundPrimary,
         topBar = {
             Surface(
-                color = colors.surfaceCard,
-                border = BorderStroke(1.dp, colors.borderSubtle)
+                color = colors.backgroundPrimary
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = CallTagSpacing.md, vertical = CallTagSpacing.sm),
+                        .padding(horizontal = CallTagSpacing.lg, vertical = CallTagSpacing.xs),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -99,9 +102,9 @@ fun MainScaffold(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(34.dp)
-                                .clip(CircleShape)
-                                .background(colors.brandPrimary),
+                                .size(32.dp)
+                                .clip(RoundedCornerShape(CallTagRadius.sm))
+                                .background(colors.brandSolid),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -176,7 +179,7 @@ fun MainScaffold(
                             label = {
                                 Text(
                                     text = tab.title,
-                                    fontSize = CallTagType.caption,
+                                    fontSize = CallTagType.label,
                                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
                                 )
                             },
@@ -198,24 +201,28 @@ fun MainScaffold(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            when (selectedTabIndex) {
-                0 -> HomeScreen(
-                    viewModel = viewModel,
-                    onNavigateToReportWithPhone = { phoneE164 ->
-                        prefilledReportPhone = phoneE164
-                        selectedTabIndex = 2
-                    }
-                )
-                1 -> EmergencyScreen(
-                    viewModel = viewModel
-                )
-                2 -> ReportAndHubScreen(
-                    viewModel = viewModel,
-                    prefilledPhone = prefilledReportPhone
-                )
-                3 -> SpamGuardScreen(
-                    viewModel = viewModel
-                )
+            tabStateHolder.SaveableStateProvider(selectedTabIndex) {
+                when (selectedTabIndex) {
+                    0 -> HomeScreen(
+                        viewModel = viewModel,
+                        onNavigateToReportWithPhone = { phoneE164 ->
+                            prefilledReportPhone = phoneE164
+                            reportRequestId += 1
+                            selectedTabIndex = 2
+                        }
+                    )
+                    1 -> EmergencyScreen(
+                        viewModel = viewModel
+                    )
+                    2 -> ReportAndHubScreen(
+                        viewModel = viewModel,
+                        prefilledPhone = prefilledReportPhone,
+                        prefillRequestId = reportRequestId
+                    )
+                    3 -> SpamGuardScreen(
+                        viewModel = viewModel
+                    )
+                }
             }
         }
     }
