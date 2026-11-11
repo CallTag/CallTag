@@ -31,3 +31,7 @@ git diff --check
 ```
 
 Script dan JSON hasil terperinci merupakan artefak pengujian sementara pada host audit, bukan dependency aplikasi. Validasi ulang di mesin lain dapat menggunakan Mermaid CLI yang dipasang pada direktori temporer dan pemeriksa link Markdown pilihan tim. Tidak menjamin renderer GitHub akan selalu memakai versi yang sama; diagram membatasi diri pada sintaks standar tanpa plugin berbayar.
+
+## Penyerahan untuk review
+
+Pada **12 November 2026**, commit audit `373e38a` telah dipush ke `codex/integration-audit-prd` dan [draft PR #1](https://github.com/CallTag/CallTag/pull/1) dibuat dengan base `codex/frontend-mobile-refresh`, sehingga diff berisi dokumentasi saja. PR belum di-merge. Tanggal ini adalah tanggal penyerahan, bukan tanggal pengulangan runtime; bukti pengujian di atas berasal dari 10 November 2026. Artefak `/tmp` bersifat sementara dan dapat dibersihkan oleh sistem.
