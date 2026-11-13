@@ -29,3 +29,4 @@ Dokumen audit dan desain lama (AUDIT_REPORT, INTEGRATION_MATRIX, FEATURE_GAP_ANA
 | 15 | [Rencana pengujian](15-RENCANA-PENGUJIAN.md) | Strategi uji |
 | 16 | [Deployment dan demo](16-DEPLOYMENT-DAN-DEMO.md) | Staging/produksi, skenario demo |
 | 17 | [Keputusan arsitektur](17-KEPUTUSAN-ARSITEKTUR.md) | ADR-012+ dan keputusan terbuka |
+| - | [Checklist pelaksanaan](CHECKLIST-PELAKSANAAN.md) | Daftar langkah yang bisa dicentang |
