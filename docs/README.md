@@ -17,3 +17,5 @@ Audit 10 November 2026 memperbarui [PRD 1.1.0](../PRD.md) berdasarkan empat repo
 | [DOC_VALIDATION](DOC_VALIDATION.md) | Hasil pengecekan tautan file dan parse/render Mermaid |
 
 Dokumen desain dan verifikasi frontend sebelumnya tetap tersedia: [Verifikasi frontend Android](frontend-refresh-verification.md), [rencana refresh](superpowers/plans/2026-11-10-frontend-refresh.md). Bukti audit menggunakan commit tetap; diagram bertanda PROPOSED tidak boleh dibaca sebagai kode yang sudah tersedia.
+
+**Perencanaan final (draft, menunggu persetujuan):** [planning/README.md](planning/README.md) berisi rancangan target role, lookup, database, API, admin, roadmap, pengujian, dan keputusan terbuka. Dokumen di atas tetap menjadi baseline as-is.

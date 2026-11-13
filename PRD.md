@@ -3,8 +3,8 @@
 | Metadata Dokumen | Detail |
 | :--- | :--- |
 | **Nama Produk** | CallTag |
-| **Versi Dokumen** | 1.1.0 (Audit integrasi dan penajaman MVP) |
-| **Status** | Draft untuk review; PARTIALLY_VERIFIED di lingkungan lokal, belum release-ready |
+| **Versi Dokumen** | 1.2.0-draft (Master plan: role, lookup, moderasi, arsitektur final; menunggu persetujuan) |
+| **Status** | Draft untuk review; PARTIALLY_VERIFIED di lingkungan lokal, belum release-ready. Bagian 10 adalah rancangan **PROPOSED**, belum disetujui dan belum diimplementasikan |
 | **Target Pasar** | Indonesia (Seluruh Provinsi & Kota/Kabupaten) |
 | **Cakupan Repositori** | `CallTag` (Mobile App), `backend` (Go `net/http` bergaya `gocroot` + MongoDB), `apidocs` (OpenAPI Vanilla JS), `calltag.github.io` (Landing Page `croot.js`) |
 | **Tanggal Pembaruan / Last Updated** | 10 November 2026 (Asia/Jakarta) |
@@ -17,6 +17,7 @@
 |---|---|---|
 | 1.0.0 | 5 November 2026 | Visi, persona, taksonomi, rumus skor, desain data dan kontrak awal. |
 | 1.1.0 | 10 November 2026 | Mempertahankan struktur dan visi; menambahkan bukti as-is, koreksi framework/nama koleksi/endpoint, status fitur, acceptance terukur, scope dua orang, model data dan diagram, serta backlog remediasi. |
+| 1.2.0-draft | 13 November 2026 | Tidak menghapus isi 1.1.0. Menambahkan **bagian 10** (keputusan rancangan, ID kebutuhan SEC/DATA/API/UX, status role dan lookup, rujukan ke [docs/planning](docs/planning/README.md)). Bagian 9 (keputusan terbuka) dirujuk silang ke OD-01 sampai OD-10. Tidak ada klaim implementasi baru. |
 
 **As-is** menyatakan hasil pemeriksaan kode/uji pada commit tersebut. **Target MVP / PROPOSED** menyatakan kebutuhan yang belum tentu diimplementasikan. **Post-MVP** ditunda. Persyaratan normatif dalam bagian 4–7 adalah target, bukan daftar fitur selesai. Label status baku dan batas `VERIFIED_E2E` ada pada [AUDIT_REPORT](docs/AUDIT_REPORT.md); [indeks docs](docs/README.md) memuat spesifikasi rinci.
 
@@ -677,3 +678,58 @@ FR-002/004 happy path lokal memiliki bukti runtime, bukan semua acceptance. Selu
 5. Mongo production/backup dan perangkat uji/operator belum tersedia untuk verifikasi penuh. Domain API pada OpenAPI belum dapat di-resolve dari host audit; bukan bukti tidak akan ada deployment.
 
 Keputusan/konsekuensi dan alternatif tercatat di [ARCHITECTURE_DECISIONS](docs/ARCHITECTURE_DECISIONS.md). [DESIGN.md](DESIGN.md) tetap sumber visual Nusantara Teal, warna semantik dan ukuran target sentuh; palet CLEAN/verified yang sama tidak membuktikan verifikasi. [AGENTS.md](AGENTS.md) tetap pedoman engineering: tidak menambahkan test Android khayalan, tidak mengubah enum/warna ad hoc atau menghapus fallback diam-diam. Audit mengusulkan koreksi semantik/policy melalui patch terpisah, bukan menimpa panduan tersebut.
+
+---
+
+## 10. MASTER PLAN 1.2.0-DRAFT: KEPUTUSAN RANCANGAN DAN KEBUTUHAN TAMBAHAN
+
+Bagian ini **PROPOSED**: menunggu persetujuan pemilik (lihat [17-KEPUTUSAN-ARSITEKTUR](docs/planning/17-KEPUTUSAN-ARSITEKTUR.md)) dan **belum diimplementasikan**. Bagian 1 sampai 9 tetap berlaku sebagai baseline dan, bila ada pertentangan, bagian ini menjadi usulan koreksi yang harus disetujui lebih dulu. Dokumen rinci: [indeks planning](docs/planning/README.md).
+
+### 10.1 Keputusan yang mengubah atau memperjelas bagian 1 sampai 9
+
+| Topik | Baseline 1.1.0 | Usulan 1.2.0 | Rujukan |
+|---|---|---|---|
+| Role | Public, User, Moderator, Admin (8.1) | Guest, User (akun perangkat tanpa nomor), Staf MOD/ADMIN, System; Verified Owner ditunda (P3) | [02](docs/planning/02-ROLE-DAN-HAK-AKSES.md) |
+| Status hasil lookup | Empat level reputasi | Tetap empat level, ditambah dimensi `availability` dan `verified_label`; tampilan UNKNOWN/OFFLINE/STALE diturunkan | [08](docs/planning/08-STRATEGI-PENCARIAN-NOMOR.md) |
+| Sumber data | Laporan komunitas | Opsi A (mandiri + kurasi); getcontact-cli hanya referensi riset, tidak menjadi dependensi | [09](docs/planning/09-ANALISIS-GETCONTACT-CLI.md) |
+| Scoring | B=8, bobot kategori, decay 90 hari (4.3) | Rumus sama; kontribusi satu per pelapor unik, clamp trust, `N ≥ 2` untuk SUSPICIOUS, gerbang konfirmasi DANGER_SCAM (OD-03), kedaluwarsa 12 bulan | [03](docs/planning/03-SPESIFIKASI-FITUR.md) |
+| Auto-block | Konservatif sebagai target | Opt-in default OFF, DANGER-only, data server ≤ 14 hari, fail-open | [10](docs/planning/10-KEAMANAN-DAN-PRIVASI.md) |
+| Sync | `offline-bundle` | Journal `sync_changes` + `GET /sync/changes` | [06](docs/planning/06-DESAIN-DATABASE.md), [07](docs/planning/07-KONTRAK-API.md) |
+| Admin | Panel sederhana (disebut) | Halaman tertanam di backend | [05](docs/planning/05-ARSITEKTUR-SISTEM.md), [11](docs/planning/11-ADMIN-DAN-MODERASI.md) |
+| Koleksi Mongo | 5 | 11 (tambah `devices`, `moderation_cases`, `verified_numbers`, `audit_logs`, `sync_changes`, `refresh_tokens`) | [06](docs/planning/06-DESAIN-DATABASE.md) |
+
+### 10.2 Kebutuhan tambahan (prioritas MoSCoW / P)
+
+Pelengkap FR-001 sampai FR-017 dan NFR-001 sampai NFR-009 (tidak diganti). Setiap ID memiliki acceptance di dokumen rujukan.
+
+| ID | Kebutuhan | MoSCoW / P | Acceptance (ringkas) | Rujukan |
+|---|---|---|---|---|
+| SEC-001 | Bearer tidak valid ditolak `401`; guest tidak dapat melapor | M / P0 | AC-02; token rusak/kedaluwarsa menghasilkan 401 | [02](docs/planning/02-ROLE-DAN-HAK-AKSES.md), [10](docs/planning/10-KEAMANAN-DAN-PRIVASI.md) |
+| SEC-002 | Secret JWT wajib dan kuat pada produksi; tanpa fallback di source | M / P0 | Proses berhenti tanpa secret | [10](docs/planning/10-KEAMANAN-DAN-PRIVASI.md) |
+| SEC-003 | Identitas pelapor hanya dari klaim token; kuota dan hold-for-review pada lonjakan | M / P0 | Uji 11 perangkat tidak menghasilkan DANGER_SCAM | [10](docs/planning/10-KEAMANAN-DAN-PRIVASI.md) |
+| SEC-004 | RBAC untuk `/admin/*`; setiap tindakan staf diaudit | M / P1 | AC-11 | [11](docs/planning/11-ADMIN-DAN-MODERASI.md) |
+| SEC-005 | Komentar disaring PII; DTO publik tanpa `reporter_user_id` | M / P0 | AC-04, K-09, K-10 | [10](docs/planning/10-KEAMANAN-DAN-PRIVASI.md) |
+| SEC-006 | Auto-block sesuai kebijakan konservatif | M / P0 | AC-06 | [10](docs/planning/10-KEAMANAN-DAN-PRIVASI.md) |
+| DATA-001 | Laporan idempoten (`Idempotency-Key`, unique index, dedup 30 hari) | M / P0 | AC-07 | [06](docs/planning/06-DESAIN-DATABASE.md) |
+| DATA-002 | Dispute disimpan di `moderation_cases` sebelum `201` | M / P0 | AC-10 | [06](docs/planning/06-DESAIN-DATABASE.md) |
+| DATA-003 | Journal sinkronisasi dengan cursor opak, tombstone, `generation` | M / P0 | AC-16 | [06](docs/planning/06-DESAIN-DATABASE.md) |
+| DATA-004 | Room v2 dengan outbox, `sync_state`, migrasi tertulis | M / P0 | AC-08, AC-09 | [06](docs/planning/06-DESAIN-DATABASE.md) |
+| DATA-005 | Retensi dan penghapusan data sesuai tabel retensi; `DELETE /me` | S / P1 | K-12 | [10](docs/planning/10-KEAMANAN-DAN-PRIVASI.md) |
+| API-001 | Kontrak v1 aditif: field `availability`, `source`, `fetched_at`, `confidence`; error terstruktur | M / P0 | Contract test | [07](docs/planning/07-KONTRAK-API.md) |
+| API-002 | Endpoint N1 sampai N6 (refresh, me, hapus akun, sync changes, lacak dispute) | M / P0-P1 | Contract test | [07](docs/planning/07-KONTRAK-API.md) |
+| API-003 | Endpoint admin N7 sampai N14 | M / P1 | Test RBAC | [07](docs/planning/07-KONTRAK-API.md) |
+| API-004 | `/healthz` dan `/readyz` memeriksa Mongo | M / P0 | Mongo mati menghasilkan 503 | [07](docs/planning/07-KONTRAK-API.md) |
+| UX-001 | Tidak ada teks "aman" untuk status tidak terverifikasi; UNKNOWN/OFFLINE/STALE jelas | M / P0 | AC-03 | [12](docs/planning/12-RANCANGAN-UI-UX.md) |
+| UX-002 | Empat tab dipertahankan; Riwayat, Sanggahan, Akun dan data sebagai sub-alur | S / P1 | Review layar | [12](docs/planning/12-RANCANGAN-UI-UX.md) |
+| UX-003 | Lima state (loading, empty, error, offline, success) per halaman | M / P1 | Screenshot emulator | [12](docs/planning/12-RANCANGAN-UI-UX.md) |
+| UX-004 | Landing page tanpa statistik contoh; form lapor web dinonaktifkan | S / P1 | AC-15 | [12](docs/planning/12-RANCANGAN-UI-UX.md) |
+| FR-018 | Riwayat laporan pribadi | C / P2 | Daftar milik sendiri | [03](docs/planning/03-SPESIFIKASI-FITUR.md) |
+| FR-019 | Verified Phone Owner (OTP/WhatsApp) | W (MVP) / P3 | Ditunda | [02](docs/planning/02-ROLE-DAN-HAK-AKSES.md) |
+
+### 10.3 Pemetaan ke backlog dan roadmap
+
+Tugas implementasi T-001 sampai T-704, dependensi, dan estimasi ada di [14-ROADMAP-PENGEMBANGAN](docs/planning/14-ROADMAP-PENGEMBANGAN.md) dan dipetakan ke B01 sampai B16 pada [IMPLEMENTATION_ROADMAP](docs/IMPLEMENTATION_ROADMAP.md). Strategi uji: [15](docs/planning/15-RENCANA-PENGUJIAN.md). Deployment dan demo: [16](docs/planning/16-DEPLOYMENT-DAN-DEMO.md).
+
+### 10.4 Kaitan dengan bagian 9 (keputusan terbuka)
+
+Keputusan terbuka 1 sampai 5 pada bagian 9 diperluas menjadi OD-01 sampai OD-10 di [17-KEPUTUSAN-ARSITEKTUR](docs/planning/17-KEPUTUSAN-ARSITEKTUR.md), masing-masing dengan rekomendasi default dan konsekuensi alternatif.
