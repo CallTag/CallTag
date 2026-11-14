@@ -22,3 +22,4 @@ Status: **PROPOSED**. Alur as-is yang sudah terdokumentasi ada di [FLOWS_AND_DIA
 | 16 | Sinkronisasi Android ↔ backend | Sistem | Cache terbaru dan benar | Terdaftar atau guest | Kirim `cursor` opak → terima halaman perubahan UPSERT/DELETE → terapkan dalam satu transaksi Room → simpan cursor | `has_more` ulang sampai habis; `generation` berubah → full resync | `GET /sync/changes (+)` (menggantikan offline-bundle) | `sync_changes` baca; Room transaksi | Respons tanpa PII | AC-16: dua perubahan satu detik keduanya terkirim |
 
 Konsistensi lintas klien: Android dan website memakai kontrak status yang sama (`availability` + `reputation_level`) sehingga nomor yang sama tampil sama.
+

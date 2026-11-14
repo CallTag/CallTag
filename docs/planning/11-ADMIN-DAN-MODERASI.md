@@ -83,3 +83,4 @@ SLA tinjauan target **7 hari** untuk dispute dan **3 hari** untuk laporan tertah
 ## 6. Acceptance ringkas
 
 AC-11 dan AC-14 di [04](04-ALUR-PENGGUNA.md); tambahan: pengguna non-staf menerima `403` pada seluruh `/admin/*`; konflik versi menghasilkan `409`; setiap keputusan memiliki entri audit yang dapat dicari berdasarkan nomor.
+

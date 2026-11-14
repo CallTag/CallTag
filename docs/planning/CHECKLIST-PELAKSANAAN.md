@@ -9,30 +9,29 @@ Centang `[x]` saat selesai. **[AI]** = bisa diserahkan ke AI coding agent lewat 
 - [x] Riset `getcontact-cli` (lisensi, status repo, kesimpulan: tidak dipakai di production)
 - [x] Tulis dokumen perencanaan 00 sampai 17 di `docs/planning/`
 - [x] Perbarui `PRD.md` ke 1.2.0-draft (bagian 10) dan indeks `docs/README.md`
-- [x] Validasi tautan dan 18 diagram Mermaid
-- [x] Commit lokal `3143c96` di branch `docs/master-plan`
+- [x] Validasi tautan dan seluruh diagram Mermaid (termasuk katalog lengkap 17 diagram sistem di [13-DIAGRAM-SISTEM](13-DIAGRAM-SISTEM.md))
+- [x] Commit lokal di branch `docs/master-plan`
 
-## Tahap 1. Persetujuan (T-001 sampai T-004) **Anda dulu, belum ada yang dikerjakan**
+## Tahap 1. Persetujuan & Penyelarasan Baseline (T-001 sampai T-004)
 
-- [ ] **[ANDA]** Baca [00-RINGKASAN](00-RINGKASAN-EKSEKUTIF.md) dan [17-KEPUTUSAN](17-KEPUTUSAN-ARSITEKTUR.md)
-- [ ] **[ANDA]** Putuskan OD-01 role MVP (default: tanpa Verified Owner)
-- [ ] **[ANDA]** Putuskan OD-02 identitas berbasis perangkat tanpa nomor telepon
-- [ ] **[ANDA]** Putuskan OD-03 gerbang konfirmasi moderator untuk DANGER_SCAM
-- [ ] **[ANDA]** Putuskan OD-04 kanal distribusi (sideload akademik atau Google Play, target SDK)
-- [ ] **[ANDA]** Putuskan OD-05 wilayah pilot dan siapa kurator data
-- [ ] **[ANDA]** Putuskan OD-06 host staging/produksi dan anggaran
-- [ ] **[ANDA]** Putuskan OD-07 sampai OD-10 (path lookup, replica set, SLA moderasi, dispute guest)
-- [ ] **[ANDA]** Bagi peran: siapa A (backend) dan siapa B (Android/web/docs)
-- [ ] **[ANDA]** Beri tahu saya hasil keputusan; saya perbarui `17-KEPUTUSAN` dan PRD final (T-002)
+- [x] **[ANDA]** Baca [00-RINGKASAN](00-RINGKASAN-EKSEKUTIF.md) dan [17-KEPUTUSAN](17-KEPUTUSAN-ARSITEKTUR.md)
+- [x] **[ANDA]** Putuskan OD-01 role MVP (Disetujui: 4 Role tanpa Verified Owner di MVP)
+- [x] **[ANDA]** Putuskan OD-02 identitas berbasis perangkat (`install_id` UUID + JWT server) tanpa nomor telepon
+- [x] **[ANDA]** Putuskan OD-03 gerbang konfirmasi moderator untuk `DANGER_SCAM` (Disetujui: Wajib konfirmasi moderator)
+- [x] **[ANDA]** Putuskan OD-04 kanal distribusi (Disetujui: Sideload APK Akademik via GitHub Releases, `targetSdk 34`)
+- [x] **[ANDA]** Putuskan OD-05 wilayah pilot dan kurator data (Disetujui: 7 Nasional + 5 Kota Utama, dikurasi tim berdua)
+- [x] **[ANDA]** Putuskan OD-06 host staging/produksi dan anggaran (Disetujui: Skema Rp 0 Lokal/LAN + opsional MongoDB Atlas Free Tier & GitHub Pages)
+- [x] **[ANDA]** Putuskan OD-07 sampai OD-10 (Disetujui: GET lookup + log masking, Idempotent Upsert + Rekonsiliasi tanpa wajib Replica Set lokal, SLA target dashboard, Dispute Guest diizinkan dengan rate limit)
+- [x] **[ANDA]** Bagi peran: Pengembang A (`backend`) dan Pengembang B (`CallTag`, `apidocs`, `calltag.github.io`)
+- [x] **[AI]** Perbarui `17-KEPUTUSAN`, `13-DIAGRAM-SISTEM` (17 diagram lengkap), dan `PRD.md` v1.2.0 final (T-001, T-002, T-003 selesai)
 - [ ] **[KEDUANYA]** Push branch `docs/master-plan`, buka PR, review, merge (T-004 bagian docs)
-- [ ] **[KEDUANYA]** PR promosi feature branch backend, apidocs, website ke `main` setelah ditinjau
+- [ ] **[KEDUANYA]** PR promosi feature branch `backend`, `apidocs`, `calltag.github.io` ke `main` setelah ditinjau
 
 ## Tahap 2. Persiapan lingkungan
 
 - [ ] **[ANDA]** Pastikan MongoDB lokal jalan (`systemctl status mongodb`) dan emulator `Pixel_5_Light` bisa start
 - [ ] **[ANDA]** Siapkan satu perangkat Android fisik untuk uji panggilan nyata (T-605)
-- [ ] **[ANDA]** Buat file `.env` lokal untuk `JWT_SECRET` kuat (jangan di-commit)
-- [ ] **[KEDUANYA]** Aktifkan MongoDB replica set satu node di lokal untuk uji transaksi (OD-08)
+- [ ] **[ANDA]** Buat file `.env` lokal untuk `JWT_SECRET` kuat minimal 32 karakter (jangan di-commit)
 
 ## Tahap 3. Fase 1 keamanan backend (pemilik A) **belum dimulai**
 

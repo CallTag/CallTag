@@ -2,8 +2,8 @@
 
 | Metadata | Nilai |
 |---|---|
-| Status | **DRAFT RENCANA, menunggu persetujuan**. Tidak ada kode produk yang diubah. |
-| Tanggal | 13 November 2026 (Asia/Jakarta) |
+| Status | **RENCANA DISETUJUI (14 November 2026)**. Siap dijadikan pedoman implementasi; belum ada kode produk yang diubah. |
+| Tanggal | 14 November 2026 (Asia/Jakarta) |
 | Branch dokumen | `docs/master-plan` (turunan `codex/integration-audit-prd`, belum di-push, belum di-merge) |
 | Baseline | Audit 10 November 2026: Android `42e9ceb`, backend `8676314`, apidocs `1ae8834`, website `c3e071b` (lihat [AUDIT_REPORT](../AUDIT_REPORT.md)) |
 | Sifat dokumen | Rancangan **PROPOSED**. Kondisi kode saat ini hanya dirujuk dari audit dan validasi ulang di bagian "Validasi 13 November". |
@@ -58,12 +58,13 @@ Alternatif dan konsekuensi lengkap ada di bagian J laporan akhir dan [17-KEPUTUS
 | [10](10-KEAMANAN-DAN-PRIVASI.md) | Ancaman, mitigasi, UU PDP, Play |
 | [11](11-ADMIN-DAN-MODERASI.md) | MVP admin dan alur moderasi |
 | [12](12-RANCANGAN-UI-UX.md) | Navigasi, halaman, state, landing page |
-| [13](13-DIAGRAM-SISTEM.md) | Diagram baru (yang belum ada) dan indeks diagram lama |
+| [13](13-DIAGRAM-SISTEM.md) | Katalog lengkap 17 diagram sistem (Mermaid) |
 | [14](14-ROADMAP-PENGEMBANGAN.md) | Fase 0 sampai 7, tugas, dependensi |
 | [15](15-RENCANA-PENGUJIAN.md) | Strategi uji |
 | [16](16-DEPLOYMENT-DAN-DEMO.md) | Staging/produksi, CI/CD, skenario demo |
-| [17](17-KEPUTUSAN-ARSITEKTUR.md) | ADR-012 dan seterusnya, keputusan terbuka |
+| [17](17-KEPUTUSAN-ARSITEKTUR.md) | ADR-012 s.d. ADR-022 dan OD-01 s.d. OD-10 (Disetujui) |
 
 ## 5. Yang sengaja tidak dilakukan
 
-Tidak ada perubahan source Android/backend/website/apidocs, tidak ada push, merge, deployment, penghapusan branch, maupun akses data nyata. Implementasi menunggu persetujuan atas keputusan di [17](17-KEPUTUSAN-ARSITEKTUR.md).
+Tidak ada perubahan source Android/backend/website/apidocs, tidak ada push, merge, deployment, penghapusan branch, maupun akses data nyata pada tahap perencanaan ini. Seluruh keputusan di [17](17-KEPUTUSAN-ARSITEKTUR.md) telah disetujui; pelaksanaan kode mengikuti urutan di [CHECKLIST-PELAKSANAAN](CHECKLIST-PELAKSANAAN.md).
+

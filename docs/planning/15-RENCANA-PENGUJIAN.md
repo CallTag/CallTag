@@ -45,3 +45,4 @@ Set uji berlabel sintetis berisi nomor bersih, nomor bisnis terverifikasi, dan n
 ## 4. Pelaporan bukti
 
 Setiap uji mencatat: perintah, lingkungan (versi, port, DB sementara), hasil PASS/FAIL/BLOCKED, dan tautan log. Format sama dengan QA_TEST_PLAN agar traceability FR/NFR tetap utuh.
+

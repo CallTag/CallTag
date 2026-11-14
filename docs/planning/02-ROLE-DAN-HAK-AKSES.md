@@ -13,6 +13,7 @@ Status: **PROPOSED**. Kondisi as-is: `users.role` ada di model tetapi tidak ada 
 | Administrator | **Wajib (P1)**, digabung dengan Moderator sebagai satu model staf berlapis | Dua operator; pemisahan lengkap berlebihan. Tindakan sensitif (kelola staf, direktori, konfigurasi) hanya `ADMIN`. |
 | System Service | **Wajib (P1)** | Tugas terjadwal (decay skor, kedaluwarsa, retensi) berjalan dengan identitas internal tercatat di audit log. Bukan akun login. |
 
+
 Prinsip: **nomor yang diketik pengguna bukan bukti kepemilikan**. Tidak ada status "terverifikasi" tanpa bukti server.
 
 ## 2. Matriks izin
@@ -113,3 +114,4 @@ Tidak dibangun pada MVP. Bila disetujui:
 Rekomendasi: manual berbukti untuk pilot; WhatsApp inbound bila perlu otomatis. Angka biaya aktual **belum diverifikasi** dan harus dicek ke penyedia pada saat keputusan.
 
 Hasil verifikasi hanya memberi hak **mengajukan koreksi/sanggahan berprioritas** dan lencana "pemilik terverifikasi pada dispute". Tidak otomatis menghapus laporan.
+

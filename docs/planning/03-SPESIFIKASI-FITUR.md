@@ -111,3 +111,4 @@ Verifikasi aritmetika U1 sampai U8 dilakukan pada saat implementasi melalui test
 - BR-02: data fixture/seed tidak pernah ditampilkan sebagai laporan nyata (`source` wajib `FIXTURE`/`SERVER`).
 - BR-03: auto-block hanya pada `DANGER_SCAM`, data server ≤ 14 hari, bukan whitelist, bukan kontak tersimpan.
 - BR-04: setiap perubahan level oleh manusia memiliki alasan, aktor, dan jejak audit.
+

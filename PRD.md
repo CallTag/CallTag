@@ -3,8 +3,8 @@
 | Metadata Dokumen | Detail |
 | :--- | :--- |
 | **Nama Produk** | CallTag |
-| **Versi Dokumen** | 1.2.0-draft (Master plan: role, lookup, moderasi, arsitektur final; menunggu persetujuan) |
-| **Status** | Draft untuk review; PARTIALLY_VERIFIED di lingkungan lokal, belum release-ready. Bagian 10 adalah rancangan **PROPOSED**, belum disetujui dan belum diimplementasikan |
+| **Versi Dokumen** | 1.2.0 (Master Plan Final Disetujui: role, lookup, moderasi, arsitektur, dan 17 diagram sistem) |
+| **Status** | Master Plan Disetujui (14 Nov 2026); implementasi kode PARTIALLY_VERIFIED di lingkungan lokal, siap masuk Fase 1 |
 | **Target Pasar** | Indonesia (Seluruh Provinsi & Kota/Kabupaten) |
 | **Cakupan Repositori** | `CallTag` (Mobile App), `backend` (Go `net/http` bergaya `gocroot` + MongoDB), `apidocs` (OpenAPI Vanilla JS), `calltag.github.io` (Landing Page `croot.js`) |
 | **Tanggal Pembaruan / Last Updated** | 10 November 2026 (Asia/Jakarta) |
@@ -17,7 +17,7 @@
 |---|---|---|
 | 1.0.0 | 5 November 2026 | Visi, persona, taksonomi, rumus skor, desain data dan kontrak awal. |
 | 1.1.0 | 10 November 2026 | Mempertahankan struktur dan visi; menambahkan bukti as-is, koreksi framework/nama koleksi/endpoint, status fitur, acceptance terukur, scope dua orang, model data dan diagram, serta backlog remediasi. |
-| 1.2.0-draft | 13 November 2026 | Tidak menghapus isi 1.1.0. Menambahkan **bagian 10** (keputusan rancangan, ID kebutuhan SEC/DATA/API/UX, status role dan lookup, rujukan ke [docs/planning](docs/planning/README.md)). Bagian 9 (keputusan terbuka) dirujuk silang ke OD-01 sampai OD-10. Tidak ada klaim implementasi baru. |
+| 1.2.0 | 14 November 2026 | Mengunci persetujuan ADR-012 s.d. ADR-022 dan OD-01 s.d. OD-10 pada **bagian 10**, melengkapi 17 diagram sistem di [13-DIAGRAM-SISTEM](docs/planning/13-DIAGRAM-SISTEM.md), serta memperbarui [CHECKLIST-PELAKSANAAN](docs/planning/CHECKLIST-PELAKSANAAN.md). Tidak menghapus isi 1.1.0 dan tidak mengklaim implementasi kode baru. |
 
 **As-is** menyatakan hasil pemeriksaan kode/uji pada commit tersebut. **Target MVP / PROPOSED** menyatakan kebutuhan yang belum tentu diimplementasikan. **Post-MVP** ditunda. Persyaratan normatif dalam bagian 4–7 adalah target, bukan daftar fitur selesai. Label status baku dan batas `VERIFIED_E2E` ada pada [AUDIT_REPORT](docs/AUDIT_REPORT.md); [indeks docs](docs/README.md) memuat spesifikasi rinci.
 
@@ -681,9 +681,9 @@ Keputusan/konsekuensi dan alternatif tercatat di [ARCHITECTURE_DECISIONS](docs/A
 
 ---
 
-## 10. MASTER PLAN 1.2.0-DRAFT: KEPUTUSAN RANCANGAN DAN KEBUTUHAN TAMBAHAN
+## 10. MASTER PLAN 1.2.0 (DISETUJUI): KEPUTUSAN RANCANGAN DAN KEBUTUHAN TAMBAHAN
 
-Bagian ini **PROPOSED**: menunggu persetujuan pemilik (lihat [17-KEPUTUSAN-ARSITEKTUR](docs/planning/17-KEPUTUSAN-ARSITEKTUR.md)) dan **belum diimplementasikan**. Bagian 1 sampai 9 tetap berlaku sebagai baseline dan, bila ada pertentangan, bagian ini menjadi usulan koreksi yang harus disetujui lebih dulu. Dokumen rinci: [indeks planning](docs/planning/README.md).
+Bagian ini telah **DISETUJUI pada 14 November 2026** (lihat [17-KEPUTUSAN-ARSITEKTUR](docs/planning/17-KEPUTUSAN-ARSITEKTUR.md)) sebagai spesifikasi target implementasi (kode produk belum diubah). Dokumen rinci: [indeks planning](docs/planning/README.md) dan katalog 17 diagram di [13-DIAGRAM-SISTEM](docs/planning/13-DIAGRAM-SISTEM.md).
 
 ### 10.1 Keputusan yang mengubah atau memperjelas bagian 1 sampai 9
 

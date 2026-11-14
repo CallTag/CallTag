@@ -54,3 +54,4 @@ Struktur mengikuti isi nyata, bukan templat:
 6. **Unduhan**: tautan rilis dengan versi hasil verifikasi (perilaku test existing dipertahankan).
 
 Pernyataan statistik hanya dari `GET /stats/public`; tanpa angka contoh dan tanpa klaim "terblokir" kecuali dihitung dari sumber nyata. Form lapor cepat web dinonaktifkan pada MVP ([05](05-ARSITEKTUR-SISTEM.md)).
+

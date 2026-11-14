@@ -87,3 +87,4 @@ Seed dan fixture berlabel `FIXTURE`, tidak boleh tampil di build release sebagai
 ## 4. Yang tidak dilakukan
 
 Tidak ada nama pemilik, tidak ada identitas dari tag komunitas, tidak ada unggah buku kontak, tidak ada pengayaan dari layanan tidak resmi.
+

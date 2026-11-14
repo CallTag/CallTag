@@ -2,12 +2,12 @@
 
 | Metadata | Nilai |
 |---|---|
-| Status | **DRAFT RENCANA, menunggu persetujuan**; tidak ada implementasi |
-| Tanggal | 13 November 2026 |
+| Status | **RENCANA DISETUJUI (14 November 2026)**; siap masuk tahap implementasi kode |
+| Tanggal | 14 November 2026 |
 | Baseline audit | [AUDIT_REPORT](../AUDIT_REPORT.md) (10 November 2026) |
-| PRD | [PRD.md](../../PRD.md) versi 1.2.0-draft, bagian 10 |
+| PRD | [PRD.md](../../PRD.md) versi 1.2.0, bagian 10 |
 
-Dokumen audit dan desain lama (AUDIT_REPORT, INTEGRATION_MATRIX, FEATURE_GAP_ANALYSIS, DATABASE_DESIGN, SYSTEM_ARCHITECTURE, FLOWS_AND_DIAGRAMS, API_CONTRACT_AUDIT, QA_TEST_PLAN, IMPLEMENTATION_ROADMAP, ARCHITECTURE_DECISIONS) **tidak diganti**; dokumen berikut merujuknya dan hanya mendefinisikan rancangan target. Lihat juga [indeks docs](../README.md). Label **PROPOSED** berarti belum disetujui dan belum dibangun.
+Dokumen audit dan desain lama (AUDIT_REPORT, INTEGRATION_MATRIX, FEATURE_GAP_ANALYSIS, DATABASE_DESIGN, SYSTEM_ARCHITECTURE, FLOWS_AND_DIAGRAMS, API_CONTRACT_AUDIT, QA_TEST_PLAN, IMPLEMENTATION_ROADMAP, ARCHITECTURE_DECISIONS) **tidak diganti**; dokumen berikut merujuknya dan mendefinisikan rancangan target yang telah disetujui. Lihat juga [indeks docs](../README.md).
 
 | No | Dokumen | Isi |
 |---|---|---|
@@ -24,9 +24,9 @@ Dokumen audit dan desain lama (AUDIT_REPORT, INTEGRATION_MATRIX, FEATURE_GAP_ANA
 | 10 | [Keamanan dan privasi](10-KEAMANAN-DAN-PRIVASI.md) | Mitigasi, temuan baru, UU PDP |
 | 11 | [Admin dan moderasi](11-ADMIN-DAN-MODERASI.md) | MVP panel, alur |
 | 12 | [Rancangan UI/UX](12-RANCANGAN-UI-UX.md) | Navigasi, state, landing |
-| 13 | [Diagram sistem](13-DIAGRAM-SISTEM.md) | Diagram target dan indeks 17 diagram |
+| 13 | [Diagram sistem](13-DIAGRAM-SISTEM.md) | Katalog lengkap 17 diagram sistem (Mermaid) |
 | 14 | [Roadmap](14-ROADMAP-PENGEMBANGAN.md) | Fase 0 sampai 7, tugas T-xxx |
 | 15 | [Rencana pengujian](15-RENCANA-PENGUJIAN.md) | Strategi uji |
 | 16 | [Deployment dan demo](16-DEPLOYMENT-DAN-DEMO.md) | Staging/produksi, skenario demo |
-| 17 | [Keputusan arsitektur](17-KEPUTUSAN-ARSITEKTUR.md) | ADR-012+ dan keputusan terbuka |
+| 17 | [Keputusan arsitektur](17-KEPUTUSAN-ARSITEKTUR.md) | ADR-012 s.d. ADR-022 dan OD-01 s.d. OD-10 (Disetujui) |
 | - | [Checklist pelaksanaan](CHECKLIST-PELAKSANAAN.md) | Daftar langkah yang bisa dicentang |

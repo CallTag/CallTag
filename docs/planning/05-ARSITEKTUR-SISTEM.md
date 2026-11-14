@@ -122,3 +122,4 @@ Pembatasan akses jaringan (allowlist IP/VPN/reverse proxy basic auth tambahan) d
 | production | strict: Mongo gagal berarti proses keluar | replica set + backup terjadwal | HTTPS eksplisit, `usesCleartextTraffic=false` | secret manager, rotasi | hanya data nyata dan kurasi |
 
 Build type Android baru: `debug` (cleartext izin), `staging`, `release` (HTTPS saja, signing dari environment). `AndroidManifest` cleartext global dihapus dan diganti `network_security_config` per build.
+

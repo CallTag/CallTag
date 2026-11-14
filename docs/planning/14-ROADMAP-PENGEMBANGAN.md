@@ -106,3 +106,4 @@ flowchart LR
 ```
 
 Pembagian dua orang tanpa konflik antar-repo: **A** memegang `backend` (Fase 1, 2, 4) dan **B** memegang `CallTag`, `apidocs`, `calltag.github.io` (Fase 3, 5). Titik sinkron wajib: kontrak OpenAPI dibekukan per milestone (T-002 → T-501); Android memakai mock server/contract fixture sampai endpoint backend siap, sehingga T-301/T-302/T-303 dapat berjalan paralel dengan T-101..T-105. Satu alur vertikal aktif per pengembang (aturan roadmap lama dipertahankan). Agen AI bekerja pada branch per tugas di repo pemilik; tidak ada agen yang menyentuh dua repo sekaligus tanpa PR terpisah.
+

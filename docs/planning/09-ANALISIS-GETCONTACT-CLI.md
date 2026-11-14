@@ -53,3 +53,4 @@ Catatan: README itu sendiri mengakui bahwa penggunaan melalui klien tidak resmi 
 
 - Tidak mengintegrasikan API tidak resmi, tidak melakukan scraping massal, tidak menyimpan kredensial pihak ketiga, tidak melewati captcha/rate limit, tidak mengimpor data kontak tanpa izin.
 - Tidak ada token/kredensial pihak ketiga di repositori atau dokumen.
+

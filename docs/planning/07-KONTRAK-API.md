@@ -69,3 +69,4 @@ Enum `call_type` disatukan: `CELLULAR_CALL`, `WHATSAPP_CALL`, `WHATSAPP_CHAT`, `
 | N7 sampai N14 | ya | tag `Admin` terpisah | tidak | tidak | ya |
 
 `apidocs` simulator (mode mock) wajib mengikuti bentuk respons nyata atau diberi label jelas "simulasi" (temuan A-docs di API_CONTRACT_AUDIT).
+

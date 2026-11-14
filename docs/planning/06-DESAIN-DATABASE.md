@@ -156,3 +156,4 @@ Migrasi: `exportSchema=true`, `Migration(1,2)` tertulis menambah tabel/kolom, uj
 ## 6. Keselarasan model
 
 Satu tabel pemetaan nama lintas lapisan disimpan di [07](07-KONTRAK-API.md) bagian 4. Aturan: OpenAPI adalah sumber kontrak; DTO Kotlin dan struct Go dihasilkan/diperiksa dengan contract test, bukan disalin manual.
+
