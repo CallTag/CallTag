@@ -37,6 +37,7 @@ Legenda: ✔ boleh, ✖ tidak, `own` hanya data milik sendiri, `Q` dengan kuota,
 | Kelola staf, konfigurasi | ✖ | ✖ | ✖ | ✔ | ✖ |
 | Baca audit log | ✖ | ✖ | own | ✔ | ✖ |
 | Hapus/ekspor data akun sendiri | ✖ | ✔ | ✔ | ✔ | ✖ |
+| Whitelist pribadi lokal (Tahap 5B `T-311`) | ✖ | ✔ own | ✔ own | ✔ own | ✖ |
 | Jalankan job terjadwal | ✖ | ✖ | ✖ | picu manual | ✔ |
 
 ## 3. Rancangan RBAC
@@ -69,11 +70,11 @@ Keterangan: panah putus-putus menandai role yang belum dibangun (P2) atau identi
 3. Opsional (P1, meningkatkan kepercayaan): token **Play Integrity** diverifikasi server; tanpa itu `trust_weight` mulai rendah (0,5).
 4. Pada `401`, aplikasi memakai `POST /api/v1/auth/refresh` satu kali; gagal berarti daftar ulang sebagai akun baru (riwayat tidak terbawa, ini batas yang dijelaskan).
 
-Perubahan dari as-is: field `phone` pada `AuthDeviceRequest` **dihapus dari alur wajib**. Nomor pengguna tidak dikumpulkan untuk MVP. Perubahan ini tidak breaking jika field dibiarkan opsional dan diabaikan pada v1.
+Perubahan dari as-is: field `phone` pada `AuthDeviceRequest` **opsional** (tidak pernah diwajibkan untuk menggunakan fitur dasar pencarian & darurat). Pada **Tahap 5B (`T-308`)**, antarmuka Android membedakan **Mode Tamu (*Guest*)** dan **Masuk Akun Opsional** (*nama tampilan + nomor HP opsional* via `POST /api/v1/auth/device`): tamu tetap dapat mencari nomor, mengakses direktori darurat, dan melacak sanggahan, sementara fitur kontribusi & personalisasi (*kirim laporan `#Tag`, lihat riwayat panggilan/outbox, whitelist pribadi `T-311`, dan halaman kuota `/me`*) terbuka setelah masuk akun. Nomor pengguna tetap hanya disimpan server dalam bentuk hash/mask.
 
 ### 4.2 Staf
 
-`POST /api/v1/admin/login {email, password, totp}` → cookie `HttpOnly; Secure; SameSite=Strict`, sesi 8 jam. Password di-hash `argon2id`; TOTP wajib untuk `ADMIN`. Akun staf dibuat lewat CLI seed (`cmd/mkstaff`, PROPOSED) bukan pendaftaran publik.
+`POST /api/v1/admin/login {username, password, totp_code}` mengembalikan cookie sesi 8 jam dengan `HttpOnly`, `SameSite=Strict`, dan `Secure` di produksi. Kata sandi memakai bcrypt dan TOTP wajib untuk `MOD` serta `ADMIN`. Operator membuat akun di `staff_accounts` melalui `backend/cmd/seedstaff`.
 
 ```mermaid
 flowchart TD

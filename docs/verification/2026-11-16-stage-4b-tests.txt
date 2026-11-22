@@ -1,0 +1,182 @@
+=== RUN   TestInfoTagPersistsWithoutSpamRisk
+2026/11/16 17:54:19 [helper/auth] PERINGATAN: JWT_SECRET belum diset, memakai secret pengembangan lokal (dilarang di produksi).
+2026/11/16 17:54:19 [controller/report] Laporan diproses target=+62811****5678 created=true
+--- PASS: TestInfoTagPersistsWithoutSpamRisk (0.00s)
+=== RUN   TestBackendPRDEndpoints
+2026/11/16 17:54:19 [config/db] MONGOSTRING belum diset. Menggunakan penyimpanan in-memory yang telah di-seed untuk mode pengembangan.
+2026/11/16 17:54:19 [controller/report] Laporan diproses target=+62813****9999 created=true
+2026/11/16 17:54:19 [controller/report] Sanggahan tersimpan dispute_id=DSP_6afae0dbbb12deab3988cb69 target=+62813****9999
+--- PASS: TestBackendPRDEndpoints (0.00s)
+=== RUN   TestT09_ReportIdempotencyAndDedup
+2026/11/16 17:54:19 [controller/report] Laporan diproses target=+62813****8888 created=true
+2026/11/16 17:54:19 [controller/report] Laporan diproses target=+62813****8888 created=false
+2026/11/16 17:54:19 [controller/report] Laporan diproses target=+62813****8888 created=false
+--- PASS: TestT09_ReportIdempotencyAndDedup (0.00s)
+=== RUN   TestT10_AuthStrictRejection
+--- PASS: TestT10_AuthStrictRejection (0.00s)
+=== RUN   TestT11_RateLimitAndQuota
+2026/11/16 17:54:19 [controller/report] Laporan diproses target=+62813****0001 created=true
+2026/11/16 17:54:19 [controller/report] Laporan diproses target=+62813****0002 created=true
+2026/11/16 17:54:19 [controller/report] Laporan diproses target=+62813****0003 created=true
+--- PASS: TestT11_RateLimitAndQuota (0.00s)
+=== RUN   TestT12_DisputePersistenceAndReadback
+2026/11/16 17:54:19 [controller/report] Sanggahan tersimpan dispute_id=DSP_6afae0dbbb12deab3988cc51 target=+62812****0001
+2026/11/16 17:54:19 [controller/report] Sanggahan tersimpan dispute_id=DSP_6afae0dbbb12deab3988cc53 target=+62812****0002
+2026/11/16 17:54:19 [controller/report] Sanggahan tersimpan dispute_id=DSP_6afae0dbbb12deab3988cc54 target=+62812****0003
+--- PASS: TestT12_DisputePersistenceAndReadback (0.00s)
+=== RUN   TestT20_ReadinessProbeAndProdStrict
+--- PASS: TestT20_ReadinessProbeAndProdStrict (0.00s)
+=== RUN   TestR11_PublicReportsRedactionAndPIIFilter
+2026/11/16 17:54:19 [controller/report] Laporan diproses target=+62813****4444 created=true
+--- PASS: TestR11_PublicReportsRedactionAndPIIFilter (0.00s)
+=== RUN   TestMongoDBPersistenceWhenEnabled
+2026/11/16 17:54:19 [config/db] Terhubung ke MongoDB database: calltag_verify_tahap3 (APP_ENV=dev)
+2026/11/16 17:54:19 [config/db] Berhasil melakukan seed 23 data EmergencyDirectory ke MongoDB.
+2026/11/16 17:54:19 [config/db] Berhasil melakukan seed 5 data OfficialChannels ke MongoDB.
+2026/11/16 17:54:19 [config/db] Berhasil melakukan seed 6 data awal PhoneTags ke MongoDB.
+2026/11/16 17:54:19 [controller/report] Laporan diproses target=+62813****5555 created=true
+2026/11/16 17:54:19 [controller/report] Laporan diproses target=+62813****5555 created=false
+2026/11/16 17:54:19 [controller/report] Sanggahan tersimpan dispute_id=DSP_6afae0dbbb12deab3988cd71 target=+62813****5555
+--- PASS: TestMongoDBPersistenceWhenEnabled (0.12s)
+=== RUN   TestT202_ScoringTableU1ToU8
+--- PASS: TestT202_ScoringTableU1ToU8 (0.00s)
+=== RUN   TestT201_SyncChangesJournalAndPagination
+2026/11/16 17:54:19 [controller/report] Laporan diproses target=+62813****0001 created=true
+2026/11/16 17:54:19 [controller/report] Laporan diproses target=+62813****0002 created=true
+--- PASS: TestT201_SyncChangesJournalAndPagination (0.00s)
+=== RUN   TestT204_AuthRefreshAndAccountLifecycle
+2026/11/16 17:54:19 [controller/report] Laporan diproses target=+62813****0001 created=true
+--- PASS: TestT204_AuthRefreshAndAccountLifecycle (0.00s)
+=== RUN   TestT203_T205_T206_MiddlewareDecayAndReconcile
+2026/11/16 17:54:19 [controller/report] Laporan diproses target=+62813****2222 created=true
+--- PASS: TestT203_T205_T206_MiddlewareDecayAndReconcile (0.00s)
+PASS
+ok  	github.com/CallTag/backend	0.138s
+=== RUN   TestDryRunWorksWithoutDatabase
+--- PASS: TestDryRunWorksWithoutDatabase (0.00s)
+PASS
+ok  	github.com/CallTag/backend/cmd/importdataset	0.004s
+=== RUN   TestImportDatasetIdempotenceAndProvenance
+--- PASS: TestImportDatasetIdempotenceAndProvenance (0.00s)
+=== RUN   TestImportDatasetMongo
+2026/11/16 17:54:19 [config/db] Berhasil melakukan seed 23 data EmergencyDirectory ke MongoDB.
+2026/11/16 17:54:19 [config/db] Berhasil melakukan seed 5 data OfficialChannels ke MongoDB.
+2026/11/16 17:54:19 [config/db] Berhasil melakukan seed 6 data awal PhoneTags ke MongoDB.
+--- PASS: TestImportDatasetMongo (0.12s)
+=== RUN   TestImportDatasetRepairsFailedMongoAggregation
+--- PASS: TestImportDatasetRepairsFailedMongoAggregation (0.02s)
+=== RUN   TestImportDatasetValidatesWholeBatchAndImportsMITFixture
+--- PASS: TestImportDatasetValidatesWholeBatchAndImportsMITFixture (0.00s)
+=== RUN   TestVerifiedMongoSeedAndIdempotentImport
+--- PASS: TestVerifiedMongoSeedAndIdempotentImport (0.08s)
+=== RUN   TestVerifiedRequiresActiveFutureExpiryAndProvenance
+=== RUN   TestVerifiedRequiresActiveFutureExpiryAndProvenance/active
+=== RUN   TestVerifiedRequiresActiveFutureExpiryAndProvenance/expired
+=== RUN   TestVerifiedRequiresActiveFutureExpiryAndProvenance/boundary
+=== RUN   TestVerifiedRequiresActiveFutureExpiryAndProvenance/revoked
+--- PASS: TestVerifiedRequiresActiveFutureExpiryAndProvenance (0.00s)
+    --- PASS: TestVerifiedRequiresActiveFutureExpiryAndProvenance/active (0.00s)
+    --- PASS: TestVerifiedRequiresActiveFutureExpiryAndProvenance/expired (0.00s)
+    --- PASS: TestVerifiedRequiresActiveFutureExpiryAndProvenance/boundary (0.00s)
+    --- PASS: TestVerifiedRequiresActiveFutureExpiryAndProvenance/revoked (0.00s)
+=== RUN   TestVerifiedUpsertIdempotentAndSync
+--- PASS: TestVerifiedUpsertIdempotentAndSync (0.00s)
+PASS
+ok  	github.com/CallTag/backend/config	0.221s
+=== RUN   TestLookupVerifiedSeedIncludesProvenanceWithoutCommunityReports
+--- PASS: TestLookupVerifiedSeedIncludesProvenanceWithoutCommunityReports (0.00s)
+=== RUN   TestLookupExpiredAndRevokedNumbersDoNotGetShield
+--- PASS: TestLookupExpiredAndRevokedNumbersDoNotGetShield (0.00s)
+=== RUN   TestLookupActiveShieldOverridesDangerButRetainsCommunityEvidence
+--- PASS: TestLookupActiveShieldOverridesDangerButRetainsCommunityEvidence (0.00s)
+PASS
+ok  	github.com/CallTag/backend/controller	0.007s
+=== RUN   TestDetectCarrierRegionalAndInternationalContext
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+622513456789
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+622803456789
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+623703456789
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+624013456789
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+625613456789
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+626513456789
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+627783456789
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+629013456789
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+629673456789
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+629843456789
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+629863456789
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+628111234567
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+628511234567
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+628141234567
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+628951234567
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+628311234567
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+628881234567
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+628771234567
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+65
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+60
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+63
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+855
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+95
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+1
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+81
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+7
+=== RUN   TestDetectCarrierRegionalAndInternationalContext/+675
+--- PASS: TestDetectCarrierRegionalAndInternationalContext (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+622513456789 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+622803456789 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+623703456789 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+624013456789 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+625613456789 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+626513456789 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+627783456789 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+629013456789 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+629673456789 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+629843456789 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+629863456789 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+628111234567 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+628511234567 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+628141234567 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+628951234567 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+628311234567 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+628881234567 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+628771234567 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+65 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+60 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+63 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+855 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+95 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+1 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+81 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+7 (0.00s)
+    --- PASS: TestDetectCarrierRegionalAndInternationalContext/+675 (0.00s)
+=== RUN   TestDetectCarrierDoesNotInventEmergencyOrDomesticOrigin
+--- PASS: TestDetectCarrierDoesNotInventEmergencyOrDomesticOrigin (0.00s)
+=== RUN   TestNormalizePhoneIDPreservesExplicitInternationalCode
+--- PASS: TestNormalizePhoneIDPreservesExplicitInternationalCode (0.00s)
+=== RUN   TestNormalizeNationalServiceNumber
+--- PASS: TestNormalizeNationalServiceNumber (0.00s)
+=== RUN   TestInfoTagNeverContributesRiskOrDangerQuorum
+--- PASS: TestInfoTagNeverContributesRiskOrDangerQuorum (0.00s)
+=== RUN   TestInfoTagPIIFilterIncludesAccountNumbers
+--- PASS: TestInfoTagPIIFilterIncludesAccountNumbers (0.00s)
+=== RUN   TestInfoTagsDoNotReplaceSpamPrimaryCategory
+--- PASS: TestInfoTagsDoNotReplaceSpamPrimaryCategory (0.00s)
+=== RUN   TestPIISanitizerPreservesServiceContext
+--- PASS: TestPIISanitizerPreservesServiceContext (0.00s)
+PASS
+ok  	github.com/CallTag/backend/helper	(cached)
+=== RUN   TestParseCSVNormalizesDeduplicatesAndSanitizes
+--- PASS: TestParseCSVNormalizesDeduplicatesAndSanitizes (0.00s)
+=== RUN   TestParseRejectsInvalidRows
+--- PASS: TestParseRejectsInvalidRows (0.00s)
+=== RUN   TestCallShieldFormat
+--- PASS: TestCallShieldFormat (0.00s)
+=== RUN   TestPinnedMITCallShieldFixture
+--- PASS: TestPinnedMITCallShieldFixture (0.00s)
+=== RUN   TestVerifiedDatesAndHTTPSRequired
+--- PASS: TestVerifiedDatesAndHTTPSRequired (0.00s)
+=== RUN   TestExternalListCannotGrantVerifiedStatus
+--- PASS: TestExternalListCannotGrantVerifiedStatus (0.00s)
+PASS
+ok  	github.com/CallTag/backend/internal/dataset	0.005s
+?   	github.com/CallTag/backend/model	[no test files]
+?   	github.com/CallTag/backend/route	[no test files]
+?   	github.com/CallTag/backend/seeds	[no test files]

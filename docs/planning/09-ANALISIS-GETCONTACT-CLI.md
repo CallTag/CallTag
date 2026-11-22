@@ -47,7 +47,7 @@ Catatan: README itu sendiri mengakui bahwa penggunaan melalui klien tidak resmi 
 2. **Opsi D hanya sebagai bahan studi konsep**: pelajari konsep (agregasi tag, kuota, penanganan rate limit) tanpa menyalin kode, menjalankan terhadap layanan, atau memakai kredensial.
 3. **Opsi B** dipertimbangkan hanya jika ada penyedia dengan kontrak tertulis, dokumentasi publik, dan perjanjian pemrosesan data. Dirancang sebagai `provider` interface dengan cache terbatas dan atribusi sumber; **tidak dibangun sekarang**.
 4. **Opsi C** menyusul Opsi B; sumber eksternal tidak pernah menimpa kurasi staf dan selalu berlabel sumber.
-5. Konsekuensi jujur Opsi A: cakupan awal kecil, banyak hasil UNKNOWN. Mitigasi: fokus pada kategori scam Indonesia, kanal lapor resmi, pilot wilayah, dan komunikasi yang jelas ke pengguna.
+5. Konsekuensi jujur Opsi A: cakupan awal kecil, banyak hasil UNKNOWN. Mitigasi yang diadopsi di **Tahap 4B (`T-207`..`T-209`) & Tahap 5B (`T-313`..`T-314`)**: fokus pada kategori scam Indonesia, seed nomor layanan resmi `verified_numbers`, detektor konteks HLR/PSTN/kode negara ITU agar hasil UNKNOWN tetap informatif, dukungan importer dataset berlisensi MIT/publik terbuka berprovenans (`EXTERNAL_OPEN_LIST`), aksi aman *Lihat di WhatsApp* (`wa.me`) tanpa scraping, kanal lapor resmi, serta komunikasi yang jujur ke pengguna.
 
 ## 5. Larangan operasional (tercatat sebagai aturan proyek)
 

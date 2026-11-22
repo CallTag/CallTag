@@ -1,0 +1,1814 @@
+[
+  {
+    "phone": "+628111234567",
+    "expected": "Telkomsel (Halo)"
+  },
+  {
+    "phone": "+628121234567",
+    "expected": "Telkomsel (Simpati/Halo)"
+  },
+  {
+    "phone": "+628131234567",
+    "expected": "Telkomsel (Simpati/Halo)"
+  },
+  {
+    "phone": "+628211234567",
+    "expected": "Telkomsel (Simpati)"
+  },
+  {
+    "phone": "+628221234567",
+    "expected": "Telkomsel (Loop/Simpati)"
+  },
+  {
+    "phone": "+628231234567",
+    "expected": "Telkomsel (AS)"
+  },
+  {
+    "phone": "+628511234567",
+    "expected": "Telkomsel (by.U / AS)"
+  },
+  {
+    "phone": "+628521234567",
+    "expected": "Telkomsel (AS)"
+  },
+  {
+    "phone": "+628531234567",
+    "expected": "Telkomsel (AS)"
+  },
+  {
+    "phone": "+628141234567",
+    "expected": "Indosat Ooredoo Hutchison"
+  },
+  {
+    "phone": "+628151234567",
+    "expected": "Indosat Ooredoo Hutchison (Mentari/Matrix)"
+  },
+  {
+    "phone": "+628161234567",
+    "expected": "Indosat Ooredoo Hutchison (IM3/Matrix)"
+  },
+  {
+    "phone": "+628551234567",
+    "expected": "Indosat Ooredoo Hutchison (Matrix)"
+  },
+  {
+    "phone": "+628561234567",
+    "expected": "Indosat Ooredoo Hutchison (IM3)"
+  },
+  {
+    "phone": "+628571234567",
+    "expected": "Indosat Ooredoo Hutchison (IM3)"
+  },
+  {
+    "phone": "+628581234567",
+    "expected": "Indosat Ooredoo Hutchison (Mentari)"
+  },
+  {
+    "phone": "+628951234567",
+    "expected": "Indosat Ooredoo Hutchison (Tri/3)"
+  },
+  {
+    "phone": "+628961234567",
+    "expected": "Indosat Ooredoo Hutchison (Tri/3)"
+  },
+  {
+    "phone": "+628971234567",
+    "expected": "Indosat Ooredoo Hutchison (Tri/3)"
+  },
+  {
+    "phone": "+628981234567",
+    "expected": "Indosat Ooredoo Hutchison (Tri/3)"
+  },
+  {
+    "phone": "+628991234567",
+    "expected": "Indosat Ooredoo Hutchison (Tri/3)"
+  },
+  {
+    "phone": "+628171234567",
+    "expected": "XL Axiata"
+  },
+  {
+    "phone": "+628181234567",
+    "expected": "XL Axiata"
+  },
+  {
+    "phone": "+628191234567",
+    "expected": "XL Axiata"
+  },
+  {
+    "phone": "+628591234567",
+    "expected": "XL Axiata"
+  },
+  {
+    "phone": "+628771234567",
+    "expected": "XL Axiata"
+  },
+  {
+    "phone": "+628781234567",
+    "expected": "XL Axiata"
+  },
+  {
+    "phone": "+628311234567",
+    "expected": "XL Axiata (AXIS)"
+  },
+  {
+    "phone": "+628321234567",
+    "expected": "XL Axiata (AXIS)"
+  },
+  {
+    "phone": "+628331234567",
+    "expected": "XL Axiata (AXIS)"
+  },
+  {
+    "phone": "+628381234567",
+    "expected": "XL Axiata (AXIS)"
+  },
+  {
+    "phone": "+628811234567",
+    "expected": "Smartfren"
+  },
+  {
+    "phone": "+628821234567",
+    "expected": "Smartfren"
+  },
+  {
+    "phone": "+628831234567",
+    "expected": "Smartfren"
+  },
+  {
+    "phone": "+628841234567",
+    "expected": "Smartfren"
+  },
+  {
+    "phone": "+628851234567",
+    "expected": "Smartfren"
+  },
+  {
+    "phone": "+628861234567",
+    "expected": "Smartfren"
+  },
+  {
+    "phone": "+628871234567",
+    "expected": "Smartfren"
+  },
+  {
+    "phone": "+628881234567",
+    "expected": "Smartfren"
+  },
+  {
+    "phone": "+628891234567",
+    "expected": "Smartfren"
+  },
+  {
+    "phone": "+62211234567",
+    "expected": "PSTN Indonesia (Jabodetabek)"
+  },
+  {
+    "phone": "+62221234567",
+    "expected": "PSTN Indonesia (Bandung)"
+  },
+  {
+    "phone": "+62241234567",
+    "expected": "PSTN Indonesia (Semarang)"
+  },
+  {
+    "phone": "+62311234567",
+    "expected": "PSTN Indonesia (Surabaya)"
+  },
+  {
+    "phone": "+62611234567",
+    "expected": "PSTN Indonesia (Medan)"
+  },
+  {
+    "phone": "+622311234567",
+    "expected": "PSTN Indonesia (Cirebon)"
+  },
+  {
+    "phone": "+622321234567",
+    "expected": "PSTN Indonesia (Kuningan)"
+  },
+  {
+    "phone": "+622331234567",
+    "expected": "PSTN Indonesia (Majalengka)"
+  },
+  {
+    "phone": "+622341234567",
+    "expected": "PSTN Indonesia (Indramayu)"
+  },
+  {
+    "phone": "+622511234567",
+    "expected": "PSTN Indonesia (Bogor)"
+  },
+  {
+    "phone": "+622521234567",
+    "expected": "PSTN Indonesia (Rangkasbitung)"
+  },
+  {
+    "phone": "+622531234567",
+    "expected": "PSTN Indonesia (Pandeglang)"
+  },
+  {
+    "phone": "+622541234567",
+    "expected": "PSTN Indonesia (Serang)"
+  },
+  {
+    "phone": "+622611234567",
+    "expected": "PSTN Indonesia (Sumedang)"
+  },
+  {
+    "phone": "+622621234567",
+    "expected": "PSTN Indonesia (Garut/Pameungpeuk)"
+  },
+  {
+    "phone": "+622631234567",
+    "expected": "PSTN Indonesia (Cianjur)"
+  },
+  {
+    "phone": "+622641234567",
+    "expected": "PSTN Indonesia (Purwakarta)"
+  },
+  {
+    "phone": "+622651234567",
+    "expected": "PSTN Indonesia (Tasikmalaya)"
+  },
+  {
+    "phone": "+622661234567",
+    "expected": "PSTN Indonesia (Sukabumi)"
+  },
+  {
+    "phone": "+622671234567",
+    "expected": "PSTN Indonesia (Karawang)"
+  },
+  {
+    "phone": "+622601234567",
+    "expected": "PSTN Indonesia (Subang)"
+  },
+  {
+    "phone": "+622711234567",
+    "expected": "PSTN Indonesia (Solo)"
+  },
+  {
+    "phone": "+622721234567",
+    "expected": "PSTN Indonesia (Klaten)"
+  },
+  {
+    "phone": "+622731234567",
+    "expected": "PSTN Indonesia (Wonogiri)"
+  },
+  {
+    "phone": "+622741234567",
+    "expected": "PSTN Indonesia (Yogyakarta)"
+  },
+  {
+    "phone": "+622751234567",
+    "expected": "PSTN Indonesia (Purworejo)"
+  },
+  {
+    "phone": "+622761234567",
+    "expected": "PSTN Indonesia (Boyolali)"
+  },
+  {
+    "phone": "+622811234567",
+    "expected": "PSTN Indonesia (Purwokerto)"
+  },
+  {
+    "phone": "+622821234567",
+    "expected": "PSTN Indonesia (Cilacap)"
+  },
+  {
+    "phone": "+622831234567",
+    "expected": "PSTN Indonesia (Tegal/Brebes)"
+  },
+  {
+    "phone": "+622841234567",
+    "expected": "PSTN Indonesia (Pemalang)"
+  },
+  {
+    "phone": "+622851234567",
+    "expected": "PSTN Indonesia (Pekalongan)"
+  },
+  {
+    "phone": "+622861234567",
+    "expected": "PSTN Indonesia (Wonosobo)"
+  },
+  {
+    "phone": "+622871234567",
+    "expected": "PSTN Indonesia (Kebumen)"
+  },
+  {
+    "phone": "+622891234567",
+    "expected": "PSTN Indonesia (Bumiayu)"
+  },
+  {
+    "phone": "+622801234567",
+    "expected": "PSTN Indonesia (Majenang)"
+  },
+  {
+    "phone": "+622911234567",
+    "expected": "PSTN Indonesia (Kudus)"
+  },
+  {
+    "phone": "+622921234567",
+    "expected": "PSTN Indonesia (Purwodadi)"
+  },
+  {
+    "phone": "+622931234567",
+    "expected": "PSTN Indonesia (Magelang)"
+  },
+  {
+    "phone": "+622941234567",
+    "expected": "PSTN Indonesia (Kendal)"
+  },
+  {
+    "phone": "+622951234567",
+    "expected": "PSTN Indonesia (Pati)"
+  },
+  {
+    "phone": "+622961234567",
+    "expected": "PSTN Indonesia (Blora)"
+  },
+  {
+    "phone": "+622971234567",
+    "expected": "PSTN Indonesia (Karimunjawa)"
+  },
+  {
+    "phone": "+622981234567",
+    "expected": "PSTN Indonesia (Salatiga)"
+  },
+  {
+    "phone": "+623211234567",
+    "expected": "PSTN Indonesia (Mojokerto)"
+  },
+  {
+    "phone": "+623221234567",
+    "expected": "PSTN Indonesia (Lamongan)"
+  },
+  {
+    "phone": "+623231234567",
+    "expected": "PSTN Indonesia (Sampang)"
+  },
+  {
+    "phone": "+623241234567",
+    "expected": "PSTN Indonesia (Pamekasan)"
+  },
+  {
+    "phone": "+623251234567",
+    "expected": "PSTN Indonesia (Sangkapura)"
+  },
+  {
+    "phone": "+623271234567",
+    "expected": "PSTN Indonesia (Pabean/Gayam)"
+  },
+  {
+    "phone": "+623281234567",
+    "expected": "PSTN Indonesia (Sumenep)"
+  },
+  {
+    "phone": "+623311234567",
+    "expected": "PSTN Indonesia (Jember)"
+  },
+  {
+    "phone": "+623321234567",
+    "expected": "PSTN Indonesia (Bondowoso)"
+  },
+  {
+    "phone": "+623331234567",
+    "expected": "PSTN Indonesia (Banyuwangi)"
+  },
+  {
+    "phone": "+623341234567",
+    "expected": "PSTN Indonesia (Lumajang)"
+  },
+  {
+    "phone": "+623351234567",
+    "expected": "PSTN Indonesia (Probolinggo)"
+  },
+  {
+    "phone": "+623361234567",
+    "expected": "PSTN Indonesia (Tanggul)"
+  },
+  {
+    "phone": "+623381234567",
+    "expected": "PSTN Indonesia (Situbondo)"
+  },
+  {
+    "phone": "+623411234567",
+    "expected": "PSTN Indonesia (Malang)"
+  },
+  {
+    "phone": "+623421234567",
+    "expected": "PSTN Indonesia (Blitar)"
+  },
+  {
+    "phone": "+623431234567",
+    "expected": "PSTN Indonesia (Pasuruan)"
+  },
+  {
+    "phone": "+623511234567",
+    "expected": "PSTN Indonesia (Madiun)"
+  },
+  {
+    "phone": "+623521234567",
+    "expected": "PSTN Indonesia (Ponorogo)"
+  },
+  {
+    "phone": "+623531234567",
+    "expected": "PSTN Indonesia (Bojonegoro)"
+  },
+  {
+    "phone": "+623541234567",
+    "expected": "PSTN Indonesia (Kediri)"
+  },
+  {
+    "phone": "+623551234567",
+    "expected": "PSTN Indonesia (Tulungagung)"
+  },
+  {
+    "phone": "+623561234567",
+    "expected": "PSTN Indonesia (Tuban)"
+  },
+  {
+    "phone": "+623571234567",
+    "expected": "PSTN Indonesia (Pacitan)"
+  },
+  {
+    "phone": "+623581234567",
+    "expected": "PSTN Indonesia (Nganjuk)"
+  },
+  {
+    "phone": "+623611234567",
+    "expected": "PSTN Indonesia (Denpasar)"
+  },
+  {
+    "phone": "+623621234567",
+    "expected": "PSTN Indonesia (Singaraja/Pupuan)"
+  },
+  {
+    "phone": "+623631234567",
+    "expected": "PSTN Indonesia (Amlapura)"
+  },
+  {
+    "phone": "+623651234567",
+    "expected": "PSTN Indonesia (Negara)"
+  },
+  {
+    "phone": "+623661234567",
+    "expected": "PSTN Indonesia (Klungkung)"
+  },
+  {
+    "phone": "+623681234567",
+    "expected": "PSTN Indonesia (Baturiti)"
+  },
+  {
+    "phone": "+623711234567",
+    "expected": "PSTN Indonesia (Sumbawa Besar)"
+  },
+  {
+    "phone": "+623721234567",
+    "expected": "PSTN Indonesia (Alas)"
+  },
+  {
+    "phone": "+623731234567",
+    "expected": "PSTN Indonesia (Dompu)"
+  },
+  {
+    "phone": "+623741234567",
+    "expected": "PSTN Indonesia (Bima)"
+  },
+  {
+    "phone": "+623761234567",
+    "expected": "PSTN Indonesia (Selong)"
+  },
+  {
+    "phone": "+623701234567",
+    "expected": "PSTN Indonesia (Mataram)"
+  },
+  {
+    "phone": "+623811234567",
+    "expected": "PSTN Indonesia (Ende)"
+  },
+  {
+    "phone": "+623821234567",
+    "expected": "PSTN Indonesia (Maumere)"
+  },
+  {
+    "phone": "+623831234567",
+    "expected": "PSTN Indonesia (Larantuka)"
+  },
+  {
+    "phone": "+623841234567",
+    "expected": "PSTN Indonesia (Bajawa)"
+  },
+  {
+    "phone": "+623851234567",
+    "expected": "PSTN Indonesia (Ruteng)"
+  },
+  {
+    "phone": "+623861234567",
+    "expected": "PSTN Indonesia (Kalabahi)"
+  },
+  {
+    "phone": "+623871234567",
+    "expected": "PSTN Indonesia (Waingapu/Waikabubak)"
+  },
+  {
+    "phone": "+623881234567",
+    "expected": "PSTN Indonesia (Soe/Kefamenanu)"
+  },
+  {
+    "phone": "+623891234567",
+    "expected": "PSTN Indonesia (Atambua)"
+  },
+  {
+    "phone": "+623801234567",
+    "expected": "PSTN Indonesia (Kupang)"
+  },
+  {
+    "phone": "+624111234567",
+    "expected": "PSTN Indonesia (Makassar)"
+  },
+  {
+    "phone": "+624131234567",
+    "expected": "PSTN Indonesia (Bantaeng)"
+  },
+  {
+    "phone": "+624141234567",
+    "expected": "PSTN Indonesia (Benteng)"
+  },
+  {
+    "phone": "+624151234567",
+    "expected": "PSTN Indonesia (Tanah Jampea)"
+  },
+  {
+    "phone": "+624171234567",
+    "expected": "PSTN Indonesia (Malino)"
+  },
+  {
+    "phone": "+624181234567",
+    "expected": "PSTN Indonesia (Takalar)"
+  },
+  {
+    "phone": "+624191234567",
+    "expected": "PSTN Indonesia (Jeneponto)"
+  },
+  {
+    "phone": "+624101234567",
+    "expected": "PSTN Indonesia (Pangkep)"
+  },
+  {
+    "phone": "+624211234567",
+    "expected": "PSTN Indonesia (Parepare)"
+  },
+  {
+    "phone": "+624221234567",
+    "expected": "PSTN Indonesia (Majene)"
+  },
+  {
+    "phone": "+624231234567",
+    "expected": "PSTN Indonesia (Rantepao)"
+  },
+  {
+    "phone": "+624261234567",
+    "expected": "PSTN Indonesia (Mamuju)"
+  },
+  {
+    "phone": "+624271234567",
+    "expected": "PSTN Indonesia (Barru)"
+  },
+  {
+    "phone": "+624281234567",
+    "expected": "PSTN Indonesia (Polewali)"
+  },
+  {
+    "phone": "+624291234567",
+    "expected": "PSTN Indonesia (Karosa)"
+  },
+  {
+    "phone": "+624201234567",
+    "expected": "PSTN Indonesia (Enrekang)"
+  },
+  {
+    "phone": "+624311234567",
+    "expected": "PSTN Indonesia (Manado)"
+  },
+  {
+    "phone": "+624321234567",
+    "expected": "PSTN Indonesia (Tahuna)"
+  },
+  {
+    "phone": "+624331234567",
+    "expected": "PSTN Indonesia (Beo)"
+  },
+  {
+    "phone": "+624341234567",
+    "expected": "PSTN Indonesia (Kotamobagu)"
+  },
+  {
+    "phone": "+624351234567",
+    "expected": "PSTN Indonesia (Gorontalo)"
+  },
+  {
+    "phone": "+624381234567",
+    "expected": "PSTN Indonesia (Bitung)"
+  },
+  {
+    "phone": "+624301234567",
+    "expected": "PSTN Indonesia (Amurang)"
+  },
+  {
+    "phone": "+624421234567",
+    "expected": "PSTN Indonesia (Kwandang)"
+  },
+  {
+    "phone": "+624431234567",
+    "expected": "PSTN Indonesia (Marisa)"
+  },
+  {
+    "phone": "+624441234567",
+    "expected": "PSTN Indonesia (Tilamuta)"
+  },
+  {
+    "phone": "+624451234567",
+    "expected": "PSTN Indonesia (Paleleh/Buol)"
+  },
+  {
+    "phone": "+624511234567",
+    "expected": "PSTN Indonesia (Palu)"
+  },
+  {
+    "phone": "+624521234567",
+    "expected": "PSTN Indonesia (Poso)"
+  },
+  {
+    "phone": "+624531234567",
+    "expected": "PSTN Indonesia (Toli-toli)"
+  },
+  {
+    "phone": "+624541234567",
+    "expected": "PSTN Indonesia (Tinombo)"
+  },
+  {
+    "phone": "+624551234567",
+    "expected": "PSTN Indonesia (Moutong)"
+  },
+  {
+    "phone": "+624561234567",
+    "expected": "PSTN Indonesia (Pasangkayu)"
+  },
+  {
+    "phone": "+624571234567",
+    "expected": "PSTN Indonesia (Donggala)"
+  },
+  {
+    "phone": "+624581234567",
+    "expected": "PSTN Indonesia (Tentena)"
+  },
+  {
+    "phone": "+624501234567",
+    "expected": "PSTN Indonesia (Parigi)"
+  },
+  {
+    "phone": "+624611234567",
+    "expected": "PSTN Indonesia (Luwuk)"
+  },
+  {
+    "phone": "+624621234567",
+    "expected": "PSTN Indonesia (Banggai)"
+  },
+  {
+    "phone": "+624631234567",
+    "expected": "PSTN Indonesia (Katupa)"
+  },
+  {
+    "phone": "+624641234567",
+    "expected": "PSTN Indonesia (Ampana)"
+  },
+  {
+    "phone": "+624651234567",
+    "expected": "PSTN Indonesia (Kolonedale)"
+  },
+  {
+    "phone": "+624711234567",
+    "expected": "PSTN Indonesia (Palopo)"
+  },
+  {
+    "phone": "+624721234567",
+    "expected": "PSTN Indonesia (Siwa)"
+  },
+  {
+    "phone": "+624731234567",
+    "expected": "PSTN Indonesia (Masamba)"
+  },
+  {
+    "phone": "+624741234567",
+    "expected": "PSTN Indonesia (Malili)"
+  },
+  {
+    "phone": "+624751234567",
+    "expected": "PSTN Indonesia (Soroako)"
+  },
+  {
+    "phone": "+624811234567",
+    "expected": "PSTN Indonesia (Watampone)"
+  },
+  {
+    "phone": "+624821234567",
+    "expected": "PSTN Indonesia (Sinjai)"
+  },
+  {
+    "phone": "+624841234567",
+    "expected": "PSTN Indonesia (Watansopeng)"
+  },
+  {
+    "phone": "+624851234567",
+    "expected": "PSTN Indonesia (Sengkang)"
+  },
+  {
+    "phone": "+624011234567",
+    "expected": "PSTN Indonesia (Kendari)"
+  },
+  {
+    "phone": "+624021234567",
+    "expected": "PSTN Indonesia (Baubau)"
+  },
+  {
+    "phone": "+624031234567",
+    "expected": "PSTN Indonesia (Raha)"
+  },
+  {
+    "phone": "+624041234567",
+    "expected": "PSTN Indonesia (Wanci)"
+  },
+  {
+    "phone": "+624051234567",
+    "expected": "PSTN Indonesia (Kolaka)"
+  },
+  {
+    "phone": "+624061234567",
+    "expected": "PSTN Indonesia (Malamala)"
+  },
+  {
+    "phone": "+624071234567",
+    "expected": "PSTN Indonesia (Waweheo)"
+  },
+  {
+    "phone": "+624081234567",
+    "expected": "PSTN Indonesia (Unaaha)"
+  },
+  {
+    "phone": "+624091234567",
+    "expected": "PSTN Indonesia (Bungku)"
+  },
+  {
+    "phone": "+625111234567",
+    "expected": "PSTN Indonesia (Banjarmasin/Marabahan)"
+  },
+  {
+    "phone": "+625121234567",
+    "expected": "PSTN Indonesia (Pleihari)"
+  },
+  {
+    "phone": "+625131234567",
+    "expected": "PSTN Indonesia (Kuala Kapuas)"
+  },
+  {
+    "phone": "+625171234567",
+    "expected": "PSTN Indonesia (Kandangan)"
+  },
+  {
+    "phone": "+625181234567",
+    "expected": "PSTN Indonesia (Kotabaru/Batu Licin)"
+  },
+  {
+    "phone": "+625191234567",
+    "expected": "PSTN Indonesia (Muarateweh)"
+  },
+  {
+    "phone": "+625221234567",
+    "expected": "PSTN Indonesia (Ampah)"
+  },
+  {
+    "phone": "+625251234567",
+    "expected": "PSTN Indonesia (Buntok)"
+  },
+  {
+    "phone": "+625261234567",
+    "expected": "PSTN Indonesia (Tanjung Tabalong)"
+  },
+  {
+    "phone": "+625271234567",
+    "expected": "PSTN Indonesia (Amuntai)"
+  },
+  {
+    "phone": "+625281234567",
+    "expected": "PSTN Indonesia (Purukcahu)"
+  },
+  {
+    "phone": "+625311234567",
+    "expected": "PSTN Indonesia (Sampit)"
+  },
+  {
+    "phone": "+625321234567",
+    "expected": "PSTN Indonesia (Pangkalan Bun)"
+  },
+  {
+    "phone": "+625331234567",
+    "expected": "PSTN Indonesia (Tumbang Samba)"
+  },
+  {
+    "phone": "+625341234567",
+    "expected": "PSTN Indonesia (Ketapang)"
+  },
+  {
+    "phone": "+625361234567",
+    "expected": "PSTN Indonesia (Palangkaraya)"
+  },
+  {
+    "phone": "+625371234567",
+    "expected": "PSTN Indonesia (Kuala Kurun)"
+  },
+  {
+    "phone": "+625381234567",
+    "expected": "PSTN Indonesia (Kuala Pembuang)"
+  },
+  {
+    "phone": "+625391234567",
+    "expected": "PSTN Indonesia (Kuala Kuayan)"
+  },
+  {
+    "phone": "+625411234567",
+    "expected": "PSTN Indonesia (Samarinda)"
+  },
+  {
+    "phone": "+625421234567",
+    "expected": "PSTN Indonesia (Balikpapan)"
+  },
+  {
+    "phone": "+625431234567",
+    "expected": "PSTN Indonesia (Tanah Grogot)"
+  },
+  {
+    "phone": "+625441234567",
+    "expected": "PSTN Indonesia (Tiongohang)"
+  },
+  {
+    "phone": "+625451234567",
+    "expected": "PSTN Indonesia (Longiram)"
+  },
+  {
+    "phone": "+625461234567",
+    "expected": "PSTN Indonesia (Tabang)"
+  },
+  {
+    "phone": "+625471234567",
+    "expected": "PSTN Indonesia (Sangkulirang)"
+  },
+  {
+    "phone": "+625481234567",
+    "expected": "PSTN Indonesia (Bontang)"
+  },
+  {
+    "phone": "+625491234567",
+    "expected": "PSTN Indonesia (Sangata)"
+  },
+  {
+    "phone": "+625511234567",
+    "expected": "PSTN Indonesia (Tarakan)"
+  },
+  {
+    "phone": "+625521234567",
+    "expected": "PSTN Indonesia (Tanjung Selor)"
+  },
+  {
+    "phone": "+625531234567",
+    "expected": "PSTN Indonesia (Malinau)"
+  },
+  {
+    "phone": "+625541234567",
+    "expected": "PSTN Indonesia (Tanjungredep)"
+  },
+  {
+    "phone": "+625551234567",
+    "expected": "PSTN Indonesia (Longnawang)"
+  },
+  {
+    "phone": "+625561234567",
+    "expected": "PSTN Indonesia (Nunukan)"
+  },
+  {
+    "phone": "+625611234567",
+    "expected": "PSTN Indonesia (Pontianak/Mempawah)"
+  },
+  {
+    "phone": "+625621234567",
+    "expected": "PSTN Indonesia (Singkawang)"
+  },
+  {
+    "phone": "+625631234567",
+    "expected": "PSTN Indonesia (Ngabang)"
+  },
+  {
+    "phone": "+625641234567",
+    "expected": "PSTN Indonesia (Sanggau/Balai Karangan)"
+  },
+  {
+    "phone": "+625651234567",
+    "expected": "PSTN Indonesia (Sintang)"
+  },
+  {
+    "phone": "+625671234567",
+    "expected": "PSTN Indonesia (Putussibau)"
+  },
+  {
+    "phone": "+625681234567",
+    "expected": "PSTN Indonesia (Sambas/Nangapinoh)"
+  },
+  {
+    "phone": "+625731234567",
+    "expected": "PSTN Indonesia (Sukadana)"
+  },
+  {
+    "phone": "+625741234567",
+    "expected": "PSTN Indonesia (Nangatayap)"
+  },
+  {
+    "phone": "+625751234567",
+    "expected": "PSTN Indonesia (Pd. Karimata)"
+  },
+  {
+    "phone": "+625821234567",
+    "expected": "PSTN Indonesia (Semitau)"
+  },
+  {
+    "phone": "+626211234567",
+    "expected": "PSTN Indonesia (Tebingtinggi)"
+  },
+  {
+    "phone": "+626221234567",
+    "expected": "PSTN Indonesia (Pematang Siantar)"
+  },
+  {
+    "phone": "+626231234567",
+    "expected": "PSTN Indonesia (Kisaran)"
+  },
+  {
+    "phone": "+626241234567",
+    "expected": "PSTN Indonesia (Rantau Prapat)"
+  },
+  {
+    "phone": "+626251234567",
+    "expected": "PSTN Indonesia (Parapat)"
+  },
+  {
+    "phone": "+626261234567",
+    "expected": "PSTN Indonesia (Pangururan)"
+  },
+  {
+    "phone": "+626271234567",
+    "expected": "PSTN Indonesia (Sidikalang)"
+  },
+  {
+    "phone": "+626281234567",
+    "expected": "PSTN Indonesia (Kabanjahe)"
+  },
+  {
+    "phone": "+626291234567",
+    "expected": "PSTN Indonesia (Kutacane)"
+  },
+  {
+    "phone": "+626201234567",
+    "expected": "PSTN Indonesia (Pangkalan Brandan)"
+  },
+  {
+    "phone": "+626311234567",
+    "expected": "PSTN Indonesia (Sibolga)"
+  },
+  {
+    "phone": "+626321234567",
+    "expected": "PSTN Indonesia (Balige)"
+  },
+  {
+    "phone": "+626331234567",
+    "expected": "PSTN Indonesia (Tarutung)"
+  },
+  {
+    "phone": "+626341234567",
+    "expected": "PSTN Indonesia (Padang Sidempuan)"
+  },
+  {
+    "phone": "+626351234567",
+    "expected": "PSTN Indonesia (Gunungtua)"
+  },
+  {
+    "phone": "+626361234567",
+    "expected": "PSTN Indonesia (Panyabungan/Natal)"
+  },
+  {
+    "phone": "+626381234567",
+    "expected": "PSTN Indonesia (Barus)"
+  },
+  {
+    "phone": "+626391234567",
+    "expected": "PSTN Indonesia (Gunung Sitoli)"
+  },
+  {
+    "phone": "+626301234567",
+    "expected": "PSTN Indonesia (Teluk Dalam)"
+  },
+  {
+    "phone": "+626411234567",
+    "expected": "PSTN Indonesia (Langsa)"
+  },
+  {
+    "phone": "+626421234567",
+    "expected": "PSTN Indonesia (Blangkejeren)"
+  },
+  {
+    "phone": "+626431234567",
+    "expected": "PSTN Indonesia (Takengon)"
+  },
+  {
+    "phone": "+626441234567",
+    "expected": "PSTN Indonesia (Bireun)"
+  },
+  {
+    "phone": "+626451234567",
+    "expected": "PSTN Indonesia (Lhok Seumawe)"
+  },
+  {
+    "phone": "+626461234567",
+    "expected": "PSTN Indonesia (Idi)"
+  },
+  {
+    "phone": "+626511234567",
+    "expected": "PSTN Indonesia (Banda Aceh)"
+  },
+  {
+    "phone": "+626521234567",
+    "expected": "PSTN Indonesia (Sabang)"
+  },
+  {
+    "phone": "+626531234567",
+    "expected": "PSTN Indonesia (Sigli)"
+  },
+  {
+    "phone": "+626541234567",
+    "expected": "PSTN Indonesia (Calang)"
+  },
+  {
+    "phone": "+626551234567",
+    "expected": "PSTN Indonesia (Meulaboh)"
+  },
+  {
+    "phone": "+626561234567",
+    "expected": "PSTN Indonesia (Tapaktuan)"
+  },
+  {
+    "phone": "+626571234567",
+    "expected": "PSTN Indonesia (Bakongan)"
+  },
+  {
+    "phone": "+626581234567",
+    "expected": "PSTN Indonesia (Singkil)"
+  },
+  {
+    "phone": "+626591234567",
+    "expected": "PSTN Indonesia (Blang Pidie)"
+  },
+  {
+    "phone": "+626501234567",
+    "expected": "PSTN Indonesia (Sinabang)"
+  },
+  {
+    "phone": "+627111234567",
+    "expected": "PSTN Indonesia (Palembang)"
+  },
+  {
+    "phone": "+627121234567",
+    "expected": "PSTN Indonesia (Kayu Agung)"
+  },
+  {
+    "phone": "+627131234567",
+    "expected": "PSTN Indonesia (Prabumulih)"
+  },
+  {
+    "phone": "+627141234567",
+    "expected": "PSTN Indonesia (Sekayu)"
+  },
+  {
+    "phone": "+627151234567",
+    "expected": "PSTN Indonesia (Belinyu)"
+  },
+  {
+    "phone": "+627161234567",
+    "expected": "PSTN Indonesia (Mentok)"
+  },
+  {
+    "phone": "+627171234567",
+    "expected": "PSTN Indonesia (Pangkal Pinang)"
+  },
+  {
+    "phone": "+627181234567",
+    "expected": "PSTN Indonesia (Koba)"
+  },
+  {
+    "phone": "+627191234567",
+    "expected": "PSTN Indonesia (Tanjung Pandan)"
+  },
+  {
+    "phone": "+627211234567",
+    "expected": "PSTN Indonesia (Bandar Lampung/Pringsewu)"
+  },
+  {
+    "phone": "+627221234567",
+    "expected": "PSTN Indonesia (Kota Agung)"
+  },
+  {
+    "phone": "+627231234567",
+    "expected": "PSTN Indonesia (Blambangan Umpu)"
+  },
+  {
+    "phone": "+627241234567",
+    "expected": "PSTN Indonesia (Kotabumi)"
+  },
+  {
+    "phone": "+627251234567",
+    "expected": "PSTN Indonesia (Metro/Bandar Jaya)"
+  },
+  {
+    "phone": "+627261234567",
+    "expected": "PSTN Indonesia (Manggala)"
+  },
+  {
+    "phone": "+627271234567",
+    "expected": "PSTN Indonesia (Kalianda)"
+  },
+  {
+    "phone": "+627281234567",
+    "expected": "PSTN Indonesia (Krui/Liwa)"
+  },
+  {
+    "phone": "+627291234567",
+    "expected": "PSTN Indonesia (Pringsewu)"
+  },
+  {
+    "phone": "+627311234567",
+    "expected": "PSTN Indonesia (Lahat)"
+  },
+  {
+    "phone": "+627321234567",
+    "expected": "PSTN Indonesia (Curup)"
+  },
+  {
+    "phone": "+627331234567",
+    "expected": "PSTN Indonesia (Lubuk Linggau)"
+  },
+  {
+    "phone": "+627341234567",
+    "expected": "PSTN Indonesia (Muaraenim)"
+  },
+  {
+    "phone": "+627351234567",
+    "expected": "PSTN Indonesia (Baturaja)"
+  },
+  {
+    "phone": "+627361234567",
+    "expected": "PSTN Indonesia (Bengkulu)"
+  },
+  {
+    "phone": "+627371234567",
+    "expected": "PSTN Indonesia (Argamakmur)"
+  },
+  {
+    "phone": "+627381234567",
+    "expected": "PSTN Indonesia (Muara Aman)"
+  },
+  {
+    "phone": "+627391234567",
+    "expected": "PSTN Indonesia (Manna)"
+  },
+  {
+    "phone": "+627301234567",
+    "expected": "PSTN Indonesia (Pagaralam)"
+  },
+  {
+    "phone": "+627411234567",
+    "expected": "PSTN Indonesia (Jambi)"
+  },
+  {
+    "phone": "+627421234567",
+    "expected": "PSTN Indonesia (Kuala Tungkal)"
+  },
+  {
+    "phone": "+627431234567",
+    "expected": "PSTN Indonesia (Muarabulian)"
+  },
+  {
+    "phone": "+627441234567",
+    "expected": "PSTN Indonesia (Muaratebo)"
+  },
+  {
+    "phone": "+627451234567",
+    "expected": "PSTN Indonesia (Sarolangun)"
+  },
+  {
+    "phone": "+627461234567",
+    "expected": "PSTN Indonesia (Bangko)"
+  },
+  {
+    "phone": "+627471234567",
+    "expected": "PSTN Indonesia (Muarabungo)"
+  },
+  {
+    "phone": "+627481234567",
+    "expected": "PSTN Indonesia (Sungai Penuh)"
+  },
+  {
+    "phone": "+627401234567",
+    "expected": "PSTN Indonesia (Mendara/Pangkalan Bulian)"
+  },
+  {
+    "phone": "+627511234567",
+    "expected": "PSTN Indonesia (Padang)"
+  },
+  {
+    "phone": "+627521234567",
+    "expected": "PSTN Indonesia (Bukittinggi)"
+  },
+  {
+    "phone": "+627531234567",
+    "expected": "PSTN Indonesia (Lubuk Sikaping)"
+  },
+  {
+    "phone": "+627541234567",
+    "expected": "PSTN Indonesia (Sijunjung)"
+  },
+  {
+    "phone": "+627551234567",
+    "expected": "PSTN Indonesia (Solok)"
+  },
+  {
+    "phone": "+627561234567",
+    "expected": "PSTN Indonesia (Painan)"
+  },
+  {
+    "phone": "+627571234567",
+    "expected": "PSTN Indonesia (Balaisalasa)"
+  },
+  {
+    "phone": "+627581234567",
+    "expected": "PSTN Indonesia (Matobe)"
+  },
+  {
+    "phone": "+627591234567",
+    "expected": "PSTN Indonesia (Muara Siberut)"
+  },
+  {
+    "phone": "+627611234567",
+    "expected": "PSTN Indonesia (Pekanbaru)"
+  },
+  {
+    "phone": "+627621234567",
+    "expected": "PSTN Indonesia (Bangkinang)"
+  },
+  {
+    "phone": "+627631234567",
+    "expected": "PSTN Indonesia (Selat Panjang)"
+  },
+  {
+    "phone": "+627641234567",
+    "expected": "PSTN Indonesia (Siak Sriindrapura)"
+  },
+  {
+    "phone": "+627651234567",
+    "expected": "PSTN Indonesia (Dumai)"
+  },
+  {
+    "phone": "+627661234567",
+    "expected": "PSTN Indonesia (Bengkalis)"
+  },
+  {
+    "phone": "+627671234567",
+    "expected": "PSTN Indonesia (Bagan Siapiapi)"
+  },
+  {
+    "phone": "+627681234567",
+    "expected": "PSTN Indonesia (Tembilahan)"
+  },
+  {
+    "phone": "+627691234567",
+    "expected": "PSTN Indonesia (Rengat)"
+  },
+  {
+    "phone": "+627601234567",
+    "expected": "PSTN Indonesia (Teluk Kuantan)"
+  },
+  {
+    "phone": "+627711234567",
+    "expected": "PSTN Indonesia (Tanjung Pinang)"
+  },
+  {
+    "phone": "+627721234567",
+    "expected": "PSTN Indonesia (Tareumpa)"
+  },
+  {
+    "phone": "+627731234567",
+    "expected": "PSTN Indonesia (Ranai)"
+  },
+  {
+    "phone": "+627741234567",
+    "expected": "PSTN Indonesia (Natuna Selatan)"
+  },
+  {
+    "phone": "+627751234567",
+    "expected": "PSTN Indonesia (Pulau Tembelan)"
+  },
+  {
+    "phone": "+627761234567",
+    "expected": "PSTN Indonesia (Dabosingkep)"
+  },
+  {
+    "phone": "+627771234567",
+    "expected": "PSTN Indonesia (Tanjungbalai Karimun)"
+  },
+  {
+    "phone": "+627781234567",
+    "expected": "PSTN Indonesia (Sekupang/Batam)"
+  },
+  {
+    "phone": "+627791234567",
+    "expected": "PSTN Indonesia (Tanjung Batu)"
+  },
+  {
+    "phone": "+627701234567",
+    "expected": "PSTN Indonesia (Kawasan Khusus Batam-Bintan)"
+  },
+  {
+    "phone": "+627021234567",
+    "expected": "PSTN Indonesia (Tebing Tinggi)"
+  },
+  {
+    "phone": "+629111234567",
+    "expected": "PSTN Indonesia (Ambon)"
+  },
+  {
+    "phone": "+629121234567",
+    "expected": "PSTN Indonesia (Piru)"
+  },
+  {
+    "phone": "+629131234567",
+    "expected": "PSTN Indonesia (Namlea)"
+  },
+  {
+    "phone": "+629141234567",
+    "expected": "PSTN Indonesia (Masohi)"
+  },
+  {
+    "phone": "+629151234567",
+    "expected": "PSTN Indonesia (Bula)"
+  },
+  {
+    "phone": "+629161234567",
+    "expected": "PSTN Indonesia (Tual)"
+  },
+  {
+    "phone": "+629171234567",
+    "expected": "PSTN Indonesia (Dobo)"
+  },
+  {
+    "phone": "+629181234567",
+    "expected": "PSTN Indonesia (Saumlaki)"
+  },
+  {
+    "phone": "+629191234567",
+    "expected": "PSTN Indonesia (Tepa)"
+  },
+  {
+    "phone": "+629101234567",
+    "expected": "PSTN Indonesia (Bandaneira)"
+  },
+  {
+    "phone": "+629211234567",
+    "expected": "PSTN Indonesia (Ternate/Soasiu)"
+  },
+  {
+    "phone": "+629221234567",
+    "expected": "PSTN Indonesia (Jailolo)"
+  },
+  {
+    "phone": "+629231234567",
+    "expected": "PSTN Indonesia (Pitu/Morotai)"
+  },
+  {
+    "phone": "+629241234567",
+    "expected": "PSTN Indonesia (Tobelo)"
+  },
+  {
+    "phone": "+629251234567",
+    "expected": "PSTN Indonesia (Weda)"
+  },
+  {
+    "phone": "+629261234567",
+    "expected": "PSTN Indonesia (Umera)"
+  },
+  {
+    "phone": "+629271234567",
+    "expected": "PSTN Indonesia (Labuha)"
+  },
+  {
+    "phone": "+629281234567",
+    "expected": "PSTN Indonesia (Laiwui)"
+  },
+  {
+    "phone": "+629291234567",
+    "expected": "PSTN Indonesia (Sanana)"
+  },
+  {
+    "phone": "+629311234567",
+    "expected": "PSTN Indonesia (Saparua)"
+  },
+  {
+    "phone": "+629511234567",
+    "expected": "PSTN Indonesia (Sorong)"
+  },
+  {
+    "phone": "+629521234567",
+    "expected": "PSTN Indonesia (Teminabuha)"
+  },
+  {
+    "phone": "+629531234567",
+    "expected": "PSTN Indonesia (Kabare)"
+  },
+  {
+    "phone": "+629551234567",
+    "expected": "PSTN Indonesia (Bintuni)"
+  },
+  {
+    "phone": "+629561234567",
+    "expected": "PSTN Indonesia (Fak-Fak)"
+  },
+  {
+    "phone": "+629571234567",
+    "expected": "PSTN Indonesia (Kaimana)"
+  },
+  {
+    "phone": "+629581234567",
+    "expected": "PSTN Indonesia (Makbon)"
+  },
+  {
+    "phone": "+629591234567",
+    "expected": "PSTN Indonesia (Seget)"
+  },
+  {
+    "phone": "+629501234567",
+    "expected": "PSTN Indonesia (Babo)"
+  },
+  {
+    "phone": "+629621234567",
+    "expected": "PSTN Indonesia (Ilaga)"
+  },
+  {
+    "phone": "+629631234567",
+    "expected": "PSTN Indonesia (Bokondini)"
+  },
+  {
+    "phone": "+629641234567",
+    "expected": "PSTN Indonesia (Genyem)"
+  },
+  {
+    "phone": "+629651234567",
+    "expected": "PSTN Indonesia (Senggi)"
+  },
+  {
+    "phone": "+629661234567",
+    "expected": "PSTN Indonesia (Sarmi)"
+  },
+  {
+    "phone": "+629671234567",
+    "expected": "PSTN Indonesia (Jayapura)"
+  },
+  {
+    "phone": "+629691234567",
+    "expected": "PSTN Indonesia (Wamena)"
+  },
+  {
+    "phone": "+629601234567",
+    "expected": "PSTN Indonesia (Tiom)"
+  },
+  {
+    "phone": "+629711234567",
+    "expected": "PSTN Indonesia (Merauke/Kimaan)"
+  },
+  {
+    "phone": "+629721234567",
+    "expected": "PSTN Indonesia (Okaba)"
+  },
+  {
+    "phone": "+629741234567",
+    "expected": "PSTN Indonesia (Bade)"
+  },
+  {
+    "phone": "+629751234567",
+    "expected": "PSTN Indonesia (Tanah Merah)"
+  },
+  {
+    "phone": "+629771234567",
+    "expected": "PSTN Indonesia (Kamur)"
+  },
+  {
+    "phone": "+629781234567",
+    "expected": "PSTN Indonesia (Waropko)"
+  },
+  {
+    "phone": "+629791234567",
+    "expected": "PSTN Indonesia (Senggo)"
+  },
+  {
+    "phone": "+629811234567",
+    "expected": "PSTN Indonesia (Biak)"
+  },
+  {
+    "phone": "+629821234567",
+    "expected": "PSTN Indonesia (Waren)"
+  },
+  {
+    "phone": "+629831234567",
+    "expected": "PSTN Indonesia (Serui)"
+  },
+  {
+    "phone": "+629841234567",
+    "expected": "PSTN Indonesia (Nabire)"
+  },
+  {
+    "phone": "+629861234567",
+    "expected": "PSTN Indonesia (Manokwari)"
+  },
+  {
+    "phone": "+629871234567",
+    "expected": "PSTN Indonesia (Korido)"
+  },
+  {
+    "phone": "+629881234567",
+    "expected": "PSTN Indonesia (Numfor)"
+  },
+  {
+    "phone": "+629891234567",
+    "expected": "PSTN Indonesia (Windesi)"
+  },
+  {
+    "phone": "+629801234567",
+    "expected": "PSTN Indonesia (Ransiki)"
+  },
+  {
+    "phone": "+629011234567",
+    "expected": "PSTN Indonesia (Timika)"
+  },
+  {
+    "phone": "+629021234567",
+    "expected": "PSTN Indonesia (Agat)"
+  },
+  {
+    "phone": "+629031234567",
+    "expected": "PSTN Indonesia (Enarotali)"
+  },
+  {
+    "phone": "+629041234567",
+    "expected": "PSTN Indonesia (Semini)"
+  },
+  {
+    "phone": "+1123456789",
+    "expected": "Nomor internasional — Amerika Utara (AS/Kanada dan wilayah NANP); waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+7123456789",
+    "expected": "Nomor internasional — Rusia/Kazakhstan; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+20123456789",
+    "expected": "Nomor internasional — Mesir; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+27123456789",
+    "expected": "Nomor internasional — Afrika Selatan; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+30123456789",
+    "expected": "Nomor internasional — Yunani; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+31123456789",
+    "expected": "Nomor internasional — Belanda; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+32123456789",
+    "expected": "Nomor internasional — Belgia; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+33123456789",
+    "expected": "Nomor internasional — Prancis; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+34123456789",
+    "expected": "Nomor internasional — Spanyol; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+39123456789",
+    "expected": "Nomor internasional — Italia; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+40123456789",
+    "expected": "Nomor internasional — Rumania; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+41123456789",
+    "expected": "Nomor internasional — Swiss; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+43123456789",
+    "expected": "Nomor internasional — Austria; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+44123456789",
+    "expected": "Nomor internasional — Britania Raya; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+45123456789",
+    "expected": "Nomor internasional — Denmark; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+46123456789",
+    "expected": "Nomor internasional — Swedia; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+47123456789",
+    "expected": "Nomor internasional — Norwegia; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+48123456789",
+    "expected": "Nomor internasional — Polandia; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+49123456789",
+    "expected": "Nomor internasional — Jerman; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+51123456789",
+    "expected": "Nomor internasional — Peru; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+52123456789",
+    "expected": "Nomor internasional — Meksiko; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+54123456789",
+    "expected": "Nomor internasional — Argentina; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+55123456789",
+    "expected": "Nomor internasional — Brasil; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+56123456789",
+    "expected": "Nomor internasional — Cile; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+58123456789",
+    "expected": "Nomor internasional — Venezuela; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+60123456789",
+    "expected": "Nomor internasional — Malaysia; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+61123456789",
+    "expected": "Nomor internasional — Australia; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+63123456789",
+    "expected": "Nomor internasional — Filipina; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+64123456789",
+    "expected": "Nomor internasional — Selandia Baru; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+65123456789",
+    "expected": "Nomor internasional — Singapura; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+66123456789",
+    "expected": "Nomor internasional — Thailand; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+81123456789",
+    "expected": "Nomor internasional — Jepang; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+82123456789",
+    "expected": "Nomor internasional — Korea Selatan; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+84123456789",
+    "expected": "Nomor internasional — Vietnam; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+86123456789",
+    "expected": "Nomor internasional — Tiongkok; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+90123456789",
+    "expected": "Nomor internasional — Turki; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+91123456789",
+    "expected": "Nomor internasional — India; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+92123456789",
+    "expected": "Nomor internasional — Pakistan; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+93123456789",
+    "expected": "Nomor internasional — Afganistan; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+94123456789",
+    "expected": "Nomor internasional — Sri Lanka; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+95123456789",
+    "expected": "Nomor internasional — Myanmar; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+98123456789",
+    "expected": "Nomor internasional — Iran; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+673123456789",
+    "expected": "Nomor internasional — Brunei Darussalam; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+670123456789",
+    "expected": "Nomor internasional — Timor-Leste; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+675123456789",
+    "expected": "Nomor internasional — Papua Nugini; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+852123456789",
+    "expected": "Nomor internasional — Hong Kong; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+853123456789",
+    "expected": "Nomor internasional — Makau; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+855123456789",
+    "expected": "Nomor internasional — Kamboja; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+856123456789",
+    "expected": "Nomor internasional — Laos; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+880123456789",
+    "expected": "Nomor internasional — Bangladesh; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+886123456789",
+    "expected": "Nomor internasional — Taiwan; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+966123456789",
+    "expected": "Nomor internasional — Arab Saudi; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+971123456789",
+    "expected": "Nomor internasional — Uni Emirat Arab; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "+974123456789",
+    "expected": "Nomor internasional — Qatar; waspadai panggilan tak dikenal, kode negara bukan bukti spam"
+  },
+  {
+    "phone": "112",
+    "expected": "Layanan Darurat Nasional Indonesia"
+  },
+  {
+    "phone": "1500888",
+    "expected": "Layanan Nasional Indonesia"
+  },
+  {
+    "phone": "+62999123456",
+    "expected": "Operator Telekomunikasi Indonesia"
+  },
+  {
+    "phone": "+999123456",
+    "expected": "Konteks nomor internasional tidak diketahui; kode negara bukan bukti spam"
+  },
+  {
+    "phone": "1234567",
+    "expected": "Konteks nomor tidak diketahui"
+  }
+]

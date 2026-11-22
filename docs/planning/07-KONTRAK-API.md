@@ -16,7 +16,7 @@ Status: **PROPOSED** untuk kolom "target"; kolom "as-is" merujuk [INTEGRATION_MA
 |---|---|---|---|---|---|
 | 1 | `GET /health` | Liveness | publik | PARTIAL (selalu 200) | Pecah: `GET /healthz` liveness, `GET /readyz` ping Mongo (503 bila gagal); `/health` tetap alias liveness |
 | 2 | `POST /api/v1/auth/device` | Daftar akun perangkat | publik, kuota | PARTIAL (tanpa bukti, tidak dipanggil app) | Body `{install_id, display_name?, attestation?}`; `phone` opsional dan diabaikan; kembalikan `access_token`, `refresh_token`, `expires_at` |
-| 3 | `GET /api/v1/phones/{e164}` | Lookup | guest+ | PARTIAL | Tambah `availability`, `source`, `fetched_at`, `confidence`, `verified_label`; `found=false` tidak lagi disertai `CLEAN` palsu (level `null`) |
+| 3 | `GET /api/v1/phones/{e164}` | Lookup | guest+ | PARTIAL | Tambah `availability`, `source`, `fetched_at`, `confidence`, `verified_label`, `verified_source_url`, `verified_at` (Tahap 4B `T-207`), dan perkuat `carrier` dengan detektor HLR/PSTN/Negara (`T-208`); `found=false` tidak lagi disertai `CLEAN` palsu (level `null`) |
 | 4 | `GET /api/v1/phones/{e164}/reports` | Laporan teredaksi | guest+ | PARTIAL (raw `SpamReport` bocor, R11) | DTO publik: `category_code`, `tag`, `comment_sanitized`, `created_at` (dibulatkan ke hari); tanpa `reporter_user_id`; paginasi `limit/cursor` |
 | 5 | `POST /api/v1/reports` | Kirim laporan | User | PARTIAL (guest diterima, tidak idempoten) | Wajib token valid + `Idempotency-Key`; `status` respons: `ACCEPTED` atau `HELD_FOR_REVIEW`; kembalikan `report_id` = `_id` persisten |
 | 6 | `POST /api/v1/disputes` | Ajukan sanggahan | User (P1: guest dengan kontak) | PARTIAL (201 tanpa tulis) | Simpan ke `moderation_cases` sebelum `201`; kembalikan `dispute_id`, `tracking_token` |
@@ -36,7 +36,7 @@ Status: **PROPOSED** untuk kolom "target"; kolom "as-is" merujuk [INTEGRATION_MA
 | N4 | `GET /api/v1/me/reports` | Riwayat laporan pribadi | User | `limit,cursor` | daftar milik sendiri | `spam_reports` | P2 |
 | N5 | `GET /api/v1/sync/changes?cursor=&limit=` | Delta aman | guest+ | cursor opak | `{items[{op,kind,key,payload}], next_cursor, has_more, generation}`; `410/409 FULL_RESYNC_REQUIRED` | `sync_changes` | P0 |
 | N6 | `GET /api/v1/disputes/{id}` | Lacak status dispute | pemilik/token pelacak | header `X-Tracking-Token` | status, keputusan publik | `moderation_cases` | P1 |
-| N7 | `POST /api/v1/admin/login`, `POST /api/v1/admin/logout` | Sesi staf | publik→staf | email, password, TOTP | cookie sesi | `users` staf | P1 |
+| N7 | `POST /api/v1/admin/login`, `POST /api/v1/admin/logout` | Sesi staf | publik→staf | username, password, totp_code | cookie sesi | `staff_accounts`, `staff_sessions` | P1 |
 | N8 | `GET /api/v1/admin/cases?status=&type=` | Antrean | MOD+ | | daftar kasus | `moderation_cases` | P1 |
 | N9 | `GET /api/v1/admin/cases/{id}` | Detail + bukti | MOD+ | | kasus + laporan terkait | beberapa | P1 |
 | N10 | `PATCH /api/v1/admin/cases/{id}` | Putuskan | MOD+ | `{outcome, reason, version}` | `200`; `409` konflik versi | cases, phone_tags, audit, sync | P1 |
@@ -45,6 +45,7 @@ Status: **PROPOSED** untuk kolom "target"; kolom "as-is" merujuk [INTEGRATION_MA
 | N13 | `POST/PUT/DELETE /api/v1/admin/emergency`, `/admin/official-channels` | Kurasi direktori | ADMIN | entri + sumber | | direktori, audit, sync | P1 |
 | N14 | `GET /api/v1/admin/audit?from=&to=&actor=` | Audit | ADMIN | | daftar | `audit_logs` | P1 |
 | N15 | `POST /api/v1/owner/claims` | Verifikasi pemilik | User | | | `owner_claims` | **P3 ditunda** |
+| N16 | `GET /api/v1/admin/export?dataset=&format=` | Rekap & ekspor data olahan | ADMIN | `dataset`, `format` (`json\|csv`) | unduhan `.json` / `.csv` bebas PII | `phone_tags`, `verified_numbers`, `moderation_cases` | P1 (`T-405`) |
 
 Tidak ada endpoint untuk "lookup nama pemilik" atau penyedia eksternal.
 

@@ -39,7 +39,7 @@ Indeks: unik `install_id_hash`; `user_id`. Retensi: dihapus bersama user. Akses:
 
 ### 2.2 `spam_reports` (perubahan)
 
-Tambahan: `idempotency_key` string (wajib, ≤ 64), `status`, `source` (`APP|FIXTURE`), `pii_flags` []. Indeks: **unik** `{reporter_user_id, idempotency_key}`; **unik parsial** `{phone_e164, reporter_user_id, window_key}` dengan `window_key = floor(created_at / 30 hari)` untuk dedup 30 hari; `{phone_e164, created_at:-1}`; `{status, created_at}` untuk antrean. Retensi: raw 24 bulan lalu anonimkan reporter; komentar hapus 12 bulan setelah `REJECTED`.
+Tambahan: `idempotency_key` string (wajib, ≤ 64), `status`, `source` (`APP|FIXTURE|EXTERNAL_OPEN_LIST`), `pii_flags` []. Indeks: **unik** `{reporter_user_id, idempotency_key}`; **unik parsial** `{phone_e164, reporter_user_id, window_key}` dengan `window_key = floor(created_at / 30 hari)` untuk dedup 30 hari; `{phone_e164, created_at:-1}`; `{status, created_at}` untuk antrean. Retensi: raw 24 bulan lalu anonimkan reporter; komentar hapus 12 bulan setelah `REJECTED`. *(Catatan `T-209`: entri impor dataset terbuka berlisensi jelas wajib memakai `source=EXTERNAL_OPEN_LIST` beserta metadata sumber agar tidak tercampur dengan laporan komunitas warga).*
 
 ```json
 {
@@ -90,7 +90,7 @@ Indeks: `{status, created_at}`; `{phone_e164}`; unik parsial `{phone_e164, submi
 
 ### 2.4 `verified_numbers`
 
-`phone_e164` (unik), `kind` (`OFFICIAL|BUSINESS|PUBLIC_SERVICE`), `display_label`, `source_url`, `verified_by`, `verified_at`, `expires_at`, `status`. Whitelist aktif bila `status=ACTIVE` dan `expires_at` di masa depan. Tindakan melalui Admin dengan audit.
+`phone_e164` (unik), `kind` (`OFFICIAL|BUSINESS|PUBLIC_SERVICE`), `display_label`, `source_url`, `verified_by`, `verified_at`, `expires_at`, `status`. Whitelist aktif bila `status=ACTIVE` dan `expires_at` di masa depan. Mulai **Tahap 4B (`T-207`, `T-209`)**, koleksi ini diisi seed awal terverifikasi instansi/bank/ekspedisi resmi Indonesia serta dapat ditambah melalui CLI importer/Admin (`T-403`) dengan kewajiban provenance `source_url` & audit.
 
 ### 2.5 `audit_logs` (append-only)
 
@@ -148,6 +148,7 @@ erDiagram
 | `sync_state` (baru) | satu baris: `cursor`, `generation`, `last_success_at`, `last_error` (cursor terpisah dari data) |
 | `emergency_contacts` | Tambah `source_url`, `verified_at`, `server_version` |
 | `call_screening_logs` | Simpan nomor ter-mask (`+62812****0005`) |
+| `local_whitelist` *(Tahap 5B `T-311`)* | Daftar pengecualian pribadi (di DataStore/Room v3) untuk melewati auto-block secara lokal |
 
 Kedaluwarsa cache: nomor reputasi 14 hari untuk keputusan blokir, 90 hari hanya untuk tampilan berlabel "data lama". Seed APK dipindah ke fixture debug dan **tidak** dipakai di build release untuk reputasi (direktori darurat tetap di-bundle dengan `verified_at`).
 

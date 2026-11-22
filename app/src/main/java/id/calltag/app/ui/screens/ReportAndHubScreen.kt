@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,11 +25,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -43,6 +46,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -61,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import id.calltag.app.data.remote.dto.OfficialChannelDto
 import id.calltag.app.ui.components.ScreenIntro
+import id.calltag.app.ui.components.AccountAccessGate
 import id.calltag.app.ui.theme.CallTagDesign
 import id.calltag.app.ui.theme.CallTagRadius
 import id.calltag.app.ui.theme.CallTagSpacing
@@ -68,6 +74,9 @@ import id.calltag.app.ui.theme.CallTagTouch
 import id.calltag.app.ui.theme.CallTagType
 import id.calltag.app.ui.viewmodel.CallTagMainViewModel
 import id.calltag.app.ui.viewmodel.UiLoadState
+import kotlinx.coroutines.launch
+import id.calltag.app.util.PhoneNormalizer
+import id.calltag.app.work.PendingReportWorker
 
 private data class ScamCategoryChoice(
     val code: String,
@@ -119,27 +128,37 @@ fun ReportAndHubScreen(
     viewModel: CallTagMainViewModel,
     prefilledPhone: String = "",
     prefillRequestId: Int = 0,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigateToAccount: () -> Unit = {}
 ) {
     val colors = CallTagDesign.colors
+    val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     var selectedSubTab by rememberSaveable { mutableIntStateOf(0) }
     var targetPhone by rememberSaveable { mutableStateOf(prefilledPhone) }
 
     var appliedPrefillRequest by rememberSaveable { mutableIntStateOf(-1) }
     val draftState = rememberSaveableStateHolder()
 
+    LaunchedEffect(isLoggedIn) {
+        if (!isLoggedIn) {
+            draftState.removeState(0)
+            targetPhone = ""
+        }
+    }
+
     LaunchedEffect(prefilledPhone, prefillRequestId) {
         if (prefilledPhone.isNotBlank() && prefillRequestId != appliedPrefillRequest) {
             appliedPrefillRequest = prefillRequestId
             targetPhone = prefilledPhone
+            viewModel.resetReportState()
             selectedSubTab = 0
         }
     }
 
     val subTabs = listOf(
-        "Beri #Tag",
+        "Laporkan nomor",
         "Kanal resmi",
-        "Koreksi"
+        "Koreksi nomor"
     )
 
     Column(
@@ -190,7 +209,9 @@ fun ReportAndHubScreen(
 
         draftState.SaveableStateProvider(selectedSubTab) {
         when (selectedSubTab) {
-            0 -> AddTagReportSubScreen(
+            0 -> if (!isLoggedIn) {
+                AccountAccessGate(onOpenAccount = onNavigateToAccount, modifier = Modifier.padding(CallTagSpacing.md))
+            } else AddTagReportSubScreen(
                 viewModel = viewModel,
                 phoneInput = targetPhone,
                 onPhoneChange = { targetPhone = it },
@@ -216,10 +237,20 @@ private fun AddTagReportSubScreen(
     onSwitchToOfficialHub: () -> Unit
 ) {
     val colors = CallTagDesign.colors
-    val recentLogs by viewModel.recentScreeningLogs.collectAsState()
+    val context = LocalContext.current
+    val recentLogs by viewModel.recentScreeningLogs.collectAsState(initial = emptyList())
+    val pendingReports by viewModel.pendingReports.collectAsState(initial = emptyList())
     val submissionState by viewModel.reportSubmissionState.collectAsState()
 
+    LaunchedEffect(submissionState) {
+        val st = submissionState
+        if (st is UiLoadState.Success && st.data.reportId.startsWith("PENDING:")) {
+            PendingReportWorker.enqueue(context)
+        }
+    }
+
     var selectedCategory by rememberSaveable { mutableStateOf("APK_SNIFFING") }
+    var isInfoTag by rememberSaveable { mutableStateOf(false) }
     var customTag by rememberSaveable { mutableStateOf("") }
     var comment by rememberSaveable { mutableStateOf("") }
     var callType by rememberSaveable { mutableStateOf("WHATSAPP_CALL") }
@@ -233,11 +264,31 @@ private fun AddTagReportSubScreen(
             ScreenIntro(
                 eyebrow = "Laporan komunitas",
                 title = "Beri #Tag nomor",
-                description = "Bagikan pengalaman Anda agar pengguna lain mengenali modus gangguan."
+                description = "Tambahkan konteks layanan atau laporkan gangguan berdasarkan pengalaman Anda."
             )
         }
         item {
-            ReportFormSection(title = "Nomor yang dilaporkan") {
+            ReportFormSection(title = "Jenis #Tag") {
+                listOf(false to "Laporkan Gangguan/Penipuan", true to "Beri #Tag Info Umum").forEach { (info, title) ->
+                    Surface(
+                        modifier = Modifier.fillMaxWidth().heightIn(min = CallTagTouch.action)
+                            .selectable(selected = isInfoTag == info, role = Role.RadioButton, onClick = { isInfoTag = info }),
+                        shape = RoundedCornerShape(CallTagRadius.md),
+                        color = if (isInfoTag == info) colors.brandContainer else colors.surfaceSubtle
+                    ) {
+                        Row(Modifier.padding(CallTagSpacing.sm), verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
+                            RadioButton(selected = isInfoTag == info, onClick = null)
+                            Text(title, color = colors.textPrimary, fontSize = CallTagType.body, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                }
+                if (isInfoTag) Text("Tag layanan/peran tidak menaikkan skor spam. Hindari nama pribadi, nomor rekening, dan isi buku kontak.",
+                    color = colors.textSecondary, fontSize = CallTagType.bodySmall)
+            }
+        }
+        item {
+            ReportFormSection(title = "Nomor yang diberi #Tag") {
                 OutlinedTextField(
                     value = phoneInput,
                     onValueChange = onPhoneChange,
@@ -257,7 +308,8 @@ private fun AddTagReportSubScreen(
                         unfocusedBorderColor = colors.borderSubtle
                     )
                 )
-                if (recentLogs.isNotEmpty()) {
+                val unmaskedLogs = recentLogs.filter { !it.phoneE164.contains('*') }.take(4)
+                if (unmaskedLogs.isNotEmpty()) {
                     Text(
                         text = "Atau pilih panggilan terakhir",
                         color = colors.textSecondary,
@@ -267,7 +319,7 @@ private fun AddTagReportSubScreen(
                         horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs),
                         verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)
                     ) {
-                        recentLogs.take(4).forEach { log ->
+                        unmaskedLogs.forEach { log ->
                             Surface(
                                 modifier = Modifier
                                     .heightIn(min = CallTagTouch.action)
@@ -296,7 +348,7 @@ private fun AddTagReportSubScreen(
                 }
             }
         }
-        item {
+        if (!isInfoTag) item {
             Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.sm)) {
                 ReportSectionTitle("Pilih jenis gangguan")
                 Column(
@@ -348,7 +400,7 @@ private fun AddTagReportSubScreen(
             }
         }
         item {
-            ReportFormSection(title = "Ceritakan kejadiannya") {
+            ReportFormSection(title = if (isInfoTag) "Konteks layanan" else "Ceritakan kejadiannya") {
                 Text(
                     text = "Dihubungi lewat",
                     color = colors.textSecondary,
@@ -391,7 +443,7 @@ private fun AddTagReportSubScreen(
                     singleLine = true,
                     shape = RoundedCornerShape(CallTagRadius.md),
                     label = { Text("Nama #Tag (opsional)") },
-                    placeholder = { Text("Contoh: Kurir Paket APK") },
+                    placeholder = { Text(if (isInfoTag) "Contoh: Kurir Ekspedisi" else "Contoh: Kurir Paket APK") },
                     supportingText = { Text("Jika kosong, nama kategori akan dipakai.") }
                 )
                 OutlinedTextField(
@@ -401,7 +453,7 @@ private fun AddTagReportSubScreen(
                     minLines = 3,
                     shape = RoundedCornerShape(CallTagRadius.md),
                     label = { Text("Cerita singkat (opsional)") },
-                    placeholder = { Text("Contoh: Mengaku kurir dan mengirim file .apk") }
+                    placeholder = { Text(if (isInfoTag) "Contoh: Layanan pengiriman paket" else "Contoh: Mengaku kurir dan mengirim file .apk") }
                 )
             }
         }
@@ -410,17 +462,18 @@ private fun AddTagReportSubScreen(
                 onClick = {
                     viewModel.submitCommunityReport(
                         phone = phoneInput,
-                        categoryCode = selectedCategory,
+                        categoryCode = if (isInfoTag) "INFO_TAG" else selectedCategory,
                         customTag = customTag,
                         comment = comment,
                         callType = callType
                     )
                 },
+                enabled = submissionState !is UiLoadState.Loading && phoneInput.isNotBlank(),
                 modifier = Modifier.fillMaxWidth().heightIn(min = CallTagTouch.action),
                 shape = RoundedCornerShape(CallTagRadius.md),
                 colors = ButtonDefaults.buttonColors(containerColor = colors.brandSolid, contentColor = colors.onBrand)
             ) {
-                Text("Simpan #Tag & laporkan", fontSize = CallTagType.subtitle, fontWeight = FontWeight.Bold)
+                Text(if (isInfoTag) "Simpan #Tag Info" else "Simpan #Tag & laporkan", fontSize = CallTagType.subtitle, fontWeight = FontWeight.Bold)
             }
         }
 
@@ -471,35 +524,45 @@ private fun AddTagReportSubScreen(
                 }
                 is UiLoadState.Success -> {
                     val pt = st.data.phoneTag
-                    val humanStatus = CallTagDesign.reputationLabel(pt.reputationLevel)
+                    val isQueuedOffline = st.data.reportId.startsWith("PENDING:")
+                    val humanStatus = if (isQueuedOffline) "Antrean Offline" else CallTagDesign.reputationLabel(pt.reputationLevel)
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(CallTagRadius.lg),
-                        colors = CardDefaults.cardColors(containerColor = colors.cleanEmeraldContainer),
-                        border = BorderStroke(1.dp, colors.cleanEmerald)
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isQueuedOffline) colors.suspiciousAmberContainer else colors.cleanEmeraldContainer
+                        ),
+                        border = BorderStroke(
+                            1.dp,
+                            if (isQueuedOffline) colors.suspiciousAmber else colors.cleanEmerald
+                        )
                     ) {
                         Column(
                             modifier = Modifier.padding(CallTagSpacing.lg),
                             verticalArrangement = Arrangement.spacedBy(CallTagSpacing.sm)
                         ) {
                             Text(
-                                text = if (st.data.reportId.contains("_local_")) "#Tag tersimpan di perangkat" else "#Tag berhasil dikirim",
-                                color = colors.cleanEmerald,
+                                text = if (isQueuedOffline) "Laporan masuk antrean offline" else "#Tag berhasil dikirim",
+                                color = if (isQueuedOffline) colors.suspiciousAmber else colors.cleanEmerald,
                                 fontSize = CallTagType.subtitle,
                                 fontWeight = FontWeight.ExtraBold
                             )
                             Text(
-                                text = "${pt.phoneE164} · $humanStatus\nSkor ${pt.spamScore.toInt()}/100",
+                                text = "${PhoneNormalizer.maskPhone(pt.phoneE164)} · $humanStatus",
                                 style = CallTagDesign.monoStyle(fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colors.textPrimary)
                             )
-                            if (st.data.reportId.contains("_local_")) {
-                                Text(
-                                    text = "Layanan belum mengonfirmasi penerimaan laporan ini.",
-                                    color = colors.textSecondary,
-                                    fontSize = CallTagType.bodySmall
-                                )
-                            }
-                            Button(
+                            Text(
+                                text = if (isQueuedOffline) {
+                                    "Skor risiko lokal tidak berubah. Laporan dikirim otomatis saat koneksi tersedia."
+                                } else if (pt.primaryCategory == "INFO_TAG") {
+                                    "Tag konteks tersimpan. Skor spam tidak berubah."
+                                } else {
+                                    "Skor agregat server: ${pt.spamScore.toInt()}/100 (${pt.uniqueReporters} pelapor)"
+                                },
+                                color = colors.textSecondary,
+                                fontSize = CallTagType.bodySmall
+                            )
+                            if (pt.primaryCategory != "INFO_TAG") Button(
                                 onClick = onSwitchToOfficialHub,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -515,6 +578,80 @@ private fun AddTagReportSubScreen(
                                     fontSize = CallTagType.bodySmall,
                                     fontWeight = FontWeight.Bold
                                 )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (pendingReports.isNotEmpty()) {
+            item {
+                ReportSectionTitle("Antrean Laporan Offline (Outbox)")
+            }
+            items(pendingReports, key = { it.localId }) { item ->
+                val statusColor = when (item.status) {
+                    "SENT" -> colors.cleanEmerald
+                    "FAILED" -> colors.dangerScam
+                    else -> colors.suspiciousAmber
+                }
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(CallTagRadius.md),
+                    colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
+                    border = BorderStroke(1.dp, colors.borderSubtle)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(CallTagSpacing.md),
+                        verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = PhoneNormalizer.maskPhone(item.phoneE164),
+                                style = CallTagDesign.monoStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
+                            )
+                            Text(
+                                text = item.status,
+                                color = statusColor,
+                                fontSize = CallTagType.caption,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                        }
+                        Text(
+                            text = "#${item.customTag} (${item.categoryCode})",
+                            color = colors.textSecondary,
+                            fontSize = CallTagType.bodySmall
+                        )
+                        if (item.lastError.isNotBlank()) {
+                            Text(
+                                text = item.lastError,
+                                color = colors.textSecondary,
+                                fontSize = CallTagType.label
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)
+                        ) {
+                            if (item.status != "SENT") {
+                                OutlinedButton(
+                                    onClick = { viewModel.retryPendingReport(item.localId) },
+                                    enabled = !item.lastError.startsWith("Laporan lama belum memiliki pemilik sesi"),
+                                    modifier = Modifier.weight(1f).heightIn(min = CallTagTouch.compact),
+                                    shape = RoundedCornerShape(CallTagRadius.md)
+                                ) {
+                                    Text("Kirim ulang", fontSize = CallTagType.bodySmall)
+                                }
+                            }
+                            OutlinedButton(
+                                onClick = { viewModel.deletePendingReport(item.localId) },
+                                modifier = Modifier.weight(1f).heightIn(min = CallTagTouch.compact),
+                                shape = RoundedCornerShape(CallTagRadius.md)
+                            ) {
+                                Text("Hapus", fontSize = CallTagType.bodySmall, color = colors.dangerScam)
                             }
                         }
                     }
@@ -711,174 +848,332 @@ private fun OfficialChannelCard(
     }
 }
 
+private enum class DisputePage(val title: String) {
+    Overview("Koreksi nomor"),
+    Submit("Ajukan koreksi"),
+    Track("Lacak pengajuan")
+}
+
 @Composable
 private fun NumberDisputeSubScreen(
     viewModel: CallTagMainViewModel
 ) {
     val colors = CallTagDesign.colors
     val disputeState by viewModel.disputeSubmissionState.collectAsState()
+    val pendingDisputes by viewModel.pendingDisputes.collectAsState(initial = emptyList())
+    val disputeLookupState by viewModel.disputeLookupState.collectAsState()
 
     var phone by rememberSaveable { mutableStateOf("") }
     var ownerName by rememberSaveable { mutableStateOf("") }
     var reason by rememberSaveable { mutableStateOf("") }
     var contactRef by rememberSaveable { mutableStateOf("") }
+    var trackDisputeId by rememberSaveable { mutableStateOf("") }
+    var trackToken by rememberSaveable { mutableStateOf("") }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().imePadding(),
-        contentPadding = PaddingValues(CallTagSpacing.md),
-        verticalArrangement = Arrangement.spacedBy(CallTagSpacing.lg)
-    ) {
-        item {
-            ScreenIntro(
-                eyebrow = "Koreksi nomor",
-                title = "Ajukan peninjauan",
-                description = "Nomor pribadi atau usaha Anda salah diberi #Tag? Jelaskan penggunaan nomor untuk mengajukan koreksi."
-            )
-        }
-        item {
-            ReportFormSection(title = "Identitas pemilik") {
-                OutlinedTextField(
-                    value = phone,
-                    onValueChange = { phone = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(CallTagRadius.md),
-                    textStyle = CallTagDesign.monoStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                    label = { Text("Nomor telepon Anda") },
-                    placeholder = { Text("Contoh: 082144556677") }
-                )
-                OutlinedTextField(
-                    value = ownerName,
-                    onValueChange = { ownerName = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(CallTagRadius.md),
-                    label = { Text("Nama pemilik / usaha") },
-                    placeholder = { Text("Contoh: Toko Logistik Nusantara") }
-                )
-                OutlinedTextField(
-                    value = contactRef,
-                    onValueChange = { contactRef = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(CallTagRadius.md),
-                    label = { Text("Kontak verifikasi") },
-                    placeholder = { Text("Email atau nomor yang bisa dihubungi") }
-                )
-            }
-        }
-        item {
-            ReportFormSection(title = "Alasan koreksi") {
-                OutlinedTextField(
-                    value = reason,
-                    onValueChange = { reason = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 4,
-                    shape = RoundedCornerShape(CallTagRadius.md),
-                    label = { Text("Penggunaan nomor") },
-                    placeholder = { Text("Jelaskan keperluan penggunaan nomor ini…") }
-                )
-            }
-        }
-        item {
-            Button(
-                onClick = {
-                    viewModel.submitNumberDispute(
-                        phone = phone,
-                        ownerName = ownerName,
-                        reason = reason,
-                        contactRef = contactRef
-                    )
-                },
-                modifier = Modifier.fillMaxWidth().heightIn(min = CallTagTouch.action),
-                shape = RoundedCornerShape(CallTagRadius.md),
-                colors = ButtonDefaults.buttonColors(containerColor = colors.brandSolid, contentColor = colors.onBrand)
-            ) {
-                Text("Kirim pengajuan koreksi", fontSize = CallTagType.subtitle, fontWeight = FontWeight.Bold)
-            }
-        }
+    var page by rememberSaveable { mutableStateOf(DisputePage.Overview) }
+    val goBack: () -> Unit = { page = DisputePage.Overview }
+    BackHandler(enabled = page != DisputePage.Overview, onBack = goBack)
 
-        item {
-            when (val st = disputeState) {
-                is UiLoadState.Idle -> Unit
-                is UiLoadState.Loading -> {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(CallTagRadius.lg),
-                        colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
-                        border = BorderStroke(1.dp, colors.borderSubtle)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(CallTagSpacing.md),
-                            horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.sm),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            CircularProgressIndicator(
-                                color = colors.brandPrimary,
-                                modifier = Modifier.size(22.dp),
-                                strokeWidth = 2.5.dp
-                            )
-                            Text(
-                                text = "Mengirim pengajuan koreksi...",
-                                color = colors.textPrimary,
-                                fontSize = CallTagType.bodySmall
-                            )
+    key(page) {
+        val listState = rememberLazyListState()
+        val scope = rememberCoroutineScope()
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize().imePadding(),
+            contentPadding = PaddingValues(CallTagSpacing.md),
+            verticalArrangement = Arrangement.spacedBy(CallTagSpacing.lg)
+        ) {
+            item {
+                SettingsHeading(page.title, if (page == DisputePage.Overview) null else goBack)
+            }
+            when (page) {
+                DisputePage.Overview -> item {
+                    SettingsMenu {
+                        SettingsMenuRow(DisputePage.Submit.title, "Laporkan #Tag yang keliru pada nomor Anda") {
+                            page = DisputePage.Submit
+                        }
+                        HorizontalDivider(color = colors.borderSubtle)
+                        SettingsMenuRow(DisputePage.Track.title, "Cek status dengan ID sanggahan") {
+                            page = DisputePage.Track
                         }
                     }
                 }
-                is UiLoadState.Error -> {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(CallTagRadius.lg),
-                        colors = CardDefaults.cardColors(containerColor = colors.dangerScamContainer),
-                        border = BorderStroke(1.dp, colors.dangerScam)
-                    ) {
+                DisputePage.Submit -> {
+                    item {
                         Text(
-                            text = st.message,
-                            modifier = Modifier.padding(CallTagSpacing.md),
-                            color = colors.dangerScam,
-                            fontSize = CallTagType.bodySmall,
-                            fontWeight = FontWeight.SemiBold
+                            "Jelaskan penggunaan nomor pribadi atau usaha yang salah diberi #Tag.",
+                            color = colors.textSecondary,
+                            fontSize = CallTagType.body
                         )
                     }
-                }
-                is UiLoadState.Success -> {
-                    val isLocalFallback = st.data.submittedAt.startsWith("Tersimpan di Antrean")
-                    val statusColor = if (isLocalFallback) colors.suspiciousAmber else colors.brandPrimary
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(CallTagRadius.lg),
-                        colors = CardDefaults.cardColors(containerColor = if (isLocalFallback) colors.suspiciousAmberContainer else colors.brandContainer),
-                        border = BorderStroke(1.dp, statusColor)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(CallTagSpacing.lg),
-                            verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)
-                        ) {
-                            Text(
-                                text = if (isLocalFallback) "Pengajuan belum terkirim" else "Respons pengajuan koreksi",
-                                color = statusColor,
-                                fontSize = CallTagType.subtitle,
-                                fontWeight = FontWeight.ExtraBold
+                    item {
+                        ReportFormSection(title = "Identitas pemilik") {
+                            OutlinedTextField(
+                                value = phone,
+                                onValueChange = { phone = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true,
+                                shape = RoundedCornerShape(CallTagRadius.md),
+                                textStyle = CallTagDesign.monoStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                                label = { Text("Nomor telepon Anda") },
+                                placeholder = { Text("Contoh: 082144556677") }
                             )
-                            Text(
-                                text = if (isLocalFallback) st.data.phoneE164 else "Referensi: ${st.data.disputeId}",
-                                style = CallTagDesign.monoStyle(
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colors.textPrimary
+                            OutlinedTextField(
+                                value = ownerName,
+                                onValueChange = { ownerName = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true,
+                                shape = RoundedCornerShape(CallTagRadius.md),
+                                label = { Text("Nama pemilik / usaha") },
+                                placeholder = { Text("Contoh: Toko Logistik Nusantara") }
+                            )
+                            OutlinedTextField(
+                                value = contactRef,
+                                onValueChange = { contactRef = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true,
+                                shape = RoundedCornerShape(CallTagRadius.md),
+                                label = { Text("Kontak verifikasi") },
+                                placeholder = { Text("Email atau nomor yang bisa dihubungi") }
+                            )
+                        }
+                    }
+                    item {
+                        ReportFormSection(title = "Alasan koreksi") {
+                            OutlinedTextField(
+                                value = reason,
+                                onValueChange = { reason = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                minLines = 4,
+                                shape = RoundedCornerShape(CallTagRadius.md),
+                                label = { Text("Penggunaan nomor") },
+                                placeholder = { Text("Jelaskan keperluan penggunaan nomor ini…") }
+                            )
+                        }
+                    }
+                    item {
+                        Button(
+                            onClick = {
+                                viewModel.submitNumberDispute(
+                                    phone = phone,
+                                    ownerName = ownerName,
+                                    reason = reason,
+                                    contactRef = contactRef
                                 )
+                            },
+                            modifier = Modifier.fillMaxWidth().heightIn(min = CallTagTouch.action),
+                            shape = RoundedCornerShape(CallTagRadius.md),
+                            colors = ButtonDefaults.buttonColors(containerColor = colors.brandSolid, contentColor = colors.onBrand)
+                        ) {
+                            Text("Kirim pengajuan koreksi", fontSize = CallTagType.subtitle, fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    item {
+                        when (val st = disputeState) {
+                            is UiLoadState.Idle -> Unit
+                            is UiLoadState.Loading -> {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(CallTagRadius.lg),
+                                    colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
+                                    border = BorderStroke(1.dp, colors.borderSubtle)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(CallTagSpacing.md),
+                                        horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.sm),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        CircularProgressIndicator(
+                                            color = colors.brandPrimary,
+                                            modifier = Modifier.size(22.dp),
+                                            strokeWidth = 2.5.dp
+                                        )
+                                        Text(
+                                            text = "Mengirim pengajuan koreksi...",
+                                            color = colors.textPrimary,
+                                            fontSize = CallTagType.bodySmall
+                                        )
+                                    }
+                                }
+                            }
+                            is UiLoadState.Error -> {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(CallTagRadius.lg),
+                                    colors = CardDefaults.cardColors(containerColor = colors.dangerScamContainer),
+                                    border = BorderStroke(1.dp, colors.dangerScam)
+                                ) {
+                                    Text(
+                                        text = st.message,
+                                        modifier = Modifier.padding(CallTagSpacing.md),
+                                        color = colors.dangerScam,
+                                        fontSize = CallTagType.bodySmall,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+                            is UiLoadState.Success -> {
+                                val isLocalQueue = st.data.status == "PENDING"
+                                val statusColor = if (isLocalQueue) colors.suspiciousAmber else colors.brandPrimary
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(CallTagRadius.lg),
+                                    colors = CardDefaults.cardColors(containerColor = if (isLocalQueue) colors.suspiciousAmberContainer else colors.brandContainer),
+                                    border = BorderStroke(1.dp, statusColor)
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(CallTagSpacing.lg),
+                                        verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)
+                                    ) {
+                                        Text(
+                                            text = if (isLocalQueue) "Pengajuan masuk antrean offline" else "Sanggahan tercatat di server",
+                                            color = statusColor,
+                                            fontSize = CallTagType.subtitle,
+                                            fontWeight = FontWeight.ExtraBold
+                                        )
+                                        Text(
+                                            text = "ID Sanggahan: ${st.data.disputeId}",
+                                            style = CallTagDesign.monoStyle(
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = colors.textPrimary
+                                            )
+                                        )
+                                        if (st.data.trackingToken.isNotBlank()) {
+                                            Text(
+                                                text = "Tracking Token: ${st.data.trackingToken}",
+                                                style = CallTagDesign.monoStyle(
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = colors.brandPrimary
+                                                )
+                                            )
+                                        }
+                                        Text(
+                                            text = if (isLocalQueue) {
+                                                "Koneksi tidak tersedia. Pengajuan akan dikirim ulang otomatis saat online."
+                                            } else {
+                                                "Status: ${st.data.status}. Simpan Tracking Token di atas untuk mengecek hasil peninjauan."
+                                            },
+                                            color = colors.textSecondary,
+                                            fontSize = CallTagType.label
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                DisputePage.Track -> {
+                    item {
+                        ReportFormSection(title = "Informasi pengajuan") {
+                            OutlinedTextField(
+                                value = trackDisputeId,
+                                onValueChange = { trackDisputeId = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true,
+                                shape = RoundedCornerShape(CallTagRadius.md),
+                                label = { Text("ID Sanggahan") },
+                                placeholder = { Text("Contoh: DSP_674...") }
                             )
-                            Text(
-                                text = if (isLocalFallback) {
-                                    "Koneksi tidak tersedia. Kirim kembali saat online; pengajuan belum masuk antrean peninjauan."
-                                } else {
-                                    "Status layanan: ${st.data.status}. Status ini belum berarti reputasi nomor telah dikoreksi."
-                                },
-                                color = colors.textSecondary,
-                                fontSize = CallTagType.label
+                            OutlinedTextField(
+                                value = trackToken,
+                                onValueChange = { trackToken = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true,
+                                shape = RoundedCornerShape(CallTagRadius.md),
+                                label = { Text("Token pelacak (opsional)") },
+                                placeholder = { Text("Token pelacak 32 karakter") }
                             )
+                            Button(
+                                onClick = { viewModel.checkDisputeStatus(trackDisputeId, trackToken) },
+                                modifier = Modifier.fillMaxWidth().heightIn(min = CallTagTouch.action),
+                                shape = RoundedCornerShape(CallTagRadius.md),
+                                colors = ButtonDefaults.buttonColors(containerColor = colors.brandSolid, contentColor = colors.onBrand)
+                            ) {
+                                Text("Periksa Status Sanggahan", fontSize = CallTagType.body, fontWeight = FontWeight.Bold)
+                            }
+                            when (val ls = disputeLookupState) {
+                                is UiLoadState.Idle -> Unit
+                                is UiLoadState.Loading -> Text("Memeriksa status sanggahan...", color = colors.textSecondary, fontSize = CallTagType.bodySmall)
+                                is UiLoadState.Error -> Text(ls.message, color = colors.dangerScam, fontSize = CallTagType.bodySmall, fontWeight = FontWeight.SemiBold)
+                                is UiLoadState.Success -> {
+                                    Surface(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(CallTagRadius.md),
+                                        color = colors.surfaceSubtle,
+                                        border = BorderStroke(1.dp, colors.borderSubtle)
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.padding(CallTagSpacing.md),
+                                            verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xxs)
+                                        ) {
+                                            Text(
+                                                text = "${ls.data.disputeId} · Status: ${ls.data.status}",
+                                                style = CallTagDesign.monoStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colors.brandPrimary)
+                                            )
+                                            if (ls.data.resolutionNotes.isNotBlank()) {
+                                                Text(
+                                                    text = "Catatan moderator: ${ls.data.resolutionNotes}",
+                                                    color = colors.textPrimary,
+                                                    fontSize = CallTagType.bodySmall
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (pendingDisputes.isNotEmpty()) {
+                        item {
+                            ReportSectionTitle("Riwayat Sanggahan Perangkat")
+                        }
+                        items(pendingDisputes, key = { it.localId }) { item ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(CallTagRadius.md),
+                                colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
+                                border = BorderStroke(1.dp, colors.borderSubtle)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(CallTagSpacing.md),
+                                    verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)
+                                ) {
+                                    Text(
+                                        text = "${PhoneNormalizer.maskPhone(item.phoneE164)} · ${item.status}",
+                                        style = CallTagDesign.monoStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
+                                    )
+                                    if (item.disputeId.isNotBlank()) {
+                                        Text(
+                                            text = "ID: ${item.disputeId}",
+                                            style = CallTagDesign.monoStyle(fontSize = 12.sp, fontWeight = FontWeight.Medium, color = colors.textSecondary)
+                                        )
+                                    }
+                                    if (item.trackingToken.isNotBlank()) {
+                                        Text(
+                                            text = "Token: ${item.trackingToken}",
+                                            style = CallTagDesign.monoStyle(fontSize = 11.sp, fontWeight = FontWeight.Medium, color = colors.textSecondary)
+                                        )
+                                    }
+                                    if (item.disputeId.isNotBlank() && !item.disputeId.startsWith("PENDING_")) {
+                                        OutlinedButton(
+                                            onClick = {
+                                                trackDisputeId = item.disputeId
+                                                trackToken = item.trackingToken
+                                                viewModel.checkDisputeStatus(item.disputeId, item.trackingToken)
+                                                scope.launch { listState.scrollToItem(0) }
+                                            },
+                                            modifier = Modifier.fillMaxWidth().heightIn(min = CallTagTouch.compact),
+                                            shape = RoundedCornerShape(CallTagRadius.md)
+                                        ) {
+                                            Text("Cek Status Terkini", fontSize = CallTagType.bodySmall)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

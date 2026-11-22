@@ -4,41 +4,43 @@ Status: **PROPOSED**. Identitas **Nusantara Teal** dan aturan [DESIGN.md](../../
 
 ## 1. Navigasi
 
-Pertahankan **empat tab**; tidak menambah tab kelima.
+Baseline lama memakai 4 tab. Mulai **Tahap 5B (`T-308` s.d. `T-314`)**, navigasi ditingkatkan menjadi **lima tab** agar pengguna mudah menemukan profil, login opsional, pengaturan, tutorial, umpan balik, serta pengalaman pencarian nomor yang lebih informatif seperti aplikasi Caller ID modern:
 
 | Tab | Isi | Perubahan |
 |---|---|---|
-| Cari | Cari nomor + Hasil + Riwayat pencarian lokal | Hasil menjadi layar rincian (sheet) dengan status baru |
+| Cari | Cari nomor + Hasil + Riwayat pencarian lokal (*login untuk riwayat*) | Hasil menjadi layar rincian dengan status 2D & ajakan login bila tamu |
 | Darurat | Direktori nasional/lokal + Kanal lapor resmi | Tampilkan `verified_at` |
-| Beri #Tag | Lapor nomor + Riwayat laporan (status pending/terkirim/ditinjau) + Sanggahan | Sanggahan menjadi sub-alur dari Hasil dan Riwayat |
-| Proteksi | Caller ID + Spam Guard + Pengaturan + Profil singkat | Menggabungkan Pengaturan dan Profil (tidak halaman terpisah) |
+| Beri #Tag | Lapor nomor & tambah tag info (*wajib login*) + Outbox + Sanggahan + Lacak Tiket | Dukung mode risiko spam maupun `#Tag` netral `INFO_TAG` (bobot 0); pembatasan untuk Tamu; lacak dispute via token tetap terbuka |
+| Proteksi | Caller ID + Spam Guard + Sync Delta + Simulator Overlay | Fokus pada kontrol proteksi panggilan & sinkronisasi |
+| Akun | Login/Logout Opsional + Kuota (`/me`) + Health Check Izin (`T-310`) + Whitelist Pribadi (`T-311`) + Tutorial (`T-309`) + Saran/Bug (`T-312`) | **Tab baru Tahap 5B** menggabungkan akun, pengaturan lengkap, & bantuan |
 
-Penggabungan: Caller ID + Spam Guard → satu halaman "Proteksi" dengan dua bagian; Profil dan Pengaturan → "Proteksi › Akun dan data"; Sanggahan → bukan tab, tetapi formulir yang dibuka dari Hasil atau Riwayat. Navigation library tetap tidak diperlukan sampai ada lebih dari satu level dalam; evaluasi `navigation-compose` bila rincian bertingkat bertambah.
+Navigation library tetap tidak diperlukan sampai ada lebih dari satu level dalam; evaluasi `navigation-compose` bila rincian bertingkat bertambah.
 
 ## 2. Halaman
 
 | Halaman | Tujuan | Komponen utama | Aksi |
 |---|---|---|---|
-| Home/Cari | Memeriksa nomor cepat | Input nomor monospace, tombol cari, riwayat lokal | Cari, tempel dari clipboard |
-| Hasil pencarian | Memahami reputasi jujur | Lencana status, skor, kategori, jumlah pelapor unik, tag, waktu pembaruan, sumber, status verifikasi | Laporkan, ajukan sanggahan, buka kanal resmi, salin |
+| Home/Cari | Memeriksa nomor cepat | Input nomor monospace, tombol cari, deteksi otomatis konteks operator/kota/negara asing, riwayat lokal (terkunci jika Guest) | Cari, tempel, masuk akun |
+| Hasil pencarian | Memahami reputasi jujur & konteks nomor | Lencana status (termasuk `VERIFIED` + sumber resmi), info operator HLR/PSTN/negara (`T-313`), skor, kategori, jumlah pelapor unik, awan `#Tag (count)` langsung terbuka (`T-314`), waktu pembaruan, sumber | `+ Tambah #Tag`, `Lihat di WhatsApp` (`wa.me`), ajukan sanggahan, buka kanal resmi, salin |
 | Caller ID (overlay/notifikasi) | Peringatan panggilan | Nomor, status, kategori, tombol "Bukan spam" | Tutup, buka aplikasi |
-| Proteksi (Spam Guard) | Atur perlindungan | Status role, toggle notifikasi/overlay, toggle auto-block (default OFF) dengan penjelasan, log screening | Minta role, ubah toggle |
-| Lapor nomor | Berkontribusi | Nomor, kategori, tag, komentar (hitung karakter), jenis kontak | Kirim/simpan pending |
-| Riwayat laporan | Transparansi | Daftar dengan status `PENDING/SENT/HELD/VALIDATED/REJECTED` | Kirim ulang, hapus pending |
+| Proteksi (Spam Guard) | Atur perlindungan | Status role, toggle notifikasi/overlay, toggle auto-block (default OFF) dengan penjelasan, log screening | Minta role, ubah toggle, sync delta |
+| Lapor nomor | Berkontribusi (terkunci jika Guest) | Nomor, kategori, tag, komentar (hitung karakter), jenis kontak, kartu ajakan login | Kirim/simpan pending, masuk akun |
+| Riwayat laporan | Transparansi (terkunci jika Guest) | Daftar dengan status `PENDING/SENT/HELD/VALIDATED/REJECTED` | Kirim ulang, hapus pending |
 | Direktori darurat | Akses cepat | Grid kode nasional, filter wilayah | Panggil, WhatsApp |
 | Sanggahan | Koreksi | Nomor, alasan, kontak balik, bukti tautan | Kirim, lacak status |
-| Akun dan data | Hak data | Status akun, kuota, versi kebijakan | Hapus data, ekspor (P2) |
+| Akun & Pengaturan *(Tahap 5B)* | Manajemen akun & bantuan | Kartu Login/Guest & Kuota `/me`, Health Check izin sistem, Whitelist pribadi, Tema/Cache, Tutorial aktivasi, Form Saran/Kritik/Bug | Login/Logout, Hapus data UU PDP, Tambah/Hapus whitelist, Buka Settings Android, Kirim feedback |
 
 ## 3. State per halaman
 
 | Halaman | Loading | Empty | Error | Offline | Success |
 |---|---|---|---|---|---|
 | Cari/Hasil | Skeleton tidak dipakai; indikator progres + teks "memeriksa" | "Masukkan nomor." / UNKNOWN: "Belum ada data. Bukan jaminan aman." | "Tidak dapat memeriksa", tombol coba lagi | STALE/OFFLINE berlabel, bukan aman | Status + sumber |
-| Lapor | Tombol disabled + progres | - | Pesan validasi/kuota/`429` | "Tersimpan di perangkat, belum terkirim" | "Diterima server" atau "Menunggu moderasi" |
-| Riwayat | Progres | "Belum ada laporan." | Gagal muat + coba lagi | Data lokal pending tetap tampil | Daftar |
+| Lapor | Tombol disabled + progres | Guest: "Masuk akun untuk mulai melapor" | Pesan validasi/kuota/`429` | "Tersimpan di perangkat, belum terkirim" | "Diterima server" atau "Menunggu moderasi" |
+| Riwayat | Progres | Guest: ajakan login / User: "Belum ada laporan." | Gagal muat + coba lagi | Data lokal pending tetap tampil | Daftar |
 | Darurat | - | "Pilih wilayah" (nasional selalu ada) | Gagal sinkron, data tetap dari cache | Cache + tanggal verifikasi | Daftar |
 | Proteksi | - | Role belum dipegang: panduan | Gagal minta role | Tidak bergantung jaringan | Status aktif |
 | Sanggahan | Progres | - | Validasi/kuota | Antre di outbox, dengan kata "belum terkirim" | `dispute_id` + pelacak |
+| Akun & Pengaturan | Progres muat `/me` atau `/health` | Guest: form login opsional; Whitelist kosong | Gagal login/hapus/kirim | Mode Tamu & Whitelist lokal tetap jalan; feedback bisa disalin | Profil aktif, izin sehat, template feedback tersalin |
 
 Aksesibilitas: label TalkBack untuk semua ikon, kontras sesuai audit DESIGN, teks hingga 130%, fokus dan urutan baca logis, status tidak hanya dengan warna (ikon + kata). Tidak ada teks "AMAN" untuk status yang tidak terverifikasi.
 

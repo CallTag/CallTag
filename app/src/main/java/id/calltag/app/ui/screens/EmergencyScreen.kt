@@ -1,11 +1,18 @@
 package id.calltag.app.ui.screens
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationManager
+import android.os.CancellationSignal
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,31 +28,39 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.core.location.LocationManagerCompat
 import id.calltag.app.data.local.entity.EmergencyContact
 import id.calltag.app.ui.components.ScreenIntro
 import id.calltag.app.ui.theme.CallTagDesign
@@ -54,6 +69,11 @@ import id.calltag.app.ui.theme.CallTagSpacing
 import id.calltag.app.ui.theme.CallTagTouch
 import id.calltag.app.ui.theme.CallTagType
 import id.calltag.app.ui.viewmodel.CallTagMainViewModel
+import java.util.Locale
+import kotlin.coroutines.resume
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Layar direktori darurat: panggilan cepat nasional, filter posko daerah, dan daftar posko.
@@ -71,27 +91,61 @@ fun EmergencyScreen(
     val context = LocalContext.current
     val colors = CallTagDesign.colors
 
+    LaunchedEffect(viewModel) { viewModel.refreshEmergencyDirectory() }
     val nationalNumbers by viewModel.nationalEmergencyContacts.collectAsState()
     val localDirectory by viewModel.filteredLocalEmergencyContacts.collectAsState()
     val selectedProvince by viewModel.selectedProvince.collectAsState()
     val selectedCity by viewModel.selectedCity.collectAsState()
     val selectedAgencyType by viewModel.selectedAgencyType.collectAsState()
 
-    val cityOptions = listOf(
-        "" to "Semua Kota",
-        "Jakarta Pusat" to "Jakarta",
-        "Kota Bandung" to "Bandung",
-        "Kota Surabaya" to "Surabaya",
-        "Kota Semarang" to "Semarang",
-        "Kota Yogyakarta" to "Yogyakarta"
+    val allLocalContacts by viewModel.localEmergencyContacts.collectAsState()
+    val provinceOptions = directoryOptions(allLocalContacts.map { it.province }, "Semua provinsi")
+    val cityOptions = directoryOptions(
+        allLocalContacts.filter { selectedProvince.isBlank() || it.province == selectedProvince }
+            .map { it.cityRegency },
+        "Semua kota/kabupaten"
     )
+    val serviceLabels = mapOf(
+        "TERPADU" to "Darurat terpadu", "DAMKAR" to "Damkar", "POLISI" to "Kepolisian",
+        "AMBULANS_RS" to "RS & IGD", "SAR" to "SAR", "PLN" to "PLN", "JASA_MARGA" to "Jasa Marga"
+    )
+    val agencyOptions = listOf("" to "Semua posko") + allLocalContacts.map { it.agencyType }
+        .filter { it.isNotBlank() }.distinct().sorted()
+        .map { it to (serviceLabels[it] ?: it) }
 
-    val agencyOptions = listOf(
-        "" to "Semua Posko",
-        "DAMKAR" to "Damkar",
-        "POLISI" to "Kepolisian",
-        "AMBULANS_RS" to "RS & IGD"
-    )
+    val scope = rememberCoroutineScope()
+    var nearbyLocation by remember { mutableStateOf<Location?>(null) }
+    var locationLoading by remember { mutableStateOf(false) }
+    var locationMessage by remember { mutableStateOf("") }
+
+    fun findLocation() {
+        locationLoading = true
+        locationMessage = ""
+        scope.launch {
+            try {
+                nearbyLocation = currentEmergencyLocation(context)
+                if (nearbyLocation == null) {
+                    locationMessage = "Lokasi belum tersedia. Aktifkan lokasi HP atau gunakan filter wilayah."
+                }
+            } finally {
+                locationLoading = false
+            }
+        }
+    }
+
+    val locationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        if (it.values.any { granted -> granted }) findLocation()
+        else locationMessage = "Izin lokasi belum diberikan. Pilih wilayah secara manual."
+    }
+    val distances = remember(localDirectory, nearbyLocation) {
+        val from = nearbyLocation
+        if (from == null) emptyMap() else localDirectory.mapNotNull { contact ->
+            contact.distanceKmFrom(from.latitude, from.longitude)?.let { contact.code to it }
+        }.toMap()
+    }
+    val orderedDirectory = remember(localDirectory, distances) {
+        localDirectory.sortedBy { distances[it.code] ?: Double.POSITIVE_INFINITY }
+    }
 
     LazyColumn(
         modifier = modifier
@@ -175,37 +229,42 @@ fun EmergencyScreen(
                         fontSize = CallTagType.bodySmall
                     )
                 }
-                Text("Kota", color = colors.textPrimary, fontSize = CallTagType.label, fontWeight = FontWeight.Bold)
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
-                    items(cityOptions) { (cityKey, cityLabel) ->
-                        FilterChipPill(
-                            label = cityLabel,
-                            selected = selectedCity == cityKey,
-                            onClick = {
-                                viewModel.setEmergencyFilter(
-                                    province = selectedProvince,
-                                    city = cityKey,
-                                    agencyType = selectedAgencyType
-                                )
-                            }
-                        )
-                    }
+                DirectoryFilter("Provinsi", selectedProvince, provinceOptions) { province ->
+                    viewModel.setEmergencyFilter(province, "", selectedAgencyType)
                 }
-                Text("Jenis layanan", color = colors.textPrimary, fontSize = CallTagType.label, fontWeight = FontWeight.Bold)
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
-                    items(agencyOptions) { (agencyKey, agencyLabel) ->
-                        FilterChipPill(
-                            label = agencyLabel,
-                            selected = selectedAgencyType == agencyKey,
-                            onClick = {
-                                viewModel.setEmergencyFilter(
-                                    province = selectedProvince,
-                                    city = selectedCity,
-                                    agencyType = agencyKey
-                                )
-                            }
-                        )
-                    }
+                DirectoryFilter("Kota/Kabupaten", selectedCity, cityOptions) { city ->
+                    viewModel.setEmergencyFilter(selectedProvince, city, selectedAgencyType)
+                }
+                DirectoryFilter("Jenis layanan", selectedAgencyType, agencyOptions) { type ->
+                    viewModel.setEmergencyFilter(selectedProvince, selectedCity, type)
+                }
+                OutlinedButton(
+                    onClick = {
+                        if (nearbyLocation != null) {
+                            nearbyLocation = null
+                        } else if (hasLocationPermission(context)) {
+                            findLocation()
+                        } else {
+                            locationPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+                        }
+                    },
+                    enabled = !locationLoading,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = CallTagTouch.action)
+                ) {
+                    Text(when {
+                        locationLoading -> "Mencari lokasi…"
+                        nearbyLocation != null -> "Matikan urutan jarak"
+                        else -> "Urutkan dari lokasi saya"
+                    })
+                }
+                val locationHint = when {
+                    locationMessage.isNotEmpty() -> locationMessage
+                    nearbyLocation != null && distances.isEmpty() -> "Posko pada filter ini belum punya koordinat."
+                    nearbyLocation != null -> "Diurutkan berdasarkan jarak garis lurus."
+                    else -> ""
+                }
+                if (locationHint.isNotEmpty()) {
+                    Text(locationHint, color = colors.textSecondary, fontSize = CallTagType.label)
                 }
                 Text(
                     text = "${localDirectory.size} posko dalam direktori",
@@ -219,9 +278,10 @@ fun EmergencyScreen(
         if (localDirectory.isEmpty()) {
             item { EmptyDirectoryCard() }
         } else {
-            items(localDirectory, key = { it.code }) { localContact ->
+            items(orderedDirectory, key = { it.code }) { localContact ->
                 LocalEmergencyAgencyCard(
                     contact = localContact,
+                    distanceKm = distances[localContact.code],
                     onDialLocal = { dialNumber(context, localContact.primaryPhone) },
                     onOpenWhatsApp = {
                         openWhatsAppEmergency(
@@ -310,34 +370,37 @@ private fun NationalHotlineButton(
 }
 
 @Composable
-private fun FilterChipPill(
+private fun DirectoryFilter(
     label: String,
-    selected: Boolean,
-    onClick: () -> Unit
+    selected: String,
+    options: List<Pair<String, String>>,
+    onSelected: (String) -> Unit
 ) {
     val colors = CallTagDesign.colors
-    val bg = if (selected) colors.brandSolid else colors.surfaceCard
-    val fg = if (selected) colors.onBrand else colors.textPrimary
+    var expanded by remember { mutableStateOf(false) }
+    val selectedLabel = options.firstOrNull { it.first == selected }?.second ?: selected
 
-    Surface(
-        modifier = Modifier
-            .heightIn(min = CallTagTouch.action)
-            .clip(RoundedCornerShape(CallTagRadius.pill))
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(CallTagRadius.pill),
-        color = bg,
-        border = BorderStroke(1.dp, if (selected) colors.brandPrimary else colors.borderSubtle)
-    ) {
-        Box(
-            modifier = Modifier.padding(horizontal = CallTagSpacing.md, vertical = CallTagSpacing.xs),
-            contentAlignment = Alignment.Center
+    Box {
+        OutlinedButton(
+            onClick = { expanded = true },
+            modifier = Modifier.fillMaxWidth().heightIn(min = CallTagTouch.action),
+            shape = RoundedCornerShape(CallTagRadius.md)
         ) {
-            Text(
-                text = label,
-                color = fg,
-                fontSize = CallTagType.label,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
-            )
+            Text("$label: $selectedLabel", modifier = Modifier.weight(1f), color = colors.textPrimary)
+            Spacer(Modifier.width(CallTagSpacing.xs))
+            Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, tint = colors.textSecondary)
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { (key, name) ->
+                DropdownMenuItem(
+                    text = { Text(name) },
+                    onClick = {
+                        expanded = false
+                        onSelected(key)
+                    },
+                    modifier = Modifier.heightIn(min = CallTagTouch.action)
+                )
+            }
         }
     }
 }
@@ -346,6 +409,7 @@ private fun FilterChipPill(
 @Composable
 private fun LocalEmergencyAgencyCard(
     contact: EmergencyContact,
+    distanceKm: Double?,
     onDialLocal: () -> Unit,
     onOpenWhatsApp: () -> Unit
 ) {
@@ -354,7 +418,8 @@ private fun LocalEmergencyAgencyCard(
     val (badgeColor, badgeContainer, agencyLabel) = when (contact.agencyType.uppercase()) {
         "DAMKAR" -> Triple(colors.dangerScam, colors.dangerScamContainer, "Damkar")
         "POLISI" -> Triple(colors.brandPrimary, colors.brandContainer, "Kepolisian")
-        else -> Triple(colors.cleanEmerald, colors.cleanEmeraldContainer, "IGD & Ambulans")
+        "AMBULANS_RS" -> Triple(colors.cleanEmerald, colors.cleanEmeraldContainer, "IGD & Ambulans")
+        else -> Triple(colors.brandPrimary, colors.brandContainer, contact.agencyType)
     }
 
     val capabilitiesList = contact.capabilitiesSummary
@@ -409,6 +474,13 @@ private fun LocalEmergencyAgencyCard(
                     fontSize = CallTagType.title,
                     fontWeight = FontWeight.Bold
                 )
+                if (distanceKm != null) {
+                    Text(
+                        text = String.format(Locale.forLanguageTag("id-ID"), "Sekitar %.1f km", distanceKm),
+                        color = colors.textSecondary,
+                        fontSize = CallTagType.label
+                    )
+                }
                 if (contact.address.isNotBlank()) {
                     Text(
                         text = contact.address,
@@ -449,6 +521,7 @@ private fun LocalEmergencyAgencyCard(
             ) {
                 Button(
                     onClick = onDialLocal,
+                    enabled = contact.primaryPhone.isNotBlank(),
                     modifier = Modifier
                         .weight(1f)
                         .heightIn(min = CallTagTouch.action),
@@ -546,4 +619,40 @@ private fun openWhatsAppEmergency(
         }
         context.startActivity(intent)
     }
+}
+
+
+private fun directoryOptions(values: List<String>, defaultLabel: String): List<Pair<String, String>> =
+    listOf("" to defaultLabel) + values.filter { it.isNotBlank() }.distinct().sorted().map { it to it }
+
+private fun hasLocationPermission(context: Context): Boolean =
+    ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+@SuppressLint("MissingPermission")
+private suspend fun currentEmergencyLocation(context: Context): Location? {
+    if (!hasLocationPermission(context)) return null
+    val manager = context.getSystemService(LocationManager::class.java) ?: return null
+    val precise = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    val providers = listOf("fused", LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER)
+        .filter { (precise || it != LocationManager.GPS_PROVIDER) && it in manager.getProviders(true) }
+    for (provider in providers) {
+        val found = withTimeoutOrNull(4_000) {
+            suspendCancellableCoroutine<Location?> { continuation ->
+                val signal = CancellationSignal()
+                continuation.invokeOnCancellation { signal.cancel() }
+                try {
+                    LocationManagerCompat.getCurrentLocation(manager, provider, signal, ContextCompat.getMainExecutor(context)) {
+                        continuation.resume(it)
+                    }
+                } catch (_: SecurityException) {
+                    continuation.resume(null)
+                } catch (_: IllegalArgumentException) {
+                    continuation.resume(null)
+                }
+            }
+        }
+        if (found != null) return found
+    }
+    return null
 }

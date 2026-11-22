@@ -35,6 +35,10 @@ Status: **PROPOSED**. Memperluas [IMPLEMENTATION_ROADMAP](../IMPLEMENTATION_ROAD
 | T-204 | Endpoint tambahan N1 sampai N3, N6 (refresh, me, hapus akun, lacak dispute) | backend | P1 | T-101, T-105 | Sedang | M | API akun | AC-02, AC-10 | Contract test | B02 |
 | T-205 | `$jsonSchema` validator, migrasi data aman, transaksi/replica set atau rekonsiliasi | backend | P1 | T-104 | Tinggi | M | DB tervalidasi | Dry-run migrasi + restore di staging | Skrip uji | B10 |
 | T-206 | Job decay, kedaluwarsa 12 bulan, retensi, rekonsiliasi agregat | backend | P2 | T-202 | Sedang | M | Job terjadwal | Skor menurun tanpa laporan baru | Test waktu terkontrol | B15 |
+| T-207 | *(Tahap 4B)* Koleksi & seed `verified_numbers` resmi Indonesia + integrasi lookup | backend | P1 | T-202 | Sedang | M | Dataset `VERIFIED` berprovenans | Nomor resmi bank/lembaga kembali `is_whitelisted_verified=true` + sumber | Test lookup + JSON seed | - |
+| T-208 | *(Tahap 4B)* Ekspansi detektor HLR seluler, PSTN Komdigi, & kode negara ITU | backend | P1 | - | Rendah | S | `DetectIndonesianCarrier` lengkap | Nomor daerah/asing tidak jatuh ke label generik | Unit test tabel prefix | - |
+| T-209 | *(Tahap 4B)* CLI Importer CSV/JSON berprovenans + template dataset MIT/open | backend | P1 | T-201, T-207 | Sedang | M | `cmd/importdataset` | Impor idempoten, normalisasi E.164, tulis `sync_changes` | Dry-run + integration test | - |
+| T-210 | *(Tahap 4B)* Kategori netral `INFO_TAG` (`W = 0.0`) untuk `#Tag` konteks non-penipu | backend | P1 | T-202 | Rendah | S | `INFO_TAG` di `scoring.go` | Tag peran/bisnis tersimpan tanpa menaikkan skor spam | Unit test + report test | - |
 
 ## Fase 3: Integrasi Android (B)
 
@@ -47,6 +51,13 @@ Status: **PROPOSED**. Memperluas [IMPLEMENTATION_ROADMAP](../IMPLEMENTATION_ROAD
 | T-305 | Onboarding, `AuthInterceptor`, penyimpanan token aman, hapus pengiriman `phone` | CallTag | P1 | T-101, T-204 | Sedang | M | Alur 1 dan 2 | AC-01, AC-02 | Uji emulator | B09 |
 | T-306 | Isolasi fixture (debug saja), hapus teks "AMAN", masking log | CallTag | P1 | T-303 | Rendah | S | UI jujur | grep "NOMOR AMAN" kosong | Pencarian kode + UI | B11 |
 | T-307 | Halaman Riwayat laporan, Sanggahan, Akun dan data; Proteksi gabungan | CallTag | P1 | T-301, T-105 | Sedang | L | UI sesuai [12](12-RANCANGAN-UI-UX.md) | State lengkap per halaman | Screenshot emulator | B09 |
+| T-308 | *(Tahap 5B)* Mode Tamu vs Login Opsional + pembatasan fitur (*gating*) | CallTag | P1 | T-305, T-307 | Sedang | M | Alur login opsional | Tamu tetap bisa Cari/Darurat; Riwayat/Lapor/Whitelist minta login | Uji emulator | - |
+| T-309 | *(Tahap 5B)* Tab ke-5 `Akun` & Pengaturan Lengkap + Tutorial Cara Pakai | CallTag | P1 | T-308 | Sedang | M | `AccountSettingsScreen` | Navigasi 5 tab, tema persisten, hapus cache, & panduan aktivasi | Screenshot emulator | - |
+| T-310 | *(Tahap 5B, Rekomendasi 1)* Diagnostik Kesehatan Izin & Koneksi Backend | CallTag | P1 | T-309 | Rendah | S | Health check izin | Status role, overlay, notifikasi, `/health`, pintasan Settings | Uji emulator | - |
+| T-311 | *(Tahap 5B, Rekomendasi 3)* Daftar Pengecualian Pribadi (*Local Whitelist*) | CallTag | P1 | T-302, T-308 | Sedang | S | Whitelist lokal | Nomor whitelist melewati auto-block (`isWhitelisted = true`) | Unit test + emulator | - |
+| T-312 | *(Tahap 5B, Rekomendasi 4)* Form Saran, Kritik, Lapor Bug + Info Diagnostik | CallTag | P2 | T-309 | Rendah | S | Feedback + info rilis | Lampirkan versi APK/perangkat aman, salin & Share Intent | Uji emulator | - |
+| T-313 | *(Tahap 5B)* Deteksi HLR/PSTN/Kode Negara offline + lencana `VERIFIED` sumber resmi | CallTag | P1 | T-207, T-208, T-303 | Rendah | S | Konteks nomor selalu informatif | Prefix & sumber `VERIFIED` tampil di Hasil Cari & Overlay | Unit test tabel prefix + emulator | - |
+| T-314 | *(Tahap 5B)* Awan `#Tag (count)` terbuka, kirim `INFO_TAG` non-penipu, & 1-tap `Lihat di WhatsApp` (`wa.me`) | CallTag | P1 | T-210, T-308, T-313 | Rendah | S | Hasil lookup menarik | Tag tampil, bisa tambah tag konteks/spam, `wa.me` aman (hidden $\le 6$ digit) | Uji emulator | - |
 
 ## Fase 4: Admin panel (A, sebagian B)
 
@@ -54,8 +65,9 @@ Status: **PROPOSED**. Memperluas [IMPLEMENTATION_ROADMAP](../IMPLEMENTATION_ROAD
 |---|---|---|---|---|---|---|---|---|---|---|
 | T-401 | Login staf (argon2id, TOTP), sesi cookie, CSRF, CLI `mkstaff` | backend | P1 | T-101 | Sedang | M | Auth staf | 403 untuk non-staf | Test RBAC | B12 |
 | T-402 | Antrean kasus, detail, keputusan (`PATCH`), optimistic lock, audit | backend | P1 | T-105, T-401 | Tinggi | L | Moderasi | AC-11 | Test alur + audit | B12 |
-| T-403 | CRUD whitelist/bisnis, direktori darurat, kanal resmi dengan sumber wajib | backend | P1 | T-401 | Sedang | M | Kurasi | AC-14 | Test validasi | B12 |
+| T-403 | CRUD whitelist/bisnis, direktori darurat, kanal resmi dengan sumber wajib (+ unggah batch CSV/JSON) | backend | P1 | T-401, T-209 | Sedang | M | Kurasi | AC-14 | Test validasi | B12 |
 | T-404 | Halaman HTML tertanam: antrean, nomor, audit, dashboard ringkas | backend | P1 | T-402 | Sedang | M | UI admin | Alur 11 dan 14 dapat dijalankan manual | Demo | B12 |
+| T-405 | Endpoint & tombol rekap ekspor data admin (JSON & CSV teredaksi, tanpa PII pelapor) | backend | P1 | T-401, T-404 | Rendah | S | Ekspor JSON/CSV admin | Non-staf `403`, admin bisa unduh rekap `phone_tags`/`verified`/`cases` | Test RBAC + format ekspor | - |
 
 ## Fase 5: Landing page dan API docs (B)
 
@@ -92,12 +104,15 @@ flowchart LR
     T001[T-001 keputusan] --> T002[T-002 PRD]
     T002 --> T004[T-004 PR ke main]
     T004 --> F1[Fase 1 backend T-101..107]
-    F1 --> F2[Fase 2 T-201..206]
+    F1 --> F2[Fase 2 T-201..206] --> F2B[Tahap 4B T-207..210 Verified, HLR, Importer & INFO_TAG]
     F1 --> A301[T-301 Room v2]
     F2 --> A304[T-304 sync Android]
     A301 --> A302[T-302 policy] --> A305[T-305..307 UI]
-    F1 --> F4[Fase 4 admin T-401..404]
-    A305 --> F6[Fase 6 QA]
+    A305 --> A308[Tahap 5B T-308..314 UX, Discovery & Akun]
+    F2B --> A308
+    F1 --> F4[Fase 4 admin T-401..405]
+    F2B --> F4
+    A308 --> F6[Fase 6 QA]
     F2 --> F6
     F4 --> F6
     F6 --> F7[Fase 7 deploy]

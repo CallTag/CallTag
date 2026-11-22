@@ -19,6 +19,6 @@ interface CallScreeningLogDao {
     @Query("SELECT COUNT(*) FROM call_screening_logs")
     suspend fun count(): Int
 
-    @Query("SELECT * FROM call_screening_logs ORDER BY screened_at_epoch_ms DESC LIMIT :limit")
-    fun observeRecentLogs(limit: Int = 50): Flow<List<CallScreeningLog>>
+    @Query("SELECT * FROM call_screening_logs WHERE owner_scope = :ownerScope ORDER BY screened_at_epoch_ms DESC LIMIT :limit")
+    fun observeRecentLogs(ownerScope: String, limit: Int = 50): Flow<List<CallScreeningLog>>
 }

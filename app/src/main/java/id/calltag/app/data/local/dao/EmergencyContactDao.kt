@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import id.calltag.app.data.local.entity.EmergencyContact
 import kotlinx.coroutines.flow.Flow
 
@@ -45,6 +46,15 @@ interface EmergencyContactDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(contacts: List<EmergencyContact>)
+
+    @Query("DELETE FROM emergency_contacts WHERE scope = :scope")
+    suspend fun deleteScope(scope: String)
+
+    @Transaction
+    suspend fun replaceScope(scope: String, contacts: List<EmergencyContact>) {
+        deleteScope(scope)
+        upsertAll(contacts)
+    }
 
     @Query("SELECT COUNT(*) FROM emergency_contacts")
     suspend fun count(): Int

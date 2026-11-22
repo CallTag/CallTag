@@ -1,0 +1,355 @@
+﻿prefix_internasional,kode_domestik,label_calltag
++6221,021,Jabodetabek
++6222,022,Bandung
++6224,024,Semarang
++6231,031,Surabaya
++6261,061,Medan
++62231,0231,Cirebon
++62232,0232,Kuningan
++62233,0233,Majalengka
++62234,0234,Indramayu
++62251,0251,Bogor
++62252,0252,Rangkasbitung
++62253,0253,Pandeglang
++62254,0254,Serang
++62261,0261,Sumedang
++62262,0262,Garut/Pameungpeuk
++62263,0263,Cianjur
++62264,0264,Purwakarta
++62265,0265,Tasikmalaya
++62266,0266,Sukabumi
++62267,0267,Karawang
++62260,0260,Subang
++62271,0271,Solo
++62272,0272,Klaten
++62273,0273,Wonogiri
++62274,0274,Yogyakarta
++62275,0275,Purworejo
++62276,0276,Boyolali
++62281,0281,Purwokerto
++62282,0282,Cilacap
++62283,0283,Tegal/Brebes
++62284,0284,Pemalang
++62285,0285,Pekalongan
++62286,0286,Wonosobo
++62287,0287,Kebumen
++62289,0289,Bumiayu
++62280,0280,Majenang
++62291,0291,Kudus
++62292,0292,Purwodadi
++62293,0293,Magelang
++62294,0294,Kendal
++62295,0295,Pati
++62296,0296,Blora
++62297,0297,Karimunjawa
++62298,0298,Salatiga
++62321,0321,Mojokerto
++62322,0322,Lamongan
++62323,0323,Sampang
++62324,0324,Pamekasan
++62325,0325,Sangkapura
++62327,0327,Pabean/Gayam
++62328,0328,Sumenep
++62331,0331,Jember
++62332,0332,Bondowoso
++62333,0333,Banyuwangi
++62334,0334,Lumajang
++62335,0335,Probolinggo
++62336,0336,Tanggul
++62338,0338,Situbondo
++62341,0341,Malang
++62342,0342,Blitar
++62343,0343,Pasuruan
++62351,0351,Madiun
++62352,0352,Ponorogo
++62353,0353,Bojonegoro
++62354,0354,Kediri
++62355,0355,Tulungagung
++62356,0356,Tuban
++62357,0357,Pacitan
++62358,0358,Nganjuk
++62361,0361,Denpasar
++62362,0362,Singaraja/Pupuan
++62363,0363,Amlapura
++62365,0365,Negara
++62366,0366,Klungkung
++62368,0368,Baturiti
++62371,0371,Sumbawa Besar
++62372,0372,Alas
++62373,0373,Dompu
++62374,0374,Bima
++62376,0376,Selong
++62370,0370,Mataram
++62381,0381,Ende
++62382,0382,Maumere
++62383,0383,Larantuka
++62384,0384,Bajawa
++62385,0385,Ruteng
++62386,0386,Kalabahi
++62387,0387,Waingapu/Waikabubak
++62388,0388,Soe/Kefamenanu
++62389,0389,Atambua
++62380,0380,Kupang
++62411,0411,Makassar
++62413,0413,Bantaeng
++62414,0414,Benteng
++62415,0415,Tanah Jampea
++62417,0417,Malino
++62418,0418,Takalar
++62419,0419,Jeneponto
++62410,0410,Pangkep
++62421,0421,Parepare
++62422,0422,Majene
++62423,0423,Rantepao
++62426,0426,Mamuju
++62427,0427,Barru
++62428,0428,Polewali
++62429,0429,Karosa
++62420,0420,Enrekang
++62431,0431,Manado
++62432,0432,Tahuna
++62433,0433,Beo
++62434,0434,Kotamobagu
++62435,0435,Gorontalo
++62438,0438,Bitung
++62430,0430,Amurang
++62442,0442,Kwandang
++62443,0443,Marisa
++62444,0444,Tilamuta
++62445,0445,Paleleh/Buol
++62451,0451,Palu
++62452,0452,Poso
++62453,0453,Toli-toli
++62454,0454,Tinombo
++62455,0455,Moutong
++62456,0456,Pasangkayu
++62457,0457,Donggala
++62458,0458,Tentena
++62450,0450,Parigi
++62461,0461,Luwuk
++62462,0462,Banggai
++62463,0463,Katupa
++62464,0464,Ampana
++62465,0465,Kolonedale
++62471,0471,Palopo
++62472,0472,Siwa
++62473,0473,Masamba
++62474,0474,Malili
++62475,0475,Soroako
++62481,0481,Watampone
++62482,0482,Sinjai
++62484,0484,Watansopeng
++62485,0485,Sengkang
++62401,0401,Kendari
++62402,0402,Baubau
++62403,0403,Raha
++62404,0404,Wanci
++62405,0405,Kolaka
++62406,0406,Malamala
++62407,0407,Waweheo
++62408,0408,Unaaha
++62409,0409,Bungku
++62511,0511,Banjarmasin/Marabahan
++62512,0512,Pleihari
++62513,0513,Kuala Kapuas
++62517,0517,Kandangan
++62518,0518,Kotabaru/Batu Licin
++62519,0519,Muarateweh
++62522,0522,Ampah
++62525,0525,Buntok
++62526,0526,Tanjung Tabalong
++62527,0527,Amuntai
++62528,0528,Purukcahu
++62531,0531,Sampit
++62532,0532,Pangkalan Bun
++62533,0533,Tumbang Samba
++62534,0534,Ketapang
++62536,0536,Palangkaraya
++62537,0537,Kuala Kurun
++62538,0538,Kuala Pembuang
++62539,0539,Kuala Kuayan
++62541,0541,Samarinda
++62542,0542,Balikpapan
++62543,0543,Tanah Grogot
++62544,0544,Tiongohang
++62545,0545,Longiram
++62546,0546,Tabang
++62547,0547,Sangkulirang
++62548,0548,Bontang
++62549,0549,Sangata
++62551,0551,Tarakan
++62552,0552,Tanjung Selor
++62553,0553,Malinau
++62554,0554,Tanjungredep
++62555,0555,Longnawang
++62556,0556,Nunukan
++62561,0561,Pontianak/Mempawah
++62562,0562,Singkawang
++62563,0563,Ngabang
++62564,0564,Sanggau/Balai Karangan
++62565,0565,Sintang
++62567,0567,Putussibau
++62568,0568,Sambas/Nangapinoh
++62573,0573,Sukadana
++62574,0574,Nangatayap
++62575,0575,Pd. Karimata
++62582,0582,Semitau
++62621,0621,Tebingtinggi
++62622,0622,Pematang Siantar
++62623,0623,Kisaran
++62624,0624,Rantau Prapat
++62625,0625,Parapat
++62626,0626,Pangururan
++62627,0627,Sidikalang
++62628,0628,Kabanjahe
++62629,0629,Kutacane
++62620,0620,Pangkalan Brandan
++62631,0631,Sibolga
++62632,0632,Balige
++62633,0633,Tarutung
++62634,0634,Padang Sidempuan
++62635,0635,Gunungtua
++62636,0636,Panyabungan/Natal
++62638,0638,Barus
++62639,0639,Gunung Sitoli
++62630,0630,Teluk Dalam
++62641,0641,Langsa
++62642,0642,Blangkejeren
++62643,0643,Takengon
++62644,0644,Bireun
++62645,0645,Lhok Seumawe
++62646,0646,Idi
++62651,0651,Banda Aceh
++62652,0652,Sabang
++62653,0653,Sigli
++62654,0654,Calang
++62655,0655,Meulaboh
++62656,0656,Tapaktuan
++62657,0657,Bakongan
++62658,0658,Singkil
++62659,0659,Blang Pidie
++62650,0650,Sinabang
++62711,0711,Palembang
++62712,0712,Kayu Agung
++62713,0713,Prabumulih
++62714,0714,Sekayu
++62715,0715,Belinyu
++62716,0716,Mentok
++62717,0717,Pangkal Pinang
++62718,0718,Koba
++62719,0719,Tanjung Pandan
++62721,0721,Bandar Lampung/Pringsewu
++62722,0722,Kota Agung
++62723,0723,Blambangan Umpu
++62724,0724,Kotabumi
++62725,0725,Metro/Bandar Jaya
++62726,0726,Manggala
++62727,0727,Kalianda
++62728,0728,Krui/Liwa
++62729,0729,Pringsewu
++62731,0731,Lahat
++62732,0732,Curup
++62733,0733,Lubuk Linggau
++62734,0734,Muaraenim
++62735,0735,Baturaja
++62736,0736,Bengkulu
++62737,0737,Argamakmur
++62738,0738,Muara Aman
++62739,0739,Manna
++62730,0730,Pagaralam
++62741,0741,Jambi
++62742,0742,Kuala Tungkal
++62743,0743,Muarabulian
++62744,0744,Muaratebo
++62745,0745,Sarolangun
++62746,0746,Bangko
++62747,0747,Muarabungo
++62748,0748,Sungai Penuh
++62740,0740,Mendara/Pangkalan Bulian
++62751,0751,Padang
++62752,0752,Bukittinggi
++62753,0753,Lubuk Sikaping
++62754,0754,Sijunjung
++62755,0755,Solok
++62756,0756,Painan
++62757,0757,Balaisalasa
++62758,0758,Matobe
++62759,0759,Muara Siberut
++62761,0761,Pekanbaru
++62762,0762,Bangkinang
++62763,0763,Selat Panjang
++62764,0764,Siak Sriindrapura
++62765,0765,Dumai
++62766,0766,Bengkalis
++62767,0767,Bagan Siapiapi
++62768,0768,Tembilahan
++62769,0769,Rengat
++62760,0760,Teluk Kuantan
++62771,0771,Tanjung Pinang
++62772,0772,Tareumpa
++62773,0773,Ranai
++62774,0774,Natuna Selatan
++62775,0775,Pulau Tembelan
++62776,0776,Dabosingkep
++62777,0777,Tanjungbalai Karimun
++62778,0778,Sekupang/Batam
++62779,0779,Tanjung Batu
++62770,0770,Kawasan Khusus Batam-Bintan
++62702,0702,Tebing Tinggi
++62911,0911,Ambon
++62912,0912,Piru
++62913,0913,Namlea
++62914,0914,Masohi
++62915,0915,Bula
++62916,0916,Tual
++62917,0917,Dobo
++62918,0918,Saumlaki
++62919,0919,Tepa
++62910,0910,Bandaneira
++62921,0921,Ternate/Soasiu
++62922,0922,Jailolo
++62923,0923,Pitu/Morotai
++62924,0924,Tobelo
++62925,0925,Weda
++62926,0926,Umera
++62927,0927,Labuha
++62928,0928,Laiwui
++62929,0929,Sanana
++62931,0931,Saparua
++62951,0951,Sorong
++62952,0952,Teminabuha
++62953,0953,Kabare
++62955,0955,Bintuni
++62956,0956,Fak-Fak
++62957,0957,Kaimana
++62958,0958,Makbon
++62959,0959,Seget
++62950,0950,Babo
++62962,0962,Ilaga
++62963,0963,Bokondini
++62964,0964,Genyem
++62965,0965,Senggi
++62966,0966,Sarmi
++62967,0967,Jayapura
++62969,0969,Wamena
++62960,0960,Tiom
++62971,0971,Merauke/Kimaan
++62972,0972,Okaba
++62974,0974,Bade
++62975,0975,Tanah Merah
++62977,0977,Kamur
++62978,0978,Waropko
++62979,0979,Senggo
++62981,0981,Biak
++62982,0982,Waren
++62983,0983,Serui
++62984,0984,Nabire
++62986,0986,Manokwari
++62987,0987,Korido
++62988,0988,Numfor
++62989,0989,Windesi
++62980,0980,Ransiki
++62901,0901,Timika
++62902,0902,Agat
++62903,0903,Enarotali
++62904,0904,Semini

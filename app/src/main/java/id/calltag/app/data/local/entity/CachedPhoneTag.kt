@@ -48,5 +48,23 @@ data class CachedPhoneTag(
     val syncVersion: Long,
 
     @ColumnInfo(name = "cached_at_epoch_ms")
-    val cachedAtEpochMs: Long = System.currentTimeMillis()
+    val cachedAtEpochMs: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "availability")
+    val availability: String = "AVAILABLE", // AVAILABLE, NOT_FOUND, UNAVAILABLE
+
+    @ColumnInfo(name = "source")
+    val source: String = "SERVER", // SERVER, FIXTURE, LOCAL
+
+    @ColumnInfo(name = "fetched_at_epoch_ms")
+    val fetchedAtEpochMs: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "expires_at_epoch_ms")
+    val expiresAtEpochMs: Long = System.currentTimeMillis() + 90L * 24 * 60 * 60 * 1000L,
+
+    @ColumnInfo(name = "server_version")
+    val serverVersion: Long = 0L,
+
+    @ColumnInfo(name = "verified_label")
+    val verifiedLabel: String? = null
 )

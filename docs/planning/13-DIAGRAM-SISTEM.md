@@ -582,7 +582,7 @@ Menggambarkan alur kerja Staf (`Moderator` dan `Administrator`) pada panel inter
 
 ```mermaid
 flowchart LR
-    LOGIN(["Staf Buka /admin/login"]) --> AUTH["Verifikasi Email, Password (Argon2id), & Kode TOTP"]
+    LOGIN(["Staf Buka /admin/login"]) --> AUTH["Verifikasi Username, Password (bcrypt), & Kode TOTP"]
     AUTH --> DASH["Dashboard Ringkas: Antrean Kasus, Peringatan SLA (OD-09), Statistik 24 Jam"]
 
     DASH --> T_MOD["Tugas Moderator & Admin"]

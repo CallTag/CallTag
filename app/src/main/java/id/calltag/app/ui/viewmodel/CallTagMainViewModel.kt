@@ -7,15 +7,21 @@ import id.calltag.app.data.local.OfflineSeedData
 import id.calltag.app.data.local.entity.CachedPhoneTag
 import id.calltag.app.data.local.entity.CallScreeningLog
 import id.calltag.app.data.local.entity.EmergencyContact
+import id.calltag.app.data.local.entity.PendingDisputeEntity
+import id.calltag.app.data.local.entity.PendingReportEntity
 import id.calltag.app.data.preferences.CallTagPreferences
 import id.calltag.app.data.remote.dto.DisputeResponseDto
+import id.calltag.app.data.remote.dto.MeResponseDto
 import id.calltag.app.data.remote.dto.OfficialChannelDto
 import id.calltag.app.data.remote.dto.ReportResponseDto
 import id.calltag.app.data.repository.CallTagRepository
 import id.calltag.app.data.repository.FullPhoneLookupResult
+import id.calltag.app.data.repository.LookupAvailability
 import id.calltag.app.data.repository.OfflineCacheStats
 import id.calltag.app.util.PhoneNormalizer
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,11 +42,18 @@ class CallTagMainViewModel(
 ) : ViewModel() {
 
     // Pengaturan Tema & Spam Guard
-    private val _isDarkMode = MutableStateFlow(false)
-    val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
+    val isDarkMode: StateFlow<Boolean> = preferences.darkModeFlow
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val isLoggedIn: StateFlow<Boolean> = preferences.isLoggedInFlow
+    val sessionDisplayName: StateFlow<String> = preferences.sessionDisplayNameFlow
+    val sessionRevision = preferences.sessionRevision
+    fun uiSessionKey(): String = preferences.sessionGenerationSync()
+    val personalWhitelist: Flow<Set<String>> = preferences.personalWhitelistFlow
+    private val _backendHealthState = MutableStateFlow<UiLoadState<String>>(UiLoadState.Idle)
+    val backendHealthState: StateFlow<UiLoadState<String>> = _backendHealthState.asStateFlow()
 
     val autoBlockScammer: StateFlow<Boolean> = preferences.autoBlockScammerFlow
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     val showHeadsUpAlert: StateFlow<Boolean> = preferences.showHeadsUpAlertFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
@@ -55,8 +68,7 @@ class CallTagMainViewModel(
     private val _activeOverlayPreview = MutableStateFlow<FullPhoneLookupResult?>(null)
     val activeOverlayPreview: StateFlow<FullPhoneLookupResult?> = _activeOverlayPreview.asStateFlow()
 
-    val recentScreeningLogs: StateFlow<List<CallScreeningLog>> = repository.observeRecentScreeningLogs()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val recentScreeningLogs: Flow<List<CallScreeningLog>> = repository.observeRecentScreeningLogs()
 
     val dangerScammers: StateFlow<List<CachedPhoneTag>> = repository.observeDangerScammers()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -79,7 +91,7 @@ class CallTagMainViewModel(
     private val _selectedAgencyType = MutableStateFlow("")
     val selectedAgencyType: StateFlow<String> = _selectedAgencyType.asStateFlow()
 
-    private val _allLocalEmergency = repository.observeLocalEmergencyContacts()
+    val localEmergencyContacts = repository.observeLocalEmergencyContacts()
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
@@ -87,14 +99,14 @@ class CallTagMainViewModel(
         )
 
     val filteredLocalEmergencyContacts: StateFlow<List<EmergencyContact>> = combine(
-        _allLocalEmergency,
+        localEmergencyContacts,
         _selectedProvince,
         _selectedCity,
         _selectedAgencyType
     ) { list, prov, city, agency ->
         list.filter { item ->
-            val matchProv = prov.isBlank() || item.province.contains(prov, ignoreCase = true)
-            val matchCity = city.isBlank() || item.cityRegency.contains(city, ignoreCase = true)
+            val matchProv = prov.isBlank() || item.province.equals(prov, ignoreCase = true)
+            val matchCity = city.isBlank() || item.cityRegency.equals(city, ignoreCase = true)
             val matchAgency = agency.isBlank() || item.agencyType.equals(agency, ignoreCase = true)
             matchProv && matchCity && matchAgency
         }
@@ -107,13 +119,25 @@ class CallTagMainViewModel(
     private val _disputeSubmissionState = MutableStateFlow<UiLoadState<DisputeResponseDto>>(UiLoadState.Idle)
     val disputeSubmissionState: StateFlow<UiLoadState<DisputeResponseDto>> = _disputeSubmissionState.asStateFlow()
 
+    val pendingReports: Flow<List<PendingReportEntity>> = repository.observePendingReports()
+
+    val pendingDisputes: Flow<List<PendingDisputeEntity>> = repository.observePendingDisputes()
+
+    private val _disputeLookupState = MutableStateFlow<UiLoadState<DisputeResponseDto>>(UiLoadState.Idle)
+    val disputeLookupState: StateFlow<UiLoadState<DisputeResponseDto>> = _disputeLookupState.asStateFlow()
+
     private val _officialChannels = MutableStateFlow(OfflineSeedData.getInitialOfficialChannels())
     val officialChannels: StateFlow<List<OfficialChannelDto>> = _officialChannels.asStateFlow()
 
     private val _lastReportedPhoneForCopy = MutableStateFlow("")
     val lastReportedPhoneForCopy: StateFlow<String> = _lastReportedPhoneForCopy.asStateFlow()
 
-    // Layar 4: Spam Guard & Offline Delta Sync
+    // Layar 4: Spam Guard, Akun UU PDP & Offline Delta Sync
+    private val _accountProfileState = MutableStateFlow<UiLoadState<MeResponseDto>>(UiLoadState.Idle)
+    val accountProfileState: StateFlow<UiLoadState<MeResponseDto>> = _accountProfileState.asStateFlow()
+
+    private val _accountActionMessage = MutableStateFlow<String?>(null)
+    val accountActionMessage: StateFlow<String?> = _accountActionMessage.asStateFlow()
     private val _cacheStats = MutableStateFlow(
         OfflineCacheStats(
             syncVersion = 6L,
@@ -132,10 +156,88 @@ class CallTagMainViewModel(
     init {
         refreshCacheStats()
         loadOfficialChannels()
+        viewModelScope.launch {
+            sessionRevision.drop(1).collect { clearPrivateUi() }
+        }
     }
 
-    fun toggleDarkMode() {
-        _isDarkMode.value = !_isDarkMode.value
+    private fun clearPrivateUi() {
+        _reportSubmissionState.value = UiLoadState.Idle
+        _disputeSubmissionState.value = UiLoadState.Idle
+        _disputeLookupState.value = UiLoadState.Idle
+        _activeOverlayPreview.value = null
+        _lastReportedPhoneForCopy.value = ""
+    }
+
+    fun toggleDarkMode() = setDarkMode(!isDarkMode.value)
+
+    fun setDarkMode(enabled: Boolean) {
+        viewModelScope.launch { preferences.setDarkMode(enabled) }
+    }
+
+    fun loginWithGoogle(idToken: String) {
+        if (_accountProfileState.value == UiLoadState.Loading) return
+        _accountActionMessage.value = "Menghubungkan akun..."
+        _accountProfileState.value = UiLoadState.Loading
+        viewModelScope.launch {
+            repository.authenticateGoogle(idToken).fold(
+                onSuccess = { _accountActionMessage.value = "Berhasil masuk akun."; refreshAccountProfile() },
+                onFailure = {
+                    _accountActionMessage.value = it.message ?: "Gagal masuk akun."
+                    _accountProfileState.value = UiLoadState.Error(_accountActionMessage.value.orEmpty())
+                }
+            )
+        }
+    }
+
+    fun logout() {
+        clearPrivateUi()
+        _accountProfileState.value = UiLoadState.Idle
+        viewModelScope.launch {
+            repository.logout()
+            _accountActionMessage.value = "Anda telah keluar."
+        }
+    }
+
+    fun addToWhitelist(phone: String) {
+        viewModelScope.launch {
+            runCatching { preferences.addPersonalWhitelist(phone) }.fold(
+                onSuccess = { _accountActionMessage.value = "Nomor ditambahkan ke pengecualian pribadi." },
+                onFailure = { _accountActionMessage.value = it.message }
+            )
+        }
+    }
+
+    fun removeFromWhitelist(phone: String) {
+        viewModelScope.launch {
+            runCatching { preferences.removePersonalWhitelist(phone) }.fold(
+                onSuccess = { _accountActionMessage.value = "Nomor dihapus dari pengecualian pribadi." },
+                onFailure = { _accountActionMessage.value = it.message }
+            )
+        }
+    }
+
+    fun addPersonalWhitelist(phone: String) = addToWhitelist(phone)
+    fun removePersonalWhitelist(phone: String) = removeFromWhitelist(phone)
+
+    fun clearCache() {
+        viewModelScope.launch {
+            repository.clearLocalCache()
+            _lookupState.value = UiLoadState.Idle
+            _activeOverlayPreview.value = null
+            refreshCacheStats()
+            _accountActionMessage.value = "Cache nomor lokal telah dibersihkan."
+        }
+    }
+
+    fun checkBackendHealth() {
+        _backendHealthState.value = UiLoadState.Loading
+        viewModelScope.launch {
+            repository.checkBackendHealth().fold(
+                onSuccess = { _backendHealthState.value = UiLoadState.Success(it) },
+                onFailure = { _backendHealthState.value = UiLoadState.Error(it.message ?: "Backend tidak terhubung.") }
+            )
+        }
     }
 
     fun updateSearchQuery(query: String) {
@@ -149,6 +251,7 @@ class CallTagMainViewModel(
             return
         }
         _searchQuery.value = cleaned
+        _activeOverlayPreview.value = null
         _lookupState.value = UiLoadState.Loading
 
         viewModelScope.launch {
@@ -171,35 +274,19 @@ class CallTagMainViewModel(
             "DANGER_SCAM" -> OfflineSeedData.getInitialTopScammers().first { it.reputationLevel == "DANGER_SCAM" }
             "SPAM" -> OfflineSeedData.getInitialTopScammers().first { it.reputationLevel == "SPAM" }
             else -> OfflineSeedData.getInitialTopScammers().first { it.reputationLevel == "SUSPICIOUS" }
-        }
-        _activeOverlayPreview.value = FullPhoneLookupResult(
-            phoneTag = sampleTag,
+        }.copy(source = "FIXTURE")
+        _activeOverlayPreview.value = CallTagRepository.resolveLookupResult(
+            e164 = sampleTag.phoneE164,
+            availability = LookupAvailability.AVAILABLE,
+            entity = sampleTag,
             categoryBreakdown = OfflineSeedData.getOfflineBreakdownForPhone(sampleTag),
             recentReports = OfflineSeedData.getOfflineCommentsForPhone(sampleTag),
-            source = "LOCAL_CACHE",
             lookupLatencyMs = 4.2
         )
     }
 
     fun dismissOverlayPreview() {
         _activeOverlayPreview.value = null
-    }
-
-    fun recordSimulatedBlock(phoneTag: CachedPhoneTag) {
-        viewModelScope.launch {
-            repository.recordScreeningLog(
-                CallScreeningLog(
-                    phoneE164 = phoneTag.phoneE164,
-                    tagLabel = phoneTag.topCommunityLabel,
-                    categoryCode = phoneTag.primaryCategory,
-                    reputationLevel = phoneTag.reputationLevel,
-                    spamScore = phoneTag.spamScore,
-                    wasBlocked = true,
-                    detectionSource = "LOCAL_CACHE"
-                )
-            )
-            _activeOverlayPreview.value = null
-        }
     }
 
     fun setEmergencyFilter(
@@ -219,6 +306,10 @@ class CallTagMainViewModel(
         comment: String,
         callType: String
     ) {
+        if (!isLoggedIn.value) {
+            _reportSubmissionState.value = UiLoadState.Error("Masuk akun untuk mengirim #Tag laporan.")
+            return
+        }
         if (phone.isBlank()) {
             _reportSubmissionState.value = UiLoadState.Error("Nomor telepon wajib diisi.")
             return
@@ -228,6 +319,7 @@ class CallTagMainViewModel(
         }
         _reportSubmissionState.value = UiLoadState.Loading
 
+        val session = uiSessionKey()
         viewModelScope.launch {
             val result = repository.submitSpamReport(
                 phone = phone,
@@ -236,6 +328,7 @@ class CallTagMainViewModel(
                 comment = comment.trim(),
                 callType = callType
             )
+            if (session != uiSessionKey()) return@launch
             result.fold(
                 onSuccess = { resp ->
                     _lastReportedPhoneForCopy.value = resp.phoneTag.phoneE164
@@ -270,6 +363,7 @@ class CallTagMainViewModel(
         }
         _disputeSubmissionState.value = UiLoadState.Loading
 
+        val session = uiSessionKey()
         viewModelScope.launch {
             val result = repository.submitDispute(
                 phone = phone,
@@ -277,6 +371,7 @@ class CallTagMainViewModel(
                 reason = reason,
                 contactRef = contactRef
             )
+            if (session != uiSessionKey()) return@launch
             result.fold(
                 onSuccess = { resp ->
                     _disputeSubmissionState.value = UiLoadState.Success(resp)
@@ -292,6 +387,80 @@ class CallTagMainViewModel(
 
     fun resetDisputeState() {
         _disputeSubmissionState.value = UiLoadState.Idle
+    }
+
+    fun retryPendingReport(localId: Long) {
+        viewModelScope.launch {
+            repository.retryPendingReport(localId)
+            refreshCacheStats()
+        }
+    }
+
+    fun deletePendingReport(localId: Long) {
+        viewModelScope.launch {
+            repository.deletePendingReport(localId)
+        }
+    }
+
+    fun checkDisputeStatus(disputeId: String, trackingToken: String = "") {
+        if (disputeId.isBlank()) {
+            _disputeLookupState.value = UiLoadState.Error("Masukkan ID sanggahan terlebih dahulu.")
+            return
+        }
+        _disputeLookupState.value = UiLoadState.Loading
+        val session = uiSessionKey()
+        viewModelScope.launch {
+            val result = repository.checkDisputeStatus(disputeId, trackingToken)
+            if (session != uiSessionKey()) return@launch
+            result.fold(
+                onSuccess = { dto -> _disputeLookupState.value = UiLoadState.Success(dto) },
+                onFailure = { err ->
+                    _disputeLookupState.value = UiLoadState.Error(
+                        err.message ?: "Gagal memeriksa status sanggahan"
+                    )
+                }
+            )
+        }
+    }
+
+    fun refreshAccountProfile(showConfirmation: Boolean = false) {
+        if (!isLoggedIn.value) {
+            _accountProfileState.value = UiLoadState.Idle
+            return
+        }
+        _accountProfileState.value = UiLoadState.Loading
+        _accountActionMessage.value = null
+        viewModelScope.launch {
+            repository.fetchAccountProfile().fold(
+                onSuccess = { me ->
+                    if (isLoggedIn.value) {
+                        _accountProfileState.value = UiLoadState.Success(me)
+                        if (showConfirmation) _accountActionMessage.value = "Profil dan kuota dimuat ulang dari server."
+                    }
+                },
+                onFailure = { err ->
+                    if (!isLoggedIn.value) return@fold
+                    _accountProfileState.value = UiLoadState.Error(
+                        err.message ?: "Tidak dapat memuat profil akun saat ini"
+                    )
+                }
+            )
+        }
+    }
+
+    fun requestAccountDeletion() {
+        _accountActionMessage.value = "Mengirim permintaan penghapusan data akun..."
+        viewModelScope.launch {
+            repository.requestAccountDeletion().fold(
+                onSuccess = { msg ->
+                    _accountActionMessage.value = msg
+                    _accountProfileState.value = UiLoadState.Idle
+                },
+                onFailure = { err ->
+                    _accountActionMessage.value = err.message ?: "Permintaan penghapusan gagal"
+                }
+            )
+        }
     }
 
     fun setAutoBlockScammer(enabled: Boolean) {
@@ -335,6 +504,10 @@ class CallTagMainViewModel(
         viewModelScope.launch {
             _cacheStats.value = repository.getLocalCacheStats()
         }
+    }
+
+    fun refreshEmergencyDirectory() {
+        viewModelScope.launch { repository.syncEmergencyDirectory() }
     }
 
     private fun loadOfficialChannels() {

@@ -32,7 +32,7 @@ Perubahan penting: `CLEAN` pada Room tidak lagi dibuat dari cache miss (A07). Te
 5. Server: `LookupService` membaca `phone_tags`, `verified_numbers`, dispute aktif.
 6. Pengambilan tag dan ringkasan laporan teredaksi (`/reports`, dimuat saat rincian dibuka).
 7. Penentuan `availability` + tingkat kepercayaan (`confidence`: `RENDAH` N<2, `SEDANG` N 2–4, `TINGGI` N≥5 dan tinjauan moderator).
-8. Tampilkan: nomor, status, kategori, skor (sebagai indikator, bukan vonis), tag, jumlah laporan, **jumlah pelapor unik**, waktu pembaruan, sumber (`SERVER`/`CACHE`/`FIXTURE`), status verifikasi, aksi (laporkan, ajukan sanggahan, buka kanal resmi, salin).
+8. Tampilkan: nomor, konteks jaringan/asal nomor (`carrier` dari detektor HLR seluler Indonesia, kode kota PSTN Komdigi, atau peringatan kode negara asing ITU pada `T-208`/`T-313` — tetap tampil meski `UNKNOWN`/`OFFLINE`), status, kategori, skor (sebagai indikator, bukan vonis), awan `#Tag (count)` langsung terlihat, jumlah laporan, **jumlah pelapor unik**, waktu pembaruan, sumber (`SERVER`/`CACHE`/`FIXTURE`/`EXTERNAL_OPEN_LIST`), status verifikasi beserta `source_url` & `verified_at`, serta aksi cepat (`+ Tambah #Tag`, `"Lihat di WhatsApp"` via deep-link resmi `wa.me` untuk nomor non-pendek tanpa scraping di `T-314`, ajukan sanggahan, buka kanal resmi, salin).
 
 ```mermaid
 flowchart TD
@@ -78,9 +78,10 @@ sequenceDiagram
 | Lapisan | Isi | Catatan |
 |---|---|---|
 | Laporan komunitas | `spam_reports` terverifikasi alur moderasi | Inti |
-| Kurasi staf | `verified_numbers`, direktori darurat, kanal resmi | Bukti dan tanggal wajib |
-| Dataset publik resmi (mis. daftar yang dirilis lembaga) | Hanya bila lisensi jelas, diimpor staf dengan provenance | Opsional, P2 |
-| Penyedia eksternal | Tidak pada MVP | Lihat [09](09-ANALISIS-GETCONTACT-CLI.md) |
+| Kurasi staf & seed resmi | `verified_numbers` (`T-207`: bank/lembaga/ekspedisi resmi Indonesia), direktori darurat, kanal resmi | Bukti `source_url` dan `verified_at` wajib |
+| Dataset publik berlisensi jelas | Hanya lisensi terbuka yang jelas (mis. MIT `SysAdminDoc/CallShield`) melalui importer `T-209`, wajib berlabel `EXTERNAL_OPEN_LIST` | Opsional; terpisah dari laporan komunitas |
+| Prefix telekomunikasi offline | HLR operator Indonesia, kode area PSTN Komdigi, kode negara ITU (`T-208`/`T-313`) | 100% lokal tanpa API pihak ketiga |
+| Penyedia eksternal privat (Getcontact/dll.) | Dilarang | Lihat [09](09-ANALISIS-GETCONTACT-CLI.md) |
 
 Seed dan fixture berlabel `FIXTURE`, tidak boleh tampil di build release sebagai laporan warga.
 

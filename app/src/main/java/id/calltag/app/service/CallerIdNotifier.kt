@@ -22,6 +22,7 @@ import android.widget.TextView
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import id.calltag.app.util.PhoneNormalizer
 import id.calltag.app.MainActivity
 import id.calltag.app.R
 import id.calltag.app.data.local.entity.CachedPhoneTag
@@ -55,10 +56,13 @@ object CallerIdNotifier {
     fun showCallerAlert(
         context: Context,
         phoneTag: CachedPhoneTag,
-        wasAutoBlocked: Boolean
+        wasAutoBlocked: Boolean,
+        showNotification: Boolean
     ) {
-        ensureNotificationChannel(context)
-        showHeadsUpNotification(context, phoneTag, wasAutoBlocked)
+        if (showNotification) {
+            ensureNotificationChannel(context)
+            showHeadsUpNotification(context, phoneTag, wasAutoBlocked)
+        }
         if (Settings.canDrawOverlays(context)) {
             showOverlayBanner(context, phoneTag, wasAutoBlocked)
         }
@@ -98,6 +102,7 @@ object CallerIdNotifier {
         val title = "$statusPrefix: ${phoneTag.topCommunityLabel}"
         val body = buildString {
             append("Nomor: ${phoneTag.phoneE164}\n")
+            append("${phoneTag.carrier.ifBlank { PhoneNormalizer.detectCarrierContext(phoneTag.phoneE164) }}\n")
             append("Kategori: ${phoneTag.primaryCategoryLabel}\n")
             append("Skor Bahaya: ${phoneTag.spamScore}/100 (${phoneTag.uniqueReporters} pelapor)")
         }
@@ -174,7 +179,7 @@ object CallerIdNotifier {
                 }
 
                 val detailView = TextView(context).apply {
-                    text = "${phoneTag.phoneE164} • ${phoneTag.primaryCategoryLabel} (Skor: ${phoneTag.spamScore}/100)"
+                    text = "${phoneTag.phoneE164}\n${phoneTag.carrier.ifBlank { PhoneNormalizer.detectCarrierContext(phoneTag.phoneE164) }}\n${phoneTag.primaryCategoryLabel} (Skor: ${phoneTag.spamScore}/100)"
                     setTextColor(Color.WHITE)
                     textSize = 13f
                 }

@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.core.content.ContextCompat
+import androidx.core.app.NotificationManagerCompat
 
 /**
  * Helper terpusat untuk mengelola izin RoleManager.ROLE_CALL_SCREENING (Android 10+)
@@ -77,6 +78,24 @@ object RolePermissionManager {
             Uri.parse("package:${context.packageName}")
         )
     }
+
+    fun areNotificationsEnabled(context: Context): Boolean {
+        val runtimeGranted = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        return runtimeGranted && NotificationManagerCompat.from(context).areNotificationsEnabled()
+    }
+
+    fun createNotificationSettingsIntent(context: Context): Intent =
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+            .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+
+    fun createDefaultAppsSettingsIntent(): Intent =
+        Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
+
+    fun createAppSettingsIntent(context: Context): Intent = Intent(
+        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+        Uri.fromParts("package", context.packageName, null)
+    )
 
     fun openAppSettings(activity: Activity) {
         val intent = Intent(

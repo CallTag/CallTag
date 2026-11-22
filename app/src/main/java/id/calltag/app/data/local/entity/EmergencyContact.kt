@@ -54,5 +54,17 @@ data class EmergencyContact(
     val address: String = "",
 
     @ColumnInfo(name = "is_24_hours")
-    val is24Hours: Boolean = true
+    val is24Hours: Boolean = true,
+
+    @ColumnInfo(name = "source_url")
+    val sourceUrl: String = "",
+
+    @ColumnInfo(name = "verified_at")
+    val verifiedAt: String = "2026-11-01",
+
+    @ColumnInfo(name = "server_version")
+    val serverVersion: Long = 1L,
+
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )

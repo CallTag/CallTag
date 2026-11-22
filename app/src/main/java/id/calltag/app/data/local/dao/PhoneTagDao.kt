@@ -27,4 +27,10 @@ interface PhoneTagDao {
 
     @Query("SELECT * FROM cached_phone_tags WHERE is_danger = 1 ORDER BY spam_score DESC")
     fun observeDangerPhoneTags(): Flow<List<CachedPhoneTag>>
+
+    @Query("DELETE FROM cached_phone_tags WHERE phone_e164 = :phoneE164")
+    suspend fun deleteByPhone(phoneE164: String)
+
+    @Query("DELETE FROM cached_phone_tags WHERE source != 'FIXTURE'")
+    suspend fun deleteAllServerCache()
 }

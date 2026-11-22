@@ -33,7 +33,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import id.calltag.app.data.local.entity.CachedPhoneTag
+import id.calltag.app.data.repository.LookupDisplayStatus
 import id.calltag.app.ui.theme.CallTagDesign
+import id.calltag.app.util.PhoneNormalizer
 
 /**
  * Kartu Popup Caller ID saat telepon berdering bergaya Truecaller / Getcontact:
@@ -48,15 +50,23 @@ fun CallerIdOverlayCard(
     autoBlockEnabled: Boolean,
     onDismiss: () -> Unit,
     onRejectSimulatedCall: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    displayStatus: LookupDisplayStatus? = null,
+    verifiedSourceUrl: String? = null,
+    verifiedAt: String? = null
 ) {
-    val level = phoneTag.reputationLevel.uppercase()
+    val level = if (displayStatus == LookupDisplayStatus.VERIFIED) "VERIFIED" else phoneTag.reputationLevel.uppercase()
 
     val headerBg: Color
     val cardBg: Color
     val badgeText: String
 
     when (level) {
+        "VERIFIED" -> {
+            headerBg = Color(0xFF115E59)
+            cardBg = Color(0xFF0F766E)
+            badgeText = "TERVERIFIKASI RESMI"
+        }
         "DANGER_SCAM" -> {
             headerBg = Color(0xFF7F1D16)
             cardBg = Color(0xFFC4271F)
@@ -73,9 +83,9 @@ fun CallerIdOverlayCard(
             badgeText = "PERLU WASPADA"
         }
         else -> {
-            headerBg = Color(0xFF0B5A54)
-            cardBg = Color(0xFF0F766E)
-            badgeText = "NOMOR AMAN"
+            headerBg = Color(0xFF334155)
+            cardBg = Color(0xFF475569)
+            badgeText = "BELUM ADA DATA"
         }
     }
 
@@ -118,7 +128,7 @@ fun CallerIdOverlayCard(
                 }
 
                 Text(
-                    text = "Panggilan Masuk",
+                    text = "Panggilan Masuk • ${phoneTag.source}",
                     color = Color.White.copy(alpha = 0.85f),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium
@@ -172,11 +182,16 @@ fun CallerIdOverlayCard(
                             )
                         )
                         Text(
-                            text = "${phoneTag.carrier} • ${phoneTag.uniqueReporters} laporan",
+                            text = "${phoneTag.carrier.ifBlank { PhoneNormalizer.detectCarrierContext(phoneTag.phoneE164) }} • ${phoneTag.uniqueReporters} laporan",
                             color = Color.White.copy(alpha = 0.82f),
                             fontSize = 12.sp
                         )
                     }
+                }
+
+                if (level == "VERIFIED") {
+                    verifiedAt?.let { Text("Diverifikasi: ${it.take(10)}", color = Color.White, fontSize = 12.sp) }
+                    verifiedSourceUrl?.let { Text("Sumber resmi: $it", color = Color.White, fontSize = 12.sp) }
                 }
 
                 // Baris #Tag & Skor Risiko

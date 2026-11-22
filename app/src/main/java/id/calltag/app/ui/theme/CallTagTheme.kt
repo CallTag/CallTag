@@ -194,7 +194,8 @@ object CallTagDesign {
             "DANGER_SCAM" -> c.dangerScam
             "SPAM" -> c.spamOrange
             "SUSPICIOUS" -> c.suspiciousAmber
-            else -> c.cleanEmerald
+            "VERIFIED", "CLEAN" -> c.cleanEmerald
+            else -> c.textSecondary
         }
     }
 
@@ -205,7 +206,8 @@ object CallTagDesign {
             "DANGER_SCAM" -> c.dangerScamContainer
             "SPAM" -> c.spamOrangeContainer
             "SUSPICIOUS" -> c.suspiciousAmberContainer
-            else -> c.cleanEmeraldContainer
+            "VERIFIED", "CLEAN" -> c.cleanEmeraldContainer
+            else -> c.surfaceSubtle
         }
     }
 
@@ -214,7 +216,9 @@ object CallTagDesign {
             "DANGER_SCAM" -> "Bahaya Penipuan"
             "SPAM" -> "Telepon Spam"
             "SUSPICIOUS" -> "Perlu Waspada"
-            else -> "Nomor Aman"
+            "VERIFIED" -> "Terverifikasi Resmi"
+            "CLEAN" -> "Pernah Dicek"
+            else -> "Belum Ada Data"
         }
     }
 
@@ -226,7 +230,9 @@ object CallTagDesign {
             "DANGER_SCAM" -> "Bahaya"
             "SPAM" -> "Spam"
             "SUSPICIOUS" -> "Waspada"
-            else -> "Aman"
+            "VERIFIED" -> "Resmi"
+            "CLEAN" -> "Dicek"
+            else -> "Belum Ada Data"
         }
     }
 

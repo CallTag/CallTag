@@ -6,7 +6,7 @@ Status: **PROPOSED**. Basis: [PRD 4.1 sampai 4.3](../../PRD.md), [ADR-010](../AR
 
 | ID | Fitur | Kelompok | Prioritas | Status as-is | Rujukan PRD |
 |---|---|---|---|---|---|
-| F-01 | Lookup nomor jujur (dua dimensi status) | Utama | P0 | PARTIAL | FR-002, FR-004 |
+| F-01 | Lookup nomor jujur (dua dimensi status + konteks HLR/PSTN/Negara) | Utama | P0 | PARTIAL | FR-002, FR-004 |
 | F-02 | Caller ID overlay/notifikasi | Utama | P1 | IMPLEMENTED_NOT_E2E_TESTED | FR-003 |
 | F-03 | Spam Guard + auto-block konservatif | Utama | P0 | PARTIAL (terlalu luas) | FR-003 |
 | F-04 | Laporan + tag komunitas | Utama | P0 | PARTIAL | FR-005, FR-006 |
@@ -26,7 +26,7 @@ Status: **PROPOSED**. Basis: [PRD 4.1 sampai 4.3](../../PRD.md), [ADR-010](../AR
 
 | Aspek | Rancangan |
 |---|---|
-| Pembuatan | Pengguna memilih **kategori baku** (6 kode) dan boleh memberi `custom_tag` bebas maksimal 40 karakter. Tag bebas **tidak** memengaruhi skor; hanya kategori. |
+| Pembuatan | Pengguna memilih **kategori baku** (6 kode risiko + 1 kategori netral opsional `INFO_TAG` dengan bobot `0,0` di Tahap 4B `T-210` untuk `#Tag` konteks peran/layanan non-penipu) dan boleh memberi `custom_tag` bebas maksimal 40 karakter. Tag bebas **tidak** memengaruhi skor; hanya kategori berisiko. |
 | Penyimpanan | Tag mentah di `spam_reports.custom_tag`; ringkasan teragregasi di `phone_tags.tags[]` (`tag`, `count`, `status`). |
 | Normalisasi/penggabungan | `lowercase`, buang tanda baca dan spasi ganda, petakan sinonim dari kamus kecil milik admin (mis. "kurir palsu", "paket palsu" → `kurir paket mencurigakan`). Penggabungan hanya pada tampilan agregat; mentah tetap. |
 | Moderasi | Tag baru tampil sebagai "dilaporkan" hanya jika ≥ 2 pelapor unik **atau** disetujui moderator. Tag mengandung PII (nomor, nama, NIK, rekening) ditolak otomatis dengan regex lalu masuk antrean. |
@@ -52,7 +52,7 @@ Status: **PROPOSED**. Basis: [PRD 4.1 sampai 4.3](../../PRD.md), [ADR-010](../AR
 
 ### 3.2 Algoritma yang diusulkan
 
-Parameter: `B = 8,0`; bobot kategori `W`: PINJOL_DC 1,5; APK_SNIFFING 2,0; IMPERSONATION 1,8; JUDOL 1,3; SOCIAL_ENG 1,8; TELEMARKETING 1,0. Decay `D(Δt) = 0,5^(Δt_hari / 90)`.
+Parameter: `B = 8,0`; bobot kategori `W`: PINJOL_DC 1,5; APK_SNIFFING 2,0; IMPERSONATION 1,8; JUDOL 1,3; SOCIAL_ENG 1,8; TELEMARKETING 1,0; serta kategori konteks non-penipu `INFO_TAG` = 0,0 (`T-210`). Decay `D(Δt) = 0,5^(Δt_hari / 90)`.
 
 Kontribusi **satu per pelapor unik per nomor** (laporan terbaru dengan bobot tertinggi dalam jendela aktif):
 

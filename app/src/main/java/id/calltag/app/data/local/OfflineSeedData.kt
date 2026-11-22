@@ -244,7 +244,21 @@ object OfflineSeedData {
             capabilitiesSummary = "IGD & Pusat Trauma Terpadu • Tim Gerak Cepat (TGC) Ambulans Medis",
             address = "Jl. Mayjen Prof. Dr. Moestopo No.6-8, Gubeng, Kota Surabaya"
         )
-    )
+    ).map { item ->
+        val defaultSourceUrl = when (item.agencyType) {
+            "POLISI" -> "https://www.polri.go.id"
+            "AMBULANS_RS" -> "https://yankes.kemkes.go.id"
+            "SAR" -> "https://www.basarnas.go.id"
+            "PLN" -> "https://web.pln.co.id"
+            "JASA_MARGA" -> "https://www.jasamarga.com"
+            else -> "https://layanan112.komdigi.go.id"
+        }
+        item.copy(
+            sourceUrl = item.sourceUrl.ifBlank { defaultSourceUrl },
+            verifiedAt = item.verifiedAt.ifBlank { "2026-11-01" },
+            serverVersion = 1L
+        )
+    }
 
     fun getInitialTopScammers(): List<CachedPhoneTag> = listOf(
         CachedPhoneTag(
@@ -325,47 +339,47 @@ object OfflineSeedData {
             uniqueReporters = 3,
             syncVersion = 6L
         )
-    )
+    ).map { it.copy(availability = "AVAILABLE", source = "FIXTURE") }
 
     fun getInitialScreeningLogs(): List<CallScreeningLog> = listOf(
         CallScreeningLog(
-            phoneE164 = "+6281299887766",
+            phoneE164 = "+62812****7766",
             tagLabel = "Penipu Kurir Paket J&T File Resi.apk",
             categoryCode = "APK_SNIFFING",
             reputationLevel = "DANGER_SCAM",
             spamScore = 92.5,
             wasBlocked = true,
-            detectionSource = "LOCAL_CACHE",
+            detectionSource = "FIXTURE",
             screenedAtEpochMs = System.currentTimeMillis() - 18 * 60 * 1000L
         ),
         CallScreeningLog(
-            phoneE164 = "+6285711223344",
+            phoneE164 = "+62857****3344",
             tagLabel = "DC Pinjol Ilegal Sebar Data & Maki-maki",
             categoryCode = "PINJOL_DC",
             reputationLevel = "DANGER_SCAM",
             spamScore = 88.0,
             wasBlocked = true,
-            detectionSource = "LOCAL_CACHE",
+            detectionSource = "FIXTURE",
             screenedAtEpochMs = System.currentTimeMillis() - 95 * 60 * 1000L
         ),
         CallScreeningLog(
-            phoneE164 = "+6289655443322",
+            phoneE164 = "+62896****3322",
             tagLabel = "Spam Robocall & Blast WA Situs Slot Judol",
             categoryCode = "JUDOL",
             reputationLevel = "SPAM",
             spamScore = 56.4,
             wasBlocked = false,
-            detectionSource = "LIVE_API",
+            detectionSource = "FIXTURE",
             screenedAtEpochMs = System.currentTimeMillis() - 240 * 60 * 1000L
         ),
         CallScreeningLog(
-            phoneE164 = "+6282144556677",
+            phoneE164 = "+62821****6677",
             tagLabel = "Sales Asuransi & KTA Jam Istirahat",
             categoryCode = "TELEMARKETING",
             reputationLevel = "SUSPICIOUS",
             spamScore = 26.5,
             wasBlocked = false,
-            detectionSource = "LOCAL_CACHE",
+            detectionSource = "FIXTURE",
             screenedAtEpochMs = System.currentTimeMillis() - 420 * 60 * 1000L
         )
     )

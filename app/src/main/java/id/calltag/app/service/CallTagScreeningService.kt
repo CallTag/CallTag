@@ -4,6 +4,7 @@ import android.os.Build
 import android.telecom.Call
 import android.telecom.CallScreeningService
 import android.util.Log
+import id.calltag.app.BuildConfig
 import id.calltag.app.CallTagApplication
 import id.calltag.app.data.local.entity.CallScreeningLog
 import id.calltag.app.util.PhoneNormalizer
@@ -11,7 +12,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Layanan sistem Android (turunan CallScreeningService) untuk mendeteksi Caller ID
@@ -40,6 +44,8 @@ class CallTagScreeningService : CallScreeningService() {
             }
         }
 
+        if (BuildConfig.DEBUG) Log.d(TAG, "Callback penyaringan panggilan masuk diterima")
+
         val rawNumber = callDetails.handle?.schemeSpecificPart
         val normalizedE164 = PhoneNormalizer.normalizeToE164(rawNumber)
 
@@ -54,64 +60,97 @@ class CallTagScreeningService : CallScreeningService() {
             return
         }
 
+        val historyOwner = app.preferences.sessionIdSync()
         serviceScope.launch {
-            val repository = app.repository
-            val preferences = app.preferences
+            val responded = AtomicBoolean(false)
+            try {
+                withTimeoutOrNull(4_200L) {
+                    if (PhoneNormalizer.isEmergencyOrShortCode(rawNumber)) {
+                        if (responded.compareAndSet(false, true)) {
+                            allowIncomingCall(callDetails)
+                        }
+                        return@withTimeoutOrNull
+                    }
 
-            val lookupResult = runCatching {
-                repository.screenIncomingPhone(normalizedE164)
-            }.getOrNull()
+                    val repository = app.repository
+                    val preferences = app.preferences
 
-            if (lookupResult == null || lookupResult.phoneTag.reputationLevel == "CLEAN") {
-                allowIncomingCall(callDetails)
-                return@launch
+                    val lookupResult = runCatching {
+                        repository.screenIncomingPhone(normalizedE164)
+                    }.getOrNull()
+
+                    if (lookupResult == null ||
+                        lookupResult.phoneTag.reputationLevel.equals("CLEAN", ignoreCase = true) ||
+                        lookupResult.phoneTag.reputationLevel.equals("UNKNOWN", ignoreCase = true)
+                    ) {
+                        if (responded.compareAndSet(false, true)) {
+                            allowIncomingCall(callDetails)
+                        }
+                        return@withTimeoutOrNull
+                    }
+
+                    val phoneTag = lookupResult.phoneTag
+                    val autoBlockEnabled = preferences.isAutoBlockScammerEnabled()
+                    val shouldBlock = PhoneNormalizer.shouldAutoBlock(
+                        reputationLevel = phoneTag.reputationLevel,
+                        spamScore = phoneTag.spamScore,
+                        primaryCategory = phoneTag.primaryCategory,
+                        autoBlockEnabled = autoBlockEnabled,
+                        source = phoneTag.source,
+                        fetchedAtEpochMs = phoneTag.fetchedAtEpochMs,
+                        isWhitelisted = !phoneTag.verifiedLabel.isNullOrBlank() ||
+                            preferences.isPersonallyWhitelisted(normalizedE164),
+                        phoneE164 = phoneTag.phoneE164
+                    )
+
+                    val maskedPhone = PhoneNormalizer.maskPhone(phoneTag.phoneE164)
+                    Log.i(
+                        TAG,
+                        "Screened call from $maskedPhone: level=${phoneTag.reputationLevel}, " +
+                            "source=${phoneTag.source}, blocked=$shouldBlock"
+                    )
+
+                    if (responded.compareAndSet(false, true)) {
+                        if (shouldBlock) {
+                            val rejectResponse = CallResponse.Builder()
+                                .setDisallowCall(true)
+                                .setRejectCall(true)
+                                .setSkipCallLog(false)
+                                .setSkipNotification(false)
+                                .build()
+                            respondToCall(callDetails, rejectResponse)
+                        } else {
+                            allowIncomingCall(callDetails)
+                        }
+                    }
+
+                    // Catat ke riwayat lokal Room DB (nomor sudah disamarkan)
+                    repository.recordScreeningLog(
+                        CallScreeningLog(
+                            phoneE164 = maskedPhone,
+                            tagLabel = phoneTag.topCommunityLabel,
+                            categoryCode = phoneTag.primaryCategory,
+                            reputationLevel = phoneTag.reputationLevel,
+                            spamScore = phoneTag.spamScore,
+                            wasBlocked = shouldBlock,
+                            detectionSource = lookupResult.source
+                        ),
+                        owner = historyOwner
+                    )
+
+                    // Tampilkan Heads-Up Notification berprioritas tinggi & Overlay Caller ID bila bukan data fixture palsu
+                    CallerIdNotifier.showCallerAlert(
+                        context = applicationContext,
+                        phoneTag = phoneTag,
+                        wasAutoBlocked = shouldBlock,
+                        showNotification = preferences.showHeadsUpAlertFlow.first()
+                    )
+                }
+            } finally {
+                if (responded.compareAndSet(false, true)) {
+                    allowIncomingCall(callDetails)
+                }
             }
-
-            val phoneTag = lookupResult.phoneTag
-            val autoBlockEnabled = preferences.isAutoBlockScammerEnabled()
-            val shouldBlock = autoBlockEnabled && PhoneNormalizer.shouldAutoBlock(
-                reputationLevel = phoneTag.reputationLevel,
-                spamScore = phoneTag.spamScore,
-                primaryCategory = phoneTag.primaryCategory
-            )
-
-            Log.i(
-                TAG,
-                "Screened call from ${phoneTag.phoneE164}: level=${phoneTag.reputationLevel}, " +
-                    "score=${phoneTag.spamScore}, category=${phoneTag.primaryCategory}, blocked=$shouldBlock"
-            )
-
-            if (shouldBlock) {
-                val rejectResponse = CallResponse.Builder()
-                    .setDisallowCall(true)
-                    .setRejectCall(true)
-                    .setSkipCallLog(false)
-                    .setSkipNotification(false)
-                    .build()
-                respondToCall(callDetails, rejectResponse)
-            } else {
-                allowIncomingCall(callDetails)
-            }
-
-            // Catat ke riwayat lokal Room DB
-            repository.recordScreeningLog(
-                CallScreeningLog(
-                    phoneE164 = phoneTag.phoneE164,
-                    tagLabel = phoneTag.topCommunityLabel,
-                    categoryCode = phoneTag.primaryCategory,
-                    reputationLevel = phoneTag.reputationLevel,
-                    spamScore = phoneTag.spamScore,
-                    wasBlocked = shouldBlock,
-                    detectionSource = lookupResult.source
-                )
-            )
-
-            // Tampilkan Heads-Up Notification berprioritas tinggi & Overlay Caller ID
-            CallerIdNotifier.showCallerAlert(
-                context = applicationContext,
-                phoneTag = phoneTag,
-                wasAutoBlocked = shouldBlock
-            )
         }
     }
 

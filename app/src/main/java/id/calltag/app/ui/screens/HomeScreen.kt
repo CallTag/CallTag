@@ -1,5 +1,9 @@
 package id.calltag.app.ui.screens
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -25,7 +29,6 @@ import androidx.compose.foundation.layout.size
 
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,6 +42,9 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -53,6 +59,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,14 +74,20 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import id.calltag.app.data.local.entity.CallScreeningLog
+import id.calltag.app.data.repository.ConfidenceTier
 import id.calltag.app.data.repository.FullPhoneLookupResult
+import id.calltag.app.data.repository.LookupDisplayStatus
+import id.calltag.app.ui.components.AccountAccessGate
 import id.calltag.app.ui.components.CallerIdOverlayCard
 import id.calltag.app.ui.components.ScreenIntro
 import id.calltag.app.ui.theme.CallTagDesign
@@ -84,6 +97,7 @@ import id.calltag.app.ui.theme.CallTagTouch
 import id.calltag.app.ui.theme.CallTagType
 import id.calltag.app.ui.viewmodel.CallTagMainViewModel
 import id.calltag.app.ui.viewmodel.UiLoadState
+import id.calltag.app.util.PhoneNormalizer
 import id.calltag.app.util.RolePermissionManager
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -100,7 +114,7 @@ private val QUICK_SAMPLE_CHIPS = listOf(
     SampleLookupChip("#CSBankPalsu", "081377665544"),
     SampleLookupChip("#SpamJudol", "089655443322"),
     SampleLookupChip("#Waspada", "082144556677"),
-    SampleLookupChip("#NomorAman", "081100001111")
+    SampleLookupChip("#BelumAdaData", "081100001111")
 )
 
 /**
@@ -119,23 +133,32 @@ private val QUICK_SAMPLE_CHIPS = listOf(
 fun HomeScreen(
     viewModel: CallTagMainViewModel,
     onNavigateToReportWithPhone: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigateToAccount: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val colors = CallTagDesign.colors
 
+    val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val lookupState by viewModel.lookupState.collectAsState()
     val overlayPreview by viewModel.activeOverlayPreview.collectAsState()
-    val screeningLogs by viewModel.recentScreeningLogs.collectAsState()
+    val screeningLogs by viewModel.recentScreeningLogs.collectAsState(initial = emptyList())
     val autoBlockEnabled by viewModel.autoBlockScammer.collectAsState()
 
     var isRoleHeld by remember {
         mutableStateOf(RolePermissionManager.isCallScreeningRoleHeld(context))
     }
-    var hasPermissions by remember {
-        mutableStateOf(RolePermissionManager.hasRuntimePermissions(context))
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, context) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isRoleHeld = RolePermissionManager.isCallScreeningRoleHeld(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     val roleLauncher = rememberLauncherForActivityResult(
@@ -144,10 +167,9 @@ fun HomeScreen(
         isRoleHeld = RolePermissionManager.isCallScreeningRoleHeld(context)
     }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
+    val legacyPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) {
-        hasPermissions = RolePermissionManager.hasRuntimePermissions(context)
         isRoleHeld = RolePermissionManager.isCallScreeningRoleHeld(context)
     }
 
@@ -183,18 +205,15 @@ fun HomeScreen(
         item {
             CallerIdStatusBar(
                 isRoleHeld = isRoleHeld,
-                hasPermissions = hasPermissions,
                 autoBlockEnabled = autoBlockEnabled,
                 onActivateCallerId = {
-                    if (!hasPermissions) {
-                        permissionLauncher.launch(RolePermissionManager.getRequiredRuntimePermissions())
-                    } else {
-                        val intent = RolePermissionManager.createCallScreeningRoleIntent(context)
-                        if (intent != null) {
-                            roleLauncher.launch(intent)
-                        } else {
-                            permissionLauncher.launch(RolePermissionManager.getRequiredRuntimePermissions())
-                        }
+                    val roleIntent = RolePermissionManager.createCallScreeningRoleIntent(context)
+                    when {
+                        roleIntent != null -> runCatching { roleLauncher.launch(roleIntent) }
+                            .onFailure { context.startActivity(RolePermissionManager.createDefaultAppsSettingsIntent()) }
+                        Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ->
+                            legacyPermissionLauncher.launch(RolePermissionManager.getRequiredRuntimePermissions())
+                        else -> context.startActivity(RolePermissionManager.createDefaultAppsSettingsIntent())
                     }
                 }
             )
@@ -207,9 +226,12 @@ fun HomeScreen(
                     phoneTag = preview.phoneTag,
                     lookupLatencyMs = preview.lookupLatencyMs,
                     source = preview.source,
+                    displayStatus = preview.displayStatus,
+                    verifiedSourceUrl = preview.verifiedSourceUrl,
+                    verifiedAt = preview.verifiedAt,
                     autoBlockEnabled = autoBlockEnabled,
                     onDismiss = { viewModel.dismissOverlayPreview() },
-                    onRejectSimulatedCall = { viewModel.recordSimulatedBlock(preview.phoneTag) }
+                    onRejectSimulatedCall = viewModel::dismissOverlayPreview
                 )
             }
         }
@@ -236,13 +258,19 @@ fun HomeScreen(
             )
         }
 
-        if (screeningLogs.isEmpty()) {
+        if (!isLoggedIn) {
+            item { AccountAccessGate(onOpenAccount = onNavigateToAccount) }
+        } else if (screeningLogs.isEmpty()) {
             item { EmptyHistoryCard() }
         } else {
             items(screeningLogs, key = { it.id }) { logItem ->
                 RecentCallRowCard(
                     log = logItem,
-                    onClick = { viewModel.performPhoneLookup(logItem.phoneE164) }
+                    onClick = {
+                        if (!logItem.phoneE164.contains('*')) {
+                            viewModel.performPhoneLookup(logItem.phoneE164)
+                        }
+                    }
                 )
             }
         }
@@ -283,7 +311,7 @@ private fun SearchPanel(
             ) {
                 ScreenIntro(
                     eyebrow = "CEK NOMOR",
-                    title = "Siapa yang\nmenelepon?",
+                    title = "Siapa yang menelepon?",
                     description = "Kenali reputasi nomor asing dari laporan komunitas."
                 )
                 Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.sm)) {
@@ -355,42 +383,20 @@ private fun SearchPanel(
                 }
             }
         }
-        Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xxs)) {
-            Text(
-                text = "Coba nomor contoh",
-                color = colors.textSecondary,
-                fontSize = CallTagType.label,
-                fontWeight = FontWeight.SemiBold
-            )
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
-                items(QUICK_SAMPLE_CHIPS) { chip ->
-                    SampleChip(label = chip.tagLabel, onClick = { onSampleChipClick(chip.phone) })
+        var examplesOpen by remember { mutableStateOf(false) }
+        Box {
+            TextButton(onClick = { examplesOpen = true }) { Text("Coba contoh") }
+            DropdownMenu(expanded = examplesOpen, onDismissRequest = { examplesOpen = false }) {
+                QUICK_SAMPLE_CHIPS.forEach { sample ->
+                    DropdownMenuItem(
+                        text = { Text(sample.tagLabel) },
+                        onClick = {
+                            examplesOpen = false
+                            onSampleChipClick(sample.phone)
+                        }
+                    )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun SampleChip(label: String, onClick: () -> Unit) {
-    val colors = CallTagDesign.colors
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(CallTagRadius.md),
-        color = colors.surfaceCard,
-        border = BorderStroke(1.dp, colors.borderSubtle)
-    ) {
-        Box(
-            modifier = Modifier.heightIn(min = CallTagTouch.action)
-                .padding(horizontal = CallTagSpacing.sm, vertical = CallTagSpacing.xs),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = label,
-                color = colors.textPrimary,
-                fontSize = CallTagType.label,
-                fontWeight = FontWeight.SemiBold
-            )
         }
     }
 }
@@ -406,12 +412,11 @@ private fun SampleChip(label: String, onClick: () -> Unit) {
 @Composable
 private fun CallerIdStatusBar(
     isRoleHeld: Boolean,
-    hasPermissions: Boolean,
     autoBlockEnabled: Boolean,
     onActivateCallerId: () -> Unit
 ) {
     val colors = CallTagDesign.colors
-    val isActive = isRoleHeld && hasPermissions
+    val isActive = isRoleHeld
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -496,22 +501,52 @@ private fun CallerProfileResultCard(
     onShowOverlayPreview: () -> Unit,
     onReportThisPhone: () -> Unit
 ) {
+    val context = LocalContext.current
     val colors = CallTagDesign.colors
     val pt = result.phoneTag
-    val badgeColor = CallTagDesign.reputationBadgeColor(pt.reputationLevel)
-    val containerColor = CallTagDesign.reputationContainerColor(pt.reputationLevel)
-    val statusText = CallTagDesign.reputationLabel(pt.reputationLevel)
+    val visualLevelKey = when (result.displayStatus) {
+        LookupDisplayStatus.DANGER_SCAM -> "DANGER_SCAM"
+        LookupDisplayStatus.SPAM -> "SPAM"
+        LookupDisplayStatus.SUSPICIOUS -> "SUSPICIOUS"
+        LookupDisplayStatus.VERIFIED -> "VERIFIED"
+        LookupDisplayStatus.CLEAN_OBSERVED -> "CLEAN"
+        LookupDisplayStatus.UNKNOWN, LookupDisplayStatus.OFFLINE -> "UNKNOWN"
+    }
+    val badgeColor = CallTagDesign.reputationBadgeColor(visualLevelKey)
+    val containerColor = CallTagDesign.reputationContainerColor(visualLevelKey)
+    val statusText = when (result.displayStatus) {
+        LookupDisplayStatus.DANGER_SCAM -> "Bahaya Penipuan"
+        LookupDisplayStatus.SPAM -> "Telepon Spam"
+        LookupDisplayStatus.SUSPICIOUS -> "Perlu Waspada"
+        LookupDisplayStatus.VERIFIED -> "Terverifikasi Resmi"
+        LookupDisplayStatus.CLEAN_OBSERVED -> "Pernah Dicek"
+        LookupDisplayStatus.UNKNOWN -> "Belum Ada Data"
+        LookupDisplayStatus.OFFLINE -> "Offline (Belum Dicek)"
+    }
+    val confidenceLabel = when (result.confidence) {
+        ConfidenceTier.HIGH -> "Keyakinan Tinggi"
+        ConfidenceTier.MEDIUM -> "Keyakinan Sedang"
+        ConfidenceTier.LOW -> "Keyakinan Rendah"
+        ConfidenceTier.NONE -> ""
+    }
     var detailsExpanded by rememberSaveable(pt.phoneE164) { mutableStateOf(false) }
 
-    val hashtags = remember(pt.tagsSummary, pt.topCommunityLabel, result.categoryBreakdown) {
-        CallTagDesign.extractHashtagList(
-            tagsSummary = pt.tagsSummary,
-            topLabel = pt.topCommunityLabel,
-            categoryBreakdown = result.categoryBreakdown
-        )
+    val hashtags = remember(result.tags, pt.tagsSummary) {
+        if (result.tags.isNotEmpty()) result.tags.map { "#${it.tag.removePrefix("#")} · ${it.count}" }
+        else pt.tagsSummary.split(", ").filter { it.isNotBlank() }.map { "#${it.removePrefix("#")}" }
     }
-    val isCleanNoReports = pt.reputationLevel.equals("CLEAN", ignoreCase = true) && pt.uniqueReporters == 0
-    val displayTitle = if (isCleanNoReports) "Belum ada laporan spam" else pt.topCommunityLabel
+    val whatsAppUrl = PhoneNormalizer.whatsAppUrl(pt.phoneE164)
+    fun openLink(url: String) {
+        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+            .onFailure { Toast.makeText(context, "Tidak ada aplikasi untuk membuka tautan ini.", Toast.LENGTH_SHORT).show() }
+    }
+    val isUnverifiedOrOffline = result.displayStatus == LookupDisplayStatus.UNKNOWN ||
+        result.displayStatus == LookupDisplayStatus.OFFLINE
+    val displayTitle = if (isUnverifiedOrOffline) {
+        result.statusHeadline
+    } else {
+        pt.topCommunityLabel.ifBlank { result.statusHeadline }
+    }
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -528,7 +563,7 @@ private fun CallerProfileResultCard(
             // Baris status ringkas di atas.
             Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
                 Text(
-                    text = "HASIL PEMERIKSAAN",
+                    text = "HASIL PEMERIKSAAN • ${result.source}",
                     color = colors.textSecondary,
                     fontSize = CallTagType.caption,
                     fontWeight = FontWeight.Bold,
@@ -549,10 +584,36 @@ private fun CallerProfileResultCard(
                     fontSize = CallTagType.title,
                     fontWeight = FontWeight.Bold
                 )
-                if (pt.carrier.isNotBlank()) {
-                    Text(text = pt.carrier, color = colors.textSecondary, fontSize = CallTagType.bodySmall)
+                Text(
+                    text = pt.carrier.ifBlank { PhoneNormalizer.detectCarrierContext(pt.phoneE164) },
+                    color = colors.textSecondary, fontSize = CallTagType.bodySmall
+                )
+                if (result.displayStatus == LookupDisplayStatus.VERIFIED) {
+                    result.verifiedAt?.let { Text("Diverifikasi: ${it.take(10)}", color = colors.textSecondary, fontSize = CallTagType.label) }
+                    result.verifiedExpiresAt?.let { Text("Berlaku hingga: $it", color = colors.textSecondary, fontSize = CallTagType.label) }
+                    result.verifiedSourceUrl?.takeIf { Uri.parse(it).scheme == "https" && !Uri.parse(it).host.isNullOrBlank() }?.let { url ->
+                        OutlinedButton(onClick = { openLink(url) }, modifier = Modifier.heightIn(min = CallTagTouch.action)) {
+                            Text("Sumber resmi: ${Uri.parse(url).host}", color = colors.brandPrimary)
+                        }
+                    }
                 }
-                TagChip(text = if (isCleanNoReports) "Belum ada laporan" else statusText, fg = badgeColor, bg = containerColor)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TagChip(text = statusText, fg = badgeColor, bg = containerColor)
+                    if (confidenceLabel.isNotBlank()) {
+                        TagChip(text = confidenceLabel, fg = colors.textSecondary, bg = colors.surfaceSubtle)
+                    }
+                }
+                if (result.isStale) {
+                    Text(
+                        text = "Catatan: Data berasal dari cache lokal yang mungkin sudah usang (> 90 hari).",
+                        color = colors.suspiciousAmber,
+                        fontSize = CallTagType.label,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
 
             // Skor risiko — angka wajib monospace.
@@ -581,14 +642,35 @@ private fun CallerProfileResultCard(
                     color = badgeColor,
                     trackColor = colors.surfaceSubtle
                 )
-                if (isCleanNoReports) {
+                if (result.statusSubtext.isNotBlank()) {
                     Text(
-                        text = "Belum ada laporan bukan jaminan nomor aman.",
+                        text = result.statusSubtext,
                         color = colors.textSecondary,
                         fontSize = CallTagType.bodySmall
                     )
                 }
             }
+
+                // Awan #Tag komunitas.
+                Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
+                    Text(text = "#Tag komunitas", color = colors.textPrimary, fontSize = CallTagType.subtitle, fontWeight = FontWeight.Bold)
+                    if (hashtags.isEmpty()) {
+                        Text(text = "Belum ada #Tag untuk nomor ini.", color = colors.textSecondary, fontSize = CallTagType.bodySmall)
+                    } else {
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs),
+                            verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)
+                        ) {
+                            hashtags.forEach { tag -> TagChip(text = tag, fg = badgeColor, bg = containerColor) }
+                        }
+                    }
+                }
+            OutlinedButton(
+                onClick = onReportThisPhone,
+                modifier = Modifier.fillMaxWidth().heightIn(min = CallTagTouch.action),
+                shape = RoundedCornerShape(CallTagRadius.md)
+            ) { Text("+ Tambah #Tag", color = colors.brandPrimary, fontWeight = FontWeight.Bold) }
 
             // Aksi: satu primer, satu sekunder.
             Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
@@ -598,7 +680,14 @@ private fun CallerProfileResultCard(
                     shape = RoundedCornerShape(CallTagRadius.md),
                     colors = ButtonDefaults.buttonColors(containerColor = colors.brandSolid, contentColor = colors.onBrand)
                 ) {
-                    Text(text = "Beri #Tag / lapor nomor", fontSize = CallTagType.body, fontWeight = FontWeight.Bold)
+                    Text(text = "Laporkan gangguan / penipuan", fontSize = CallTagType.body, fontWeight = FontWeight.Bold)
+                }
+                if (whatsAppUrl != null) {
+                    OutlinedButton(
+                        onClick = { openLink(whatsAppUrl) },
+                        modifier = Modifier.fillMaxWidth().heightIn(min = CallTagTouch.action),
+                        shape = RoundedCornerShape(CallTagRadius.md)
+                    ) { Text("Lihat di WhatsApp", color = colors.brandPrimary, fontWeight = FontWeight.SemiBold) }
                 }
                 OutlinedButton(
                     onClick = onShowOverlayPreview,
@@ -641,21 +730,6 @@ private fun CallerProfileResultCard(
                 }
             }
             if (detailsExpanded) {
-                // Awan #Tag komunitas.
-                Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)) {
-                    Text(text = "#Tag komunitas", color = colors.textPrimary, fontSize = CallTagType.subtitle, fontWeight = FontWeight.Bold)
-                    if (hashtags.isEmpty()) {
-                        Text(text = "Belum ada #Tag untuk nomor ini.", color = colors.textSecondary, fontSize = CallTagType.bodySmall)
-                    } else {
-                        FlowRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(CallTagSpacing.xs),
-                            verticalArrangement = Arrangement.spacedBy(CallTagSpacing.xs)
-                        ) {
-                            hashtags.forEach { tag -> TagChip(text = tag, fg = badgeColor, bg = containerColor) }
-                        }
-                    }
-                }
                 // Catatan pengguna lain.
                 Column(verticalArrangement = Arrangement.spacedBy(CallTagSpacing.sm)) {
                     Text(text = "Catatan pengguna lain", color = colors.textPrimary, fontSize = CallTagType.subtitle, fontWeight = FontWeight.Bold)

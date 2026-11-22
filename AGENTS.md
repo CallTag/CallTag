@@ -4,7 +4,7 @@ Single-module Android app (`:app`), Jetpack Compose + Room + Retrofit. Package `
 
 ## Build / verify
 - Build: `./gradlew assembleDebug` (or `:app:compileDebugKotlin` for a fast compile check).
-- **No tests exist.** There are no `test`/`androidTest` source dirs. Do not invent `./gradlew test` expectations; verify changes by compiling.
+- Unit tests now exist in `app/src/test/` (Tahap 5/5B). Run `./gradlew testDebugUnitTest assembleDebug` for verification. There are no instrumented `androidTest` suites.
 - Offline works if the Gradle cache is warm: append `--offline`.
 - Requires JDK 17 (CI uses Temurin 17) and `local.properties` with `sdk.dir`. `compileSdk`/`targetSdk` = 34, `minSdk` = 26, `jvmTarget` = 17.
 - All dependency versions live in `gradle/libs.versions.toml`; add libs there and reference via `libs.*` aliases, never hardcode versions in `app/build.gradle.kts`.
@@ -17,10 +17,11 @@ Single-module Android app (`:app`), Jetpack Compose + Room + Retrofit. Package `
 ## Architecture (where things are wired)
 - Wiring: `CallTagApplication` lazily builds `CallTagDatabase`, `CallTagPreferences`, `CallTagRepository`. No DI framework — add dependencies through `CallTagApplication` and pass down.
 - `data/remote/NetworkModule.kt` exposes **two** Retrofit clients on `ApiService`: a standard client (8s timeouts) and a `fastScreeningApiService` with **800ms timeouts** used only by the call-screening service. Use the fast one for anything on the incoming-call path.
+- Tahap 5B: login is explicit and optional. Legacy tokens do not grant account mode; never bootstrap guests through 401 handling. Session/outbox ownership and personal whitelist are local. Guest may still submit/track disputes. Account settings live in `AccountSettingsScreen`; theme persists in DataStore.
 - `ApiService` endpoint contracts are documented against `PRD.md` §5.3 (11 endpoints). `PRD.md` is the spec source of truth; `DESIGN.md` is the visual/design source of truth (colors, 4-tier `reputation_level`, monospace phone digits, 56dp/64dp touch targets). Consult them before changing DTOs, categories, or UI styling.
-- Call flow: `service/CallTagScreeningService` (a `CallScreeningService`) → `PhoneNormalizer.normalizeToE164` → `repository.screenIncomingPhone` (Room cache first, then 800ms API) → auto-block decision in `PhoneNormalizer.shouldAutoBlock` (gated by the DataStore `auto_block_scammer` toggle, default ON) → `service/CallerIdNotifier` (heads-up notification + `TYPE_APPLICATION_OVERLAY` window). The overlay draws with `android.view` + `WindowManager`, not Compose.
-- Room DB is version 1 with `fallbackToDestructiveMigration()` and `exportSchema = false` — schema changes silently wipe local data; no migrations are written. Bump carefully and re-seed if needed.
-- UI: `MainScaffold` holds a 4-tab bottom nav (Cari / Darurat / Beri #Tag / Proteksi) driven by an integer index, no Navigation library. Screens live in `ui/screens/`; state via `CallTagMainViewModel` (`UiLoadState` sealed type: Idle/Loading/Success/Error).
+- Call flow: `service/CallTagScreeningService` (a `CallScreeningService`) → `PhoneNormalizer.normalizeToE164` → `repository.screenIncomingPhone` (Room cache first, then 800ms API) → auto-block decision in `PhoneNormalizer.shouldAutoBlock` (gated by the DataStore `auto_block_scammer` toggle, default OFF (opt-in)) → `service/CallerIdNotifier` (heads-up notification + `TYPE_APPLICATION_OVERLAY` window). The overlay draws with `android.view` + `WindowManager`, not Compose.
+- Room DB is version 2 with explicit `Migration(1, 2)` for outbox/sync/provenance. Preserve existing data and add explicit migrations when changing schema.
+- UI: `MainScaffold` holds a 5-tab bottom nav (Cari / Darurat / Beri #Tag / Proteksi / Akun) driven by an integer index, no Navigation library. Screens live in `ui/screens/`; state via `CallTagMainViewModel` (`UiLoadState` sealed type: Idle/Loading/Success/Error).
 - Design tokens live in `ui/theme/CallTagTokens.kt` (`CallTagSpacing`, `CallTagRadius`, `CallTagType`, `CallTagTouch`). Take spacing, radius, font sizes and touch targets from these instead of writing `.dp`/`.sp` literals — `HomeScreen` and `EmergencyScreen` are already converted; `ReportAndHubScreen` and `SpamGuardScreen` still use inline literals.
 - Brand palette is "Nusantara Teal" (`brandPrimary` `#0F766E` light / `#2DD4BF` dark) defined in `ui/theme/CallTagTheme.kt`. Danger semantics (`dangerScam`/`spamOrange`/`suspiciousAmber`) are a PRD contract — **do not change them**; they are duplicated as hex literals in `service/CallerIdNotifier.kt` and `ui/components/CallerIdOverlayCard.kt`, so palette changes must be applied in all three files.
 - Two separate colour roles, do not mix them: `dangerScam`/`brandPrimary` are **foreground/text** colours (bright in dark mode), while `dangerSolid`/`brandSolid` are **button background** colours (always dark enough for white text). Using a foreground colour as a button background produced unreadable teal-on-teal and salmon-on-white in dark mode.
@@ -45,7 +46,7 @@ All four screens (`HomeScreen`, `EmergencyScreen`, `ReportAndHubScreen`, `SpamGu
 
 ## Conventions & gotchas
 - Launcher icon is an adaptive icon (`mipmap-anydpi-v26` + `drawable/ic_launcher_foreground.xml`, background `#0F766E` in `values/colors.xml`); `minSdk` 26 means no PNG density buckets are needed.
-- Category codes (`PINJOL_DC`, `APK_SNIFFING`, `IMPERSONATION`, `JUDOL`, `SOCIAL_ENG`, `TELEMARKETING`) and reputation levels (`CLEAN`/`SUSPICIOUS`/`SPAM`/`DANGER_SCAM`) are fixed enums in `dto/ApiDtos.kt` — do not add ad-hoc strings; they must match `PRD.md` tables.
+- Category codes (`PINJOL_DC`, `APK_SNIFFING`, `IMPERSONATION`, `JUDOL`, `SOCIAL_ENG`, `TELEMARKETING`) and reputation levels (`CLEAN`/`SUSPICIOUS`/`SPAM`/`DANGER_SCAM`) are fixed enums in `dto/ApiDtos.kt` (plus neutral `INFO_TAG`, weight 0) — do not add ad-hoc strings; they must match `PRD.md` tables.
 - Phone numbers are normalized to E.164 (`+62…`); short emergency codes (≤6 digits like `112`) are intentionally kept as-is. Use `PhoneNormalizer`, don't re-implement.
 - Gson DTOs use `@SerializedName`; some scores accept `spam_score` as an alternate for `risk_score`. Keep alternates when editing DTOs.
 - ProGuard keeps all `data.remote.dto.**` and `data.local.entity.**` (Gson/Room reflection) — new DTO/entity packages need equivalent keep rules.

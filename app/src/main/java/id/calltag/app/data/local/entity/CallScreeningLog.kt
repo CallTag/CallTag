@@ -2,12 +2,19 @@ package id.calltag.app.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "call_screening_logs")
+@Entity(
+    tableName = "call_screening_logs",
+    indices = [Index(value = ["owner_scope", "screened_at_epoch_ms"])]
+)
 data class CallScreeningLog(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+
+    @ColumnInfo(name = "owner_scope")
+    val ownerScope: String? = null,
 
     @ColumnInfo(name = "phone_e164")
     val phoneE164: String,

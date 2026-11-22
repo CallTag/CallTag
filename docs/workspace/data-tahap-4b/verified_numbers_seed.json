@@ -1,0 +1,182 @@
+[
+  {
+    "phone_e164": "1500888",
+    "kind": "OFFICIAL",
+    "display_label": "Halo BCA",
+    "source_url": "https://www.bca.co.id/halobca",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "+628111500998",
+    "kind": "OFFICIAL",
+    "display_label": "WhatsApp Halo BCA",
+    "source_url": "https://www.bca.co.id/halobca",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "1500017",
+    "kind": "OFFICIAL",
+    "display_label": "Contact BRI",
+    "source_url": "https://bri.co.id/en/contact-us",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "14000",
+    "kind": "OFFICIAL",
+    "display_label": "Mandiri Call",
+    "source_url": "https://www.bankmandiri.co.id/new-flow-verifikasi-14000",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "1500046",
+    "kind": "OFFICIAL",
+    "display_label": "BNI Call",
+    "source_url": "https://bni.co.id/Portals/1/BNI/Kontak/Docs/Pengumuman-Alur-Penanganan-Komplain.pdf",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "14040",
+    "kind": "OFFICIAL",
+    "display_label": "BSI Call",
+    "source_url": "https://www.bankbsi.co.id/jaringan",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "157",
+    "kind": "PUBLIC_SERVICE",
+    "display_label": "Kontak OJK 157",
+    "source_url": "https://ojk.go.id/id/berita-dan-kegiatan/publikasi/Pages/Jadwal-Operasional-Kontak-157.aspx",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "1500200",
+    "kind": "PUBLIC_SERVICE",
+    "display_label": "Kring Pajak",
+    "source_url": "https://www.pajak.go.id/id/tata-cara-pengaduan",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "1500225",
+    "kind": "PUBLIC_SERVICE",
+    "display_label": "Bravo Bea Cukai",
+    "source_url": "https://www.beacukai.go.id/daftar-kantor-bea-cukai",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "123",
+    "kind": "PUBLIC_SERVICE",
+    "display_label": "PLN 123",
+    "source_url": "https://cos.pln.co.id/wbs/laporan_non_wbs",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "165",
+    "kind": "PUBLIC_SERVICE",
+    "display_label": "BPJS Kesehatan Care Center",
+    "source_url": "https://bpjs-kesehatan.go.id/haldownload-3.html",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "175",
+    "kind": "PUBLIC_SERVICE",
+    "display_label": "BPJS Ketenagakerjaan",
+    "source_url": "https://www.bpjsketenagakerjaan.go.id/search.html/",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "1500161",
+    "kind": "PUBLIC_SERVICE",
+    "display_label": "Halo Pos",
+    "source_url": "https://admin-piol.posindonesia.co.id/media/Annual%20Report%20PosIND%202024.pdf",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "+622129278888",
+    "kind": "BUSINESS",
+    "display_label": "JNE Customer Care",
+    "source_url": "https://www.jne.co.id/contact-us",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "+622180661888",
+    "kind": "BUSINESS",
+    "display_label": "J&T Express",
+    "source_url": "https://www.jet.co.id/information/terms",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "+62211500702",
+    "kind": "BUSINESS",
+    "display_label": "Shopee (panggilan resmi, bukan pengaduan)",
+    "source_url": "https://help.shopee.co.id/portal/4/article/168645-%5BTentang-Shopee%5D-Berapa-nomor-WhatsApp-resmi-Shopee",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "1500696",
+    "kind": "BUSINESS",
+    "display_label": "OVO Call Center",
+    "source_url": "https://www.ovo.id/index/information",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  },
+  {
+    "phone_e164": "1500445",
+    "kind": "BUSINESS",
+    "display_label": "DANA Customer Care",
+    "source_url": "https://www.dana.id/blog/daftar-kontak-resmi-dana-yang-dapat-anda-hubungi/",
+    "verified_by": "official-domain-review:2026-11-16",
+    "verified_at": "2026-11-16T00:00:00Z",
+    "expires_at": "2027-05-16T00:00:00Z",
+    "status": "ACTIVE"
+  }
+]

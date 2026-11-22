@@ -18,6 +18,7 @@ Status: **PROPOSED**. Saat ini `MISSING` ([FEATURE_GAP_ANALYSIS](../FEATURE_GAP_
 | 10 | Kanal resmi | MVP | `/admin/channels` | ADMIN | N13 | `official_channels` |
 | 11 | Audit log | MVP (baca) | `/admin/audit` | ADMIN | N14 | `audit_logs` |
 | 12 | Pengaturan sistem | **Ditunda**; konfigurasi lewat environment | - | - | - | - |
+| 13 | Import batch & Rekap Ekspor JSON/CSV (`T-209`, `T-405`) | MVP | `/admin` | ADMIN | N12, N16 | `verified_numbers`, `phone_tags`, `moderation_cases` |
 
 Analitik besar, manajemen staf lewat UI, dan peran super-admin ditunda.
 

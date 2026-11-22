@@ -117,3 +117,37 @@ Validator memakai filesystem untuk mengecek target tautan relatif serta browser 
 ## Batas dan pekerjaan yang belum dilakukan
 
 Tidak dilakukan benchmark latency/beban, Play Console check akun, sertifikasi audit hukum, verifikasi kontak lewat telepon, test perangkat fisik/operator, automated Android unit/instrumentation, tes race untuk seluruh Mongo, backup restore, migration non-destructive, dan monitoring produksi. Banyak acceptance memerlukan implementasi yang belum ada. Semua ini tetap tercatat sebagai belum terverifikasi, bukan dianggap lulus karena compile atau test happy path.
+
+---
+
+## Verifikasi Tahap 8 — 16 November 2026 WIB
+
+Pembaruan bukti Quality Assurance ini mencatat verifikasi pasca-implementasi Tahap 1–7 untuk butir `T-601`, `T-602`, `T-603`, `T-604`, dan `T-606` (sedangkan `T-605` tetap terbuka menunggu pengujian perangkat Android fisik). Catatan baseline **10 November 2026 WIB** di atas dipertahankan apa adanya sebagai arsip sejarah sebelum patch.
+
+### Lingkungan pengujian Tahap 8 (terisolasi)
+
+| Komponen | Nilai yang benar-benar digunakan |
+|---|---|
+| Host & Waktu | Linux (`cachyos-x8664`), bash, `Asia/Jakarta` (16 November 2026 WIB) |
+| Go Toolchain | `go version go1.27.3-X:nodwarf5 linux/amd64` |
+| Gradle / JVM / Kotlin | Gradle `8.11.1`, Kotlin `2.0.20`, Daemon JVM `/home/ridwan/.local/jdk17`, Launcher JVM `27.0.1.0.3` |
+| Node.js | `v26.13.0` |
+| SQLite CLI / In-Process | `sqlite3 3.54.0` (`2026-10-09`) dan driver SQLite Python untuk tolok ukur kueri dalam-proses |
+| MongoDB Uji Terisolasi | `mongod v8.3.9` pada `127.0.0.1:28019` (`CALLTAG_TEST_MONGO_URI=mongodb://127.0.0.1:28019`), direktori data `mktemp -d /tmp/calltag-mongo-*` yang dihentikan & dihapus otomatis setelah uji; MongoDB host `127.0.0.1:27017` tidak tersentuh |
+
+### Ringkasan hasil uji Tahap 8 (`T-601` s.d. `T-606` & `K-01` s.d. `K-12`)
+
+| ID / Cakupan | Perintah & Berkas Uji | Hasil yang Diamati & Catatan Bukti |
+|---|---|---|
+| `T-601` & `T-604` Backend Integrasi & Keamanan | `CALLTAG_TEST_MONGO_URI="mongodb://127.0.0.1:28019" go test -count=1 -v ./...` (`backend/qa_security_test.go`, `backend/main_test.go`, `backend/config/*_test.go`, `backend/controller/*_test.go`, `backend/helper/*_test.go`, `backend/internal/dataset/*_test.go`, `backend/cmd/*_test.go`); disertai `go vet ./...` & `go build ./...` | **PASS** seluruh 7 paket Go bertest (`0` fail, `0` skip): `backend` (`3.157s`), `cmd/importdataset` (`0.208s`), `cmd/seedstaff` (`0.209s`), `config` (`1.109s`), `controller` (`1.761s`), `helper` (`0.005s`), `internal/dataset` (`0.004s`). Memverifikasi `K-01` (11 akun melapor nomor sama tertahan `SPAM` + `pending_danger_review=true`, baru naik `DANGER_SCAM` setelah `CONFIRM_DANGER` moderator), `K-02` (idempotensi `Idempotency-Key` & `409 Conflict`), `K-03` (dispute + kasus moderasi bertahan di MongoDB pasca simulasi putus/nyambung ulang server), `K-04` (`limit=1` pagination `/api/v1/sync/changes`), `K-08` (Device JWT selalu ditolak `403` pada semua rute `/api/v1/admin/*` dan RBAC `MOD` vs `ADMIN`), `K-09` & `K-10` (penyaringan PII + redaksi `reporter_user_id`), `K-12` (`DELETE /api/v1/me` mencabut access + refresh token serta mempertahankan agregat), serta pertahanan negatif IDOR `/disputes/{id}`, CSRF + cross-origin `Origin`, replay refresh token reuse-detection, injeksi objek JSON NoSQL (`400`), dan rute 404 `/api/v1/phones/{e164}/nonexistent` yang menyamarkan nomor di pesan galat. |
+| `T-601` Suite False-Positive Berlabel Sintetis | `TestQA_FalsePositiveLabeledSuite` (`backend/qa_security_test.go`) | **PASS** pada `75` nomor berlabel sintetis (`60` non-danger: `40` bersih/kebisingan/kedaluwarsa/`INFO_TAG` + `10` brigading tanpa moderator + `10` terverifikasi diserang 10 laporan; dan `15` `DANGER_SCAM` terkonfirmasi/official blacklist): `TP=15`, `TN=60`, `FP=0`, `FN=0`, `FPR=0.00%` (< target `<0.5%`), `Recall=100.00%`. (Menggunakan data sintetis, bukan data nyata pengguna.) |
+| `T-602` Contract Test Lintas Repositori | `TestQA_T602_OpenAPIContractParity` (`backend/contract_openapi_test.go`), `node --test tests/contract.test.mjs` (`apidocs`), dan `ContractParityTest` (`CallTag/app/src/test/java/id/calltag/app/ContractParityTest.kt`) | **PASS**: seluruh path OpenAPI v1.2.0 (`32` path) terpetakan ke router backend (tidak 404); `19` subtest validasi skema JSON langsung memeriksa amplop `APIResponse` & seluruh properti `data` terhadap `apidocs/openapi.json` (sekaligus memperbaiki skema `PhoneTag`, `PublicReportItem`, `OfficialChannel`, dan rute sub-path `/api/v1/phones/*`). `apidocs/tests/contract.test.mjs` (`4/4` PASS); Kotlin `ContractParityTest` memverifikasi paritas 7 `CategoryCode` (termasuk `INFO_TAG`) & 4 `ReputationLevel` ke `openapi.json` serta deserialisasi/serialisasi Gson seluruh DTO Android. |
+| `T-603` Android Unit Test & Migrasi Room (`K-05`, `K-06`, `K-11`) | `cd CallTag && ./gradlew testDebugUnitTest --rerun-tasks --offline`; ditambah eksekusi SQL DDL migrasi v1 -> v2 via `sqlite3` Python (`K-11`) | **PASS** (`BUILD SUCCESSFUL` 14s, bukan `NO-SOURCE`): `18` unit test di `6` kelas (`CallTagTahap5UnitTest` `6`, `ContractParityTest` `3`, `DatabaseMigrationTest` `1`, `FeedbackDiagnosticsTest` `2`, `PhoneContextTest` `4`, `SessionAccessPolicyTest` `2`), `0` fail, `0` skipped. Memverifikasi normalisasi nomor + konteks negara/carrier, kebijakan konservatif `shouldAutoBlock`, matriks `LookupResult` (`K-05` `OFFLINE` bukan `CLEAN`, `K-06` `SPAM`/`FIXTURE` tidak diblokir), serta `CallTagDatabase.MIGRATION_1_2` non-destruktif (`K-11`) baik lewat proxy `SupportSQLiteDatabase` maupun simulasi SQLite v1 berbaris nyata -> v2 (`K11_SQLITE_MIGRATION=PASS`). |
+| Website & Simulator Docs | `cd calltag.github.io && node tests/frontend-state.test.mjs` & `cd apidocs && node --check app.js && node --test tests/contract.test.mjs` | **PASS**: `10/10` test website `calltag.github.io` dan `4/4` test `apidocs` lulus. |
+| `T-606` Benchmark Latensi Lokal Reproducible | `TestQA_T606_LocalAPIBenchmark` (Go `httptest.NewServer` TCP loopback -> `mongod 127.0.0.1:28019`) & kueri cache SQLite dalam-proses (`sqlite3` Python) | **PASS** (lingkungan lokal, bukan produksi): SQLite lookup skema v2 `cached_phone_tags` (`1.001` baris, `n=500`): **`p50=0.0149 ms`, `p95=0.0170 ms`**, `max=0.0500 ms`. Go HTTP + MongoDB `28019`: `GET /api/v1/phones/{e164}` (`n=100`) **`p50=0.539 ms`, `p95=0.623 ms`**; `POST /api/v1/reports` (`n=20`) **`p50=2.564 ms`, `p95=2.920 ms`**; `GET /api/v1/sync/changes?limit=50` (`n=50`) **`p50=0.880 ms`, `p95=1.290 ms`**. |
+| `T-605` & `K-07` Uji Perangkat Android Fisik (panggilan masuk & callback 10s) | `[ANDA]` (`adb reverse tcp:8080 tcp:8080`, izin *Call Screening Role*, panggilan masuk dari nomor lain) | **BLOCKED / BELUM DIJALANKAN**: Timeout fail-open kode terverifikasi pada `CallTagScreeningService` (`4.200 ms`) & `CallTagRepository.fastScreening` (`800 ms`), namun pengujian callback OS `CallScreeningService`, izin runtime fisik, dan tampilan overlay di perangkat HP Android fisik tetap memerlukan eksekusi manual `[ANDA]`. |
+
+### Batas yang tersisa pasca-Tahap 8
+
+1. **`T-605` (Panggilan masuk nyata di HP Android fisik)**: memerlukan perangkat Android fisik, kartu/nomor pemanggil kedua, dan izin *Call Screening Role* aktif.
+2. **Tahap 9 & Operasional Rilis**: pemisahan `network_security_config` (`debug` vs `release`), penyelarasan workflow CI/CD GitHub Actions (`release-android.yml`), utilitas `mongodump`/`mongorestore`, serta penyiapan keystore rilis & audit hukum eksternal belum dikerjakan di Tahap 8.

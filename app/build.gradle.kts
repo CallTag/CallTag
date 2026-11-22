@@ -61,6 +61,14 @@ android {
             ?: System.getenv("BASE_API_URL")
             ?: "http://10.0.2.2:8080/"
         buildConfigField("String", "BASE_API_URL", "\"$apiUrl\"")
+        val googleClientId = providers.gradleProperty("googleClientId")
+            .orElse(providers.environmentVariable("GOOGLE_CLIENT_ID"))
+            .orElse("23321394343-9vp7211b0tplpro2upuo0pvoj8s31tl7.apps.googleusercontent.com")
+            .get().trim()
+        require(googleClientId.matches(Regex("[A-Za-z0-9-]+[.]apps[.]googleusercontent[.]com"))) {
+            "googleClientId harus berupa OAuth Client ID jenis Web application."
+        }
+        buildConfigField("String", "GOOGLE_CLIENT_ID", "\"$googleClientId\"")
     }
 
     signingConfigs {
@@ -116,6 +124,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.credentials.core)
+    implementation(libs.androidx.credentials.play)
+    implementation(libs.google.identity)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
@@ -135,7 +146,12 @@ dependencies {
     implementation(libs.okhttp.core)
     implementation(libs.okhttp.logging)
 
-    // Coroutines & DataStore Preferences (Auto-Block Scammer toggle)
+    // Coroutines, DataStore Preferences, & WorkManager Background Sync
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.work.runtime.ktx)
+
+    // Unit Testing
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
