@@ -16,6 +16,13 @@ Status: **PROPOSED**. Diagram: [13](13-DIAGRAM-SISTEM.md) bagian 7 dan 8. Host p
 
 Gerbang rilis (menyempurnakan PRD 8.4): P0 tertutup, Must P1 diterima, kontrak sinkron, outage/offline/restart/retry/revocation diuji, moderasi false positive berfungsi, fixture terisolasi, sumber kontak diverifikasi, restore backup teruji, keputusan kanal/SDK diambil (OD-04).
 
+### Konfigurasi rilis di kode
+
+- Backend mewajibkan `APP_ENV`. Gunakan `APP_ENV=prod` dan MongoDB persisten pada staging dan produksi. Pasang reverse proxy HTTPS dan arahkan probe kesiapan ke `/readyz`. Sebelum rilis Android, konfirmasi respons `200` dengan `storage_mode: mongodb-connected`.
+- Di repositori Android, isi variabel GitHub Actions `BASE_API_URL` dengan URL HTTPS dan secret `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, serta `KEY_PASSWORD`. Samakan OAuth Web Client ID di build dan `GOOGLE_CLIENT_ID` backend untuk login Google.
+- Workflow APK/AAB berjalan pada perubahan berkas build Android di `main` atau lewat `workflow_dispatch` pada `main`. Tag dibuat setelah APK dan AAB bertanda tangan tersedia. Untuk build release lokal, isi `BASE_API_URL`, `KEYSTORE_FILE`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, dan `KEY_PASSWORD`, lalu jalankan `./gradlew assembleRelease bundleRelease`.
+- Debug mengizinkan HTTP untuk emulator, `adb reverse`, atau demo LAN. Release memerlukan HTTPS. Branch backup menyimpan snapshot kerja. Publikasi GitHub Pages dan deployment backend perlu dikonfigurasi untuk commit yang disetujui.
+
 ## 2. Demo akademik (lokal, data sintetis)
 
 Prasyarat umum: [CARA_RUN_APLIKASI](../../../CARA_RUN_APLIKASI.md) (MongoDB lokal, backend `:8080` dengan `APP_ENV=dev`, emulator `Pixel_5_Light`). Semua nomor adalah fixture berlabel `FIXTURE`; tidak ada data warga.

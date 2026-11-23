@@ -3,13 +3,13 @@
 | Metadata Dokumen | Detail |
 | :--- | :--- |
 | **Nama Produk** | CallTag |
-| **Versi Dokumen** | 1.2.0 (Master Plan Final Disetujui: role, lookup, moderasi, arsitektur, dan 17 diagram sistem) |
-| **Status** | Master Plan Disetujui (14 Nov 2026); implementasi kode PARTIALLY_VERIFIED di lingkungan lokal, siap masuk Fase 1 |
+| **Versi Dokumen** | 1.2.1 (pembaruan status implementasi dan konfigurasi rilis) |
+| **Status** | Master Plan disetujui. Implementasi `PARTIALLY_VERIFIED` di lingkungan lokal. |
 | **Target Pasar** | Indonesia (Seluruh Provinsi & Kota/Kabupaten) |
 | **Cakupan Repositori** | `CallTag` (Mobile App), `backend` (Go `net/http` bergaya `gocroot` + MongoDB), `apidocs` (OpenAPI Vanilla JS), `calltag.github.io` (Landing Page `croot.js`) |
-| **Tanggal Pembaruan / Last Updated** | 10 November 2026 (Asia/Jakarta) |
+| **Tanggal Pembaruan / Last Updated** | 23 November 2026 (Asia/Jakarta) |
 | **Pemilik / reviewer** | Tim CallTag dua pengembang; review silang Android/QA dan Backend/API/Data; keputusan produk akhir oleh pemilik proyek |
-| **Basis audit** | Android `42e9ceb`, backend `8676314`, apidocs `1ae8834`, website `c3e071b`; branch dan tanggal lengkap di [baseline audit](docs/AUDIT_REPORT.md) |
+| **Basis pembaruan** | Snapshot `backup/workspace-2026-11-22` (Android `b17db8b`, backend `84f0a2b`, apidocs `7fbc40c`, web `6a56d93`) dan patch konfigurasi rilis pada workspace. |
 
 ### Riwayat versi dan aturan membaca
 
@@ -18,6 +18,7 @@
 | 1.0.0 | 5 November 2026 | Visi, persona, taksonomi, rumus skor, desain data dan kontrak awal. |
 | 1.1.0 | 10 November 2026 | Mempertahankan struktur dan visi; menambahkan bukti as-is, koreksi framework/nama koleksi/endpoint, status fitur, acceptance terukur, scope dua orang, model data dan diagram, serta backlog remediasi. |
 | 1.2.0 | 14 November 2026 | Mengunci persetujuan ADR-012 s.d. ADR-022 dan OD-01 s.d. OD-10 pada **bagian 10**, melengkapi 17 diagram sistem di [13-DIAGRAM-SISTEM](docs/planning/13-DIAGRAM-SISTEM.md), serta memperbarui [CHECKLIST-PELAKSANAAN](docs/planning/CHECKLIST-PELAKSANAAN.md). Tidak menghapus isi 1.1.0 dan tidak mengklaim implementasi kode baru. |
+| 1.2.1 | 23 November 2026 | Memperbarui status Android, backend, web, kontrak API, serta prasyarat rilis berdasarkan kode workspace dan bukti QA yang tersedia. |
 
 **As-is** menyatakan hasil pemeriksaan kode/uji pada commit tersebut. **Target MVP / PROPOSED** menyatakan kebutuhan yang belum tentu diimplementasikan. **Post-MVP** ditunda. Persyaratan normatif dalam bagian 4–7 adalah target, bukan daftar fitur selesai. Label status baku dan batas `VERIFIED_E2E` ada pada [AUDIT_REPORT](docs/AUDIT_REPORT.md); [indeks docs](docs/README.md) memuat spesifikasi rinci.
 
@@ -39,24 +40,24 @@ Menjadi **perisai komunikasi dan asisten keselamatan darurat nomor satu bagi mas
 ### 1.3 Arsitektur Ekosistem 4 Repositori
 Ekosistem CallTag dibagi ke dalam empat repositori terpisah dengan tanggung jawab yang jelas:
 1. **`CallTag` (Mobile App):** Aplikasi utama pengguna untuk identifikasi penelepon (*Caller ID*), pemblokiran otomatis (*Spam Guard*), direktori panggilan darurat nasional & lokal berbasis Kota/Kabupaten, pelaporan *crowdsourcing*, serta pusat panduan tindak lanjut resmi.
-2. **`backend` (Go + MongoDB):** Satu proses REST API menggunakan `net/http`, router manual bergaya `gocroot`, dan MongoDB driver. `go.mod` baseline tidak memiliki dependency `gocroot`; tidak mengklaim microservice atau middleware framework tersedia. Mengelola reputasi, laporan, direktori dan sync dengan fallback memory saat startup Mongo gagal.
+2. **`backend` (Go + MongoDB):** Satu proses REST API menggunakan `net/http`, router manual, dan MongoDB driver. Backend mengelola reputasi, laporan, direktori, moderasi, dan sinkronisasi. Penyimpanan memori tersedia untuk demo `APP_ENV=dev` dengan kedua URI MongoDB kosong.
 3. **`apidocs` (OpenAPI/Swagger UI):** Dokumentasi kontrak REST API interaktif berbasis Vanilla JS yang di-hosting di GitHub Pages sebagai rujukan tunggal (*Single Source of Truth*) integrasi antara `backend`, `CallTag`, dan `calltag.github.io`.
 4. **`calltag.github.io` (Landing Page `croot.js`):** Situs web publik berbasis `croot.js` untuk edukasi produk, pengecekan reputasi nomor singkat via web, statistik ancaman publik, dan tautan unduhan aplikasi.
 
 ### 1.4 Current state dan batas rilis
 
-**Verdict: PARTIALLY_VERIFIED.** Lookup Android dan submit laporan dari UI telah diuji melalui API sampai MongoDB lokal, lalu UI/Room dibaca ulang. Ini bukan bukti produksi atau screening telepon nyata. Backend, API docs dan website baru berada di feature branch; main ketiganya masih kerangka. Hasil perintah, fixture, PASS/FAIL/BLOCKED ada pada [rencana dan hasil QA](docs/QA_TEST_PLAN.md).
+**Status `PARTIALLY_VERIFIED`.** QA mencatat alur lookup dan laporan Android hingga MongoDB lokal pada baseline 10 November, serta verifikasi lokal Tahap 4B–8 pada 16 November. Snapshot kode 22 November juga berisi login Google dan dua path OpenAPI tambahan. Panggilan masuk pada perangkat fisik, login Google pada konfigurasi rilis, dan deployment publik masih menunggu verifikasi. [Rencana dan hasil QA](docs/QA_TEST_PLAN.md), [checklist HP](docs/workspace/CHECKLIST_TESTING_HP.md).
 
 | Modul | As-is | Status |
 |---|---|---|
-| Compose empat tab, Room dan Retrofit | Cari, Darurat, Beri #Tag/kanal/koreksi, Proteksi; Nusantara Teal dan mode gelap tersedia | IMPLEMENTED_NOT_E2E_TESTED untuk keseluruhan UI; lookup/report lokal VERIFIED_E2E terbatas |
-| Auth perangkat | Method, DTO, JWT dan save-token ada; tidak ada caller onboarding Android; guest atau ID statis dipakai report biasa | PARTIAL |
-| Report | Mongo insert+aggregate lokal terbukti; tanpa idempotency/quota/moderasi; offline hanya menaikkan agregat cache, bukan raw outbox | PARTIAL |
-| Dispute | Respons backend 201/UNDER_REVIEW tanpa write; Android fallback juga tidak punya antrean | PARTIAL; persistence MISSING |
-| Screening/auto-block | Service dan notifier ada; cache-first dengan batas API 800 ms; policy lebih luas daripada DANGER-only, tanpa TTL | IMPLEMENTED_NOT_E2E_TESTED untuk panggilan nyata; safety PARTIAL |
-| Offline sync | Manual satu batch 250, cursor MAX bercampur seed/lokal; server risk-sort dapat skip, CLEAN/delete tidak dikirim | PARTIAL |
-| Direktori dan hub resmi | Seed+API, dialer/browser/WhatsApp handoff; sumber dan freshness per kontak belum dibuktikan | PARTIAL; seed MOCK_OR_LOCAL_ONLY |
-| Moderator/whitelist workflow | Tidak ada route/panel admin atau lifecycle dispute persisten | MISSING |
+| Compose, Room dan Retrofit | Lima tab Cari, Darurat, Beri #Tag, Proteksi, dan Akun | Lookup dan laporan punya bukti lokal terbatas |
+| Akun | Mode Tamu, login Google eksplisit, refresh sesi, dan penghapusan akun | Implementasi tersedia. Login Google pada build rilis belum diverifikasi. |
+| Laporan | Login wajib, kuota, idempotensi, moderasi, dan outbox Room per akun | Alur tertentu teruji secara lokal. |
+| Sanggahan | Tamu dapat mengajukan dan melacak dengan token. MongoDB menyimpan kasus sebelum respons sukses. | Persistensi dan pelacakan teruji secara lokal. |
+| Screening | Auto-block opt-in untuk `DANGER_SCAM` dari server dengan umur cache maksimal 14 hari. Whitelist dan kode pendek dikecualikan. | Kebijakan teruji secara lokal. Panggilan masuk nyata masih terbuka di T-605. |
+| Sinkronisasi | `sync/changes` memakai cursor, pagination, serta event perubahan/penghapusan. Android menyimpan cursor terpisah. | Pagination backend teruji secara lokal. Uji putus jaringan dan restart klien masih bagian dari gerbang rilis. |
+| Direktori dan panel staf | Seed dan API, metadata verifikasi, kurasi, antrean moderasi, serta audit | Panel dan perubahan data teruji secara lokal. Kurasi dan uji kontak wilayah pilot masih diperlukan. |
+| Situs dan apidocs | Lookup publik, sanggahan tamu, statistik dari API, serta simulator berlabel | Bukti lokal tersedia. Hosting dan API publik menunggu konfirmasi. |
 
 ### 1.5 Scope, asumsi, batasan dan non-goals
 
@@ -87,7 +88,7 @@ Asumsi: data uji sintetis, akses Mongo test sah, URL API ditentukan per environm
 | **Keterlibatan Pengguna** | Rasio Konversi Laporan Pasca-Panggilan Asing | `>= 8%` | Jumlah laporan `SpamReports` dibagi total panggilan masuk dari nomor tidak dikenal |
 | **Keandalan API** | *Uptime* Layanan `backend` | `>= 99.5%` | Pemantauan *health check* endpoint `/health` |
 
-**Baseline seluruh KPI di atas: belum terukur.** Ini target desain awal, bukan hasil audit. API 150 ms dan cache 20 ms adalah sasaran optimasi yang memerlukan benchmark dataset/perangkat/ukuran beban jelas; latency field aplikasi saat ini hanya pembacaan Room, bukan waktu total API. Respons health 200 tidak membuktikan readiness Mongo. Uptime 99,5% dan konversi 8% menjadi metrik pilot setelah deployment; bukan gate demo akademik. Ukur FPR dengan dataset berlabel dan denominator evaluasi yang diketahui; rasio dispute-valid/flagged hanyalah proxy yang bias, bukan FPR statistik. Direktori 100% berarti kontak pilot yang dibundel tersedia offline, bukan seluruh wilayah Indonesia terlayani.
+QA Tahap 8 mencatat benchmark API dan SQLite lokal serta pengukuran FPR pada data sintetis. Uptime, konversi, FPR populasi pilot, dan latensi perangkat pada beban nyata masih perlu diukur setelah deployment. Gunakan dataset berlabel untuk mengukur FPR dan `/readyz` untuk mengecek MongoDB. Ketersediaan offline 100% berlaku untuk kontak wilayah pilot yang dibundel. [QA Test Plan](docs/QA_TEST_PLAN.md#verifikasi-tahap-8--16-november-2026-wib).
 
 ---
 
@@ -132,7 +133,7 @@ Prioritas menggunakan metode **MoSCoW**:
 ## 4. FUNCTIONAL REQUIREMENTS & ACCEPTANCE CRITERIA
 
 ### 4.1 Taksonomi Deteksi Spam & Scam Khas Indonesia
-**Target MVP dan invariant lintas repo.** Bobot berikut ditemukan pada backend, tetapi deduplikasi 30 hari, batas trust, moderation dan decay berkala belum lengkap. Penilaian gap ada pada [audit kontrak](docs/API_CONTRACT_AUDIT.md).
+**Target MVP dan invariant lintas repo.** Bagian 10 merinci keputusan scoring dan moderasi. `INFO_TAG` melengkapi enam kategori gangguan sebagai tag netral.
 Seluruh komponen ekosistem (`CallTag`, `backend`, `apidocs`, `calltag.github.io`) WAJIB menggunakan kode kategori terstandarisasi berikut:
 
 | Kode Kategori (`category_code`) | Nama Tampilan (UI) | Bobot Keparahan Dasar ($W_{cat}$) | Contoh Modus di Indonesia |
@@ -143,6 +144,7 @@ Seluruh komponen ekosistem (`CallTag`, `backend`, `apidocs`, `calltag.github.io`
 | `JUDOL` | Promosi Judi Online (Judol) | `1.3` | Robocall atau pesan suara/WA menawarkan bonus deposit situs slot/judi online. |
 | `SOCIAL_ENG` | Penipuan Sosial / Hipnotis Telepon | `1.8` | Modus "anak/keluarga kecelakaan di RS butuh biaya operasi segera", menang undian palsu. |
 | `TELEMARKETING` | Telemarketing / Spam Promosi Agresif | `1.0` | Penawaran KTA, asuransi, atau properti berulang kali di luar jam wajar. |
+| `INFO_TAG` | Informasi Layanan / Peran | `0.0` | Informasi identitas atau fungsi nomor. |
 
 ---
 
@@ -306,17 +308,17 @@ flowchart TD
     end
 
     subgraph BackendLayer["Layer Layanan (Repo: backend)"]
-        Gocroot["AS-IS Go net/http REST API\nAuth dan scoring parsial - rate limiter belum ada"]
-        Mongo[("MongoDB bila terhubung\nusers, phone_tags, spam_reports,\nemergency_directory, official_channels")]
+        Gocroot["Go net/http REST API\nLogin, reputasi, moderasi, direktori, sinkronisasi"]
+        Mongo[("MongoDB\nusers, phone_tags, spam_reports, moderation_cases, sync_changes, direktori")]
     end
 
-    Mobile <-->|"REST JSON - HTTP emulator default\nLookup dan report lokal teruji, sync parsial"| Gocroot
+    Mobile <-->|"REST JSON\nHTTPS untuk release, HTTP lokal untuk debug"| Gocroot
     Landing <-->|"croot.js Fetch API\nPublic Stats & Quick Lookup"| Gocroot
     Docs -.->|"Dokumentasi & Try-It-Out"| Gocroot
     Gocroot <-->|"Mongo Go Driver"| Mongo
 ```
 
-Diagram ini overview as-is feature audit. Startup gagal Mongo memilih memory fallback yang tidak durable; dispute tidak ditulis ke Mongo. HTTPS produksi, autentikasi ketat, moderasi dan sync lengkap adalah target. Component/container, DFD0/1 dan deployment yang memisahkan kondisi aktual/usulan ada pada [SYSTEM_ARCHITECTURE](docs/SYSTEM_ARCHITECTURE.md).
+Pada staging dan produksi, backend dijalankan dengan `APP_ENV=prod` dan MongoDB. Startup berhenti bila konfigurasi, koneksi, atau inisialisasi database gagal. Diagram baseline dan usulan deployment tersedia di [SYSTEM_ARCHITECTURE](docs/SYSTEM_ARCHITECTURE.md). Konfigurasi terkini ada di [Deployment dan demo](docs/planning/16-DEPLOYMENT-DAN-DEMO.md).
 
 ---
 
@@ -404,7 +406,7 @@ Menyimpan log laporan individual dari pengguna serta status peninjauan/sanggahan
 }
 ```
 - **Indexes:**
-  - `idx_reports_dedup`: `{ "phone_e164": 1, "reporter_user_id": 1 }` (**as-is nonunique**, tidak mencegah penyisipan duplikat; gate skor per reporter hanya ada di helper)
+  - `idx_reports_dedup`: `{ "phone_e164": 1, "reporter_user_id": 1 }` (indeks pencarian). Backend juga memiliki indeks unik parsial untuk idempotensi dan deduplikasi jendela laporan.
   - `idx_reports_phone_created`: `{ "phone_e164": 1, "created_at": -1 }`
 
 #### 4. Koleksi `EmergencyDirectory`
@@ -484,21 +486,23 @@ Menyimpan daftar kanal pelaporan resmi pemerintah/otoritas beserta panduan persi
 
 ### 5.3 Kontrak Endpoint REST API (`backend`) untuk `apidocs`
 
-Sebelas endpoint berikut ditemukan pada router feature backend dengan `net/http`, bukan middleware framework `gocroot`. Tabel ini **kebijakan target MVP**: kolom auth menyatakan target; as-is report menerima guest atau JWT tidak valid, dispute tanpa auth, sync publik, dan reports lookup publik. Android memiliki 10 metode tanpa health. Skema OpenAPI belum lengkap dan lookup envelope keliru. Lihat [INTEGRATION_MATRIX](docs/INTEGRATION_MATRIX.md) untuk tiap request/response/status/DB dan [API_CONTRACT_AUDIT](docs/API_CONTRACT_AUDIT.md) untuk langkah perbaikan kompatibel.
+OpenAPI 1.2.0 mendokumentasikan **34 path** pada snapshot workspace. `apidocs/openapi.json` di repositori `apidocs` menjadi acuan parameter, schema, dan status HTTP. Matriks integrasi dan audit kontrak menyimpan kondisi baseline 10 November. Hasil uji kontrak Tahap 8 mencakup snapshot saat itu yang memiliki 32 path. [INTEGRATION_MATRIX](docs/INTEGRATION_MATRIX.md), [API_CONTRACT_AUDIT](docs/API_CONTRACT_AUDIT.md), [QA_TEST_PLAN](docs/QA_TEST_PLAN.md).
 
 | Method | Path Endpoint | Auth | Deskripsi Fungsional | Target Pemanggil |
 | :---: | :--- | :---: | :--- | :--- |
-| `GET` | `/health` | Public | Pemeriksaan status server API dan koneksi MongoDB. | Semua |
-| `POST` | `/api/v1/auth/device` | Public | Registrasi perangkat anonim/terverifikasi & penerbitan token JWT. | `CallTag` |
-| `GET` | `/api/v1/phones/{e164}` | Bearer / Public Rate-Limited | *Lookup* reputasi nomor telepon (`reputation_level`, `risk_score`, `primary_category`, `top_community_label`). | `CallTag`, `calltag.github.io` |
-| `GET` | `/api/v1/phones/{e164}/reports` | Bearer | Mengambil daftar ringkasan komentar laporan komunitas terbaru untuk suatu nomor. | `CallTag` |
+| `GET` | `/health`, `/healthz`, `/readyz` | Publik | Health memeriksa proses API. Readiness memeriksa MongoDB atau mode demo yang dipilih. | Klien, operator |
+| `POST` | `/api/v1/auth/google`, `/api/v1/auth/refresh` | Token Google / refresh token | Memulai dan memperbarui sesi pengguna. | `CallTag` |
+| `POST` | `/api/v1/auth/device` | Publik, dev saja | Jalur lama ketika login Google belum dikonfigurasi. Di produksi mengembalikan `410`. | Pengembangan |
+| `GET`, `DELETE` | `/api/v1/me` | Bearer | Membaca profil/kuota atau mengajukan penghapusan akun. | `CallTag` |
+| `GET` | `/api/v1/phones/{e164}`, `/api/v1/phones/{e164}/reports` | Publik | Lookup reputasi dan laporan komunitas yang telah disaring. | `CallTag`, `calltag.github.io` |
 | `POST` | `/api/v1/reports` | Bearer | Mengirimkan laporan nomor spam/scam baru (memicu kalkulasi ulang `PhoneTags`). | `CallTag` |
-| `POST` | `/api/v1/disputes` | Bearer | Mengajukan sanggahan (*dispute*) apabila nomor milik pengguna salah dilabeli sebagai spam/scam. | `CallTag` |
+| `POST`, `GET` | `/api/v1/disputes`, `/api/v1/disputes/{id}` | Pengajuan publik. Pelacakan memakai token pelacakan atau sesi pemohon. | Mengajukan dan melacak sanggahan. | `CallTag`, `calltag.github.io` |
 | `GET` | `/api/v1/emergency/national` | Public | Mengambil daftar 7 nomor darurat nasional Indonesia (`112`, `110`, `113`, `118`/`119`, `115`, `123`, `14080`). | `CallTag`, `calltag.github.io` |
 | `GET` | `/api/v1/emergency/local` | Public | Filter `?province=...&city=...&type=...`; lat/lng dan pencarian terdekat Post-MVP, belum didukung. | `CallTag`, `calltag.github.io` |
 | `GET` | `/api/v1/official-channels` | Public | Mengambil daftar kanal pelaporan resmi pemerintah (AduanNomor, CekRekening/IASC, OJK 157, Patroli Siber, LAPOR!). | `CallTag`, `calltag.github.io` |
-| `GET` | `/api/v1/sync/offline-bundle` | Bearer | Mengunduh *delta sync* nomor darurat dan daftar *Top Scammers* (`DANGER_SCAM`) berdasarkan parameter `?since_version=...` untuk disimpan di cache HP. | `CallTag` |
+| `GET` | `/api/v1/sync/changes`, `/api/v1/sync/offline-bundle` | Publik | `changes` menyediakan jurnal dengan cursor. `offline-bundle` dipertahankan untuk kompatibilitas. | `CallTag` |
 | `GET` | `/api/v1/stats/public` | Public | Mengambil statistik agregat publik (jumlah nomor scam terdeteksi per kategori) untuk ditampilkan di landing page. | `calltag.github.io` |
+| Beberapa | `/api/v1/admin/*` | Login memakai kredensial staf dan TOTP. Operasi berikutnya memakai sesi staf, RBAC, dan CSRF untuk mutasi. | Login, review kasus, kurasi direktori, impor, audit dan ekspor. | Panel `/admin` |
 
 ---
 
@@ -528,7 +532,7 @@ Untuk mencegah persaingan bisnis tidak sehat atau perundungan siber (melaporkan 
 6. **Mekanisme Sanggah (*Dispute Resolution*):** Pemilik nomor dapat membuktikan kepemilikan nomor (melalui verifikasi OTP/WhatsApp Auth) dan mengajukan sanggahan via `POST /api/v1/disputes` untuk membekukan penalti skor sambil ditinjau.
 
 ### 6.3 Privasi Data & Kepatuhan Regulasi (UU PDP No. 27 Tahun 2022)
-**As-is:** aturan ini target. Endpoint reports masih membalas raw `SpamReport` dengan `reporter_user_id`, snapshot trust dan komentar tanpa filter; jangan mengklaim sanitasi/anonimisasi publik sudah diterapkan. Lihat R11 pada laporan audit. Tidak ditemukan upload buku kontak, tetapi hal itu saja belum membuktikan seluruh tata kelola privasi terpenuhi.
+Endpoint reports menggunakan proyeksi publik yang menghapus identitas pelapor, dan backend menyaring pola PII pada tag dan komentar. R11 mencatat bentuk respons sebelum perubahan. Bagian ini menetapkan persyaratan privasi yang lebih luas, termasuk akses data dan retensi. [Audit baseline](docs/AUDIT_REPORT.md), [verifikasi Tahap 8](docs/QA_TEST_PLAN.md#verifikasi-tahap-8--16-november-2026-wib).
 1. **Tanpa Pencurian Buku Telepon (*No Contact Book Harvesting*):** Aplikasi `CallTag` DILARANG mengunggah daftar kontak pribadi dari buku telepon pengguna ke server `backend`. Pemeriksaan apakah penelepon ada di kontak pengguna dilakukan 100% di dalam memori lokal perangkat.
 2. **Hashing Identitas Pelapor:** Nomor telepon pelapor disimpan dalam bentuk *salted SHA-256 hash* (`phone_hash`) di koleksi `Users` dan tidak pernah ditampilkan secara publik pada respons API `/api/v1/phones/{e164}/reports`.
 3. **Sanitasi Komentar:** Komentar laporan di `SpamReports` difilter secara otomatis untuk menyensor kata kasar ekstrem dan mencegah penyebaran NIK/data pribadi warga di kolom komentar publik.
@@ -554,7 +558,7 @@ flowchart LR
   1. Konfigurasi koneksi MongoDB dan pembuatan indeks untuk 5 koleksi (`Users`, `PhoneTags`, `SpamReports`, `EmergencyDirectory`, `OfficialChannels`).
   2. *Seeder* data awal Indonesia: 7 nomor darurat nasional, direktori Damkar/Polres/RS kota-kota utama Indonesia, dan 5 kanal resmi (`OfficialChannels`: AduanNomor.id, CekRekening.id/IASC, Satgas PASTI OJK 157, Patroli Siber Polri, LAPOR!).
   3. Implementasi mesin kalkulasi *Risk Score* ($S$), *time decay*, *rate limiter*, dan perlindungan *anti-brigading*.
-  4. Implementasi seluruh 11 endpoint REST API beserta pengujian unit/integrasi.
+  4. Implementasi kontrak REST API sesuai bagian 5.3 beserta pengujian unit dan integrasi.
 
 ### Fase 2: Repositori `apidocs` (Standarisasi Kontrak OpenAPI)
 - **Fokus:** Mendokumentasikan seluruh endpoint `backend` secara interaktif di GitHub Pages.
@@ -586,23 +590,23 @@ Bagian 4 mempertahankan cerita dan skenario produk; register ini memberi ID stab
 |---|---|---|
 | FR-001 US01 M/P1 onboarding | Given instalasi baru, when role/permission ditolak/dicabut, then UI menyatakan nonaktif dan direktori tetap dapat dipakai tanpa crash; flow grant overlay terpisah | FR-003; PARTIAL |
 | FR-002 US03 M/P0 lookup | Given format 08/+62 yang valid, when API/Room tersedia, then nomor identik, sumber dan fetchedAt tampil; input tidak valid ditolak; cache miss atau error tidak menghasilkan klaim aman | NFR-003/FR-008; happy path lokal VERIFIED_E2E, keseluruhan PARTIAL |
-| FR-003 US01/02 M/P0 screening | Given role aktif dan opt-in, when fresh authoritative DANGER diterima, then policy dievaluasi dan callback < 5 detik; unknown/stale/whitelist mengizinkan panggilan dan memberi peringatan yang tepat; SPAM saja tidak auto-block | FR-002/008/011; IMPLEMENTED_NOT_E2E_TESTED, policy PARTIAL |
-| FR-004 US04 M/P0 report | Given principal sah, when payload valid dikirim, then 201 hanya sesudah persist, ID opaque dapat ditelusuri, retry idempoten; JWT tidak valid menghasilkan 401 dan body tidak valid menghasilkan 400 | FR-007/NFR-001; mobile→Mongo lokal happy path VERIFIED_E2E, safety PARTIAL |
-| FR-005 US04/08 M/P1 penulisan offline | Given offline, when submit, then draft mentah/payload persisten bertanda pending; tetap ada setelah restart; reconnect tidak double-post atau menaikkan skor lokal otoritatif | FR-004/008, migrasi Room; MISSING outbox, fallback MOCK_OR_LOCAL_ONLY |
-| FR-006 US05 M/P0 dispute | Given pemohon sah, when mengajukan koreksi, then ID record unik persisten dan status dapat dibaca pemilik sesudah restart; error DB tidak mengaku dicatat | FR-007/010; PARTIAL handler, persistence MISSING |
-| FR-007 US04 M/P0 identitas | Given instalasi perangkat, when memperoleh credential, then principal server-issued stabil dan tak dapat diganti header; nomor tidak disebut terverifikasi tanpa bukti kepemilikan | NFR-001; PARTIAL, pemanggil Android MISSING |
-| FR-008 US08 M/P0 sync | Given dataset > limit dan update/deletion, when semua halaman diproses, then tidak ada versi tertinggal dan cursor transaksional terpisah seed; retry/restart/revocation lulus | FR-004, change log dan migrasi Room; PARTIAL |
+| FR-003 US01/02 M/P0 screening | Given role aktif dan opt-in, when fresh authoritative DANGER diterima, then policy dievaluasi dan callback < 5 detik; unknown/stale/whitelist mengizinkan panggilan dan memberi peringatan yang tepat; SPAM saja tidak auto-block | FR-002/008/011. Kebijakan konservatif tersedia. Uji operator T-605 masih terbuka. |
+| FR-004 US04 M/P0 report | Given principal sah, when payload valid dikirim, then 201 hanya sesudah persist, ID opaque dapat ditelusuri, retry idempoten; JWT tidak valid menghasilkan 401 dan body tidak valid menghasilkan 400 | FR-007/NFR-001. Integrasi historis Android teruji lokal. Backend memiliki bukti kuota, autentikasi, dan idempotensi. |
+| FR-005 US04/08 M/P1 penulisan offline | Given offline, when submit, then draft mentah/payload persisten bertanda pending; tetap ada setelah restart; reconnect tidak double-post atau menaikkan skor lokal otoritatif | FR-004/008 dan migrasi Room. Outbox laporan dan retry pada akun yang sama teruji di emulator Tahap 5B. |
+| FR-006 US05 M/P0 dispute | Given pemohon sah, when mengajukan koreksi, then ID record unik persisten dan status dapat dibaca pemilik sesudah restart; error DB tidak mengaku dicatat | FR-007/010. Persistensi kasus dan kontrol pelacakan teruji dengan MongoDB lokal. |
+| FR-007 US04 M/P0 identitas | Given instalasi perangkat, when memperoleh credential, then principal server-issued stabil dan tak dapat diganti header; nomor tidak disebut terverifikasi tanpa bukti kepemilikan | NFR-001. Android memulai sesi eksplisit dengan Google. Login pada build rilis menunggu verifikasi. |
+| FR-008 US08 M/P0 sync | Given dataset > limit dan update/deletion, when semua halaman diproses, then tidak ada versi tertinggal dan cursor transaksional terpisah seed; retry/restart/revocation lulus | FR-004. Pagination backend dan cursor Room tersedia. Penerapan perubahan dan commit cursor Android belum memakai satu transaksi Room. |
 | FR-009 US06/07/09 M/P1 direktori+hub | Given instalasi baru dalam kondisi offline, when memilih wilayah pilot, then kontak terkurasi dapat ditemukan ≤ 5 detik pada uji tugas; dialer/WA/browser terbuka atau error yang jelas, bukan klaim sambungan | Kurator sumber/NFR-007; PARTIAL, panggilan nyata BLOCKED |
-| FR-010 US05 M/P1 moderator | Given staf berwenang, when meninjau report/dispute, then keputusan, alasan, aktor dan timestamp diaudit dan koreksi menghasilkan sync; pengguna biasa menerima 403 | FR-006/007/008; MISSING |
-| FR-011 US01/05 M/P1 whitelist | Given bukti resmi dan masa berlaku yang valid, when whitelist aktif, then tidak diblokir dan override berasal dari server, berlaku sesudah sync; expiry/revocation diaudit | FR-010/008; field server tersedia, workflow MISSING |
+| FR-010 US05 M/P1 moderator | Given staf berwenang, when meninjau report/dispute, then keputusan, alasan, aktor dan timestamp diaudit dan koreksi menghasilkan sync; pengguna biasa menerima 403 | FR-006/007/008. Panel, RBAC, keputusan, dan audit teruji lokal pada Tahap 6–8. |
+| FR-011 US01/05 M/P1 whitelist | Given bukti resmi dan masa berlaku yang valid, when whitelist aktif, then tidak diblokir dan override berasal dari server, berlaku sesudah sync; expiry/revocation diaudit | FR-010/008. Kurasi dan perlindungan data resmi tersedia di backend. Dampak revocation di perangkat fisik perlu diuji. |
 | FR-012 US04 M/P0 scoring | Given pelapor valid yang berbeda, when agregasi, then formula B = 8, bobot tabel dan half-life 90 hari konsisten, satu principal tidak memperbanyak kategori/tag/score; uji threshold 14.99/15/40/70 dan N = 1/2/3/5 | FR-004/007/010; PARTIAL |
-| FR-013 US10 M/P1 web+docs | Given API live, when lookup/report/stat, then sumber akurat termasuk nilai 0; respons OpenAPI sesuai format wire 11 endpoint; demo tidak mengaku hasil produksi | FR-002/004/008, skema kontrak; PARTIAL |
+| FR-013 US10 M/P1 web+docs | Given API live, when lookup/stat/sanggahan, then sumber akurat termasuk nilai 0; respons mengikuti kontrak OpenAPI; data simulasi diberi label | FR-002/006/008. Bukti kontrak dan web tersedia secara lokal. Deployment publik belum diverifikasi. |
 | FR-014 US01 M/P1 settings/history | Given toggle notifikasi OFF, when panggilan berisiko, then notifier mengikuti preference dan permission; seed/simulation tidak dihitung sebagai panggilan nyata | FR-003/NFR-006; PARTIAL |
 | FR-015 US11 W/P3 pesan/APK | Given spesifikasi baru disepakati, when desain fitur pesan dimulai, then review permission/privacy tersendiri; tidak disertakan pada gate MVP saat ini | M1–M4 selesai; SPEC_ONLY |
 | FR-016 US07 C/P3 pencarian terdekat berbasis GPS | Given data geo tervalidasi dan consent, when lookup terdekat dibangun, then kontrak lat/lng/indeks geo diuji; tidak diiklankan di MVP | FR-009, dataset geo; SPEC_ONLY |
-| FR-017 privasi M/P1 rights | Given pemilik principal sah, when meminta hapus/koreksi data, then akses dibatasi, hasil ditelusuri dan retensi backup dijelaskan; tidak menghapus bukti tanpa kebijakan | FR-007/010/NFR-002; MISSING |
+| FR-017 privasi M/P1 rights | Given pemilik principal sah, when meminta hapus/koreksi data, then akses dibatasi, hasil ditelusuri dan retensi backup dijelaskan; tidak menghapus bukti tanpa kebijakan | FR-007/010/NFR-002. Penghapusan akun dan pencabutan sesi teruji lokal. Kebijakan retensi backup masih perlu ditetapkan. |
 
-Perbaikan salah label dan persistensi dispute menaikkan prioritas US05 dari Should menjadi Must karena auto-block berdampak pada panggilan penting. Registrasi anonim bukan verifikasi kepemilikan; opsi verifikasi bisnis/OTP lengkap ditunda kecuali diperlukan pilot. Target deduplikasi 30 hari pada bagian 4.3/6.2 harus disepakati sebagai rolling window atau satu kontribusi aktif; keputusan final ada di ADR/backlog sebelum implementasi. Backend as-is hanya melakukan deduplikasi kontribusi skor pertama per identitas tanpa window, memberi SUSPICIOUS untuk 1 pelapor dengan skor ≥ 15, dan menerapkan decay hanya saat penulisan data.
+US05 menjadi Must karena salah label dapat menyebabkan panggilan penting ditolak. Verifikasi kepemilikan nomor dengan OTP ditunda kecuali diperlukan pilot. Aturan scoring yang disetujui dicatat di bagian 10 dan rincian acceptance ada di dokumen perencanaan.
 
 ### 8.1 Role, permission dan moderasi
 
@@ -613,17 +617,17 @@ Perbaikan salah label dan persistensi dispute menaikkan prioritas US05 dari Shou
 | Moderator | Antrean report/dispute, keputusan dengan alasan, koreksi false positive | RBAC internal; least privilege; tindakan diaudit |
 | Admin/kurator | Kelola akses staf, sumber kontak, whitelist dengan expiry, tampilan audit | Akses sensitif dibatasi; bukan CRUD semua data tanpa log |
 
-As-is hanya field role USER dan token claims, tanpa enforcement admin/panel. Minimum MVP berupa endpoint internal dan panel sederhana **wajib P1**; login aman dan keamanan dispute mendahului panel. Superadmin, grafik besar dan analitik kompleks P2/P3. Detail keputusan/effort/alternatif [FEATURE_GAP_ANALYSIS](docs/FEATURE_GAP_ANALYSIS.md).
+Panel staf tertanam di backend. Sesi staf terpisah dari JWT pengguna dan menerapkan peran `MOD` dan `ADMIN`. Verifikasi Tahap 6 mencatat uji antrean, keputusan, kurasi, dan audit. [Bukti Tahap 6](docs/verification/2026-11-16-stage-6.md).
 
 ### 8.2 NFR, threat model dan batas privasi
 
 | ID / prioritas | Acceptance terukur target | Dependensi / status |
 |---|---|---|
 | NFR-001 M/P0 security | Secret produksi kosong → startup gagal; JWT tidak valid menghasilkan 401, hak akses tidak mencukupi menghasilkan 403, kuota terlampaui menghasilkan 429; replay idempoten; ukuran body/field dibatasi; origin CORS terdaftar; tidak ada token/nomor utuh di log | B01/B05/B07; PARTIAL |
-| NFR-002 M/P1 privacy | PII tidak direspons publik; tujuan persetujuan dan retensi terbit; delete/export diuji principal; enkripsi HTTPS dan akses penyimpanan minimum; buku kontak tidak diunggah | FR-017; PARTIAL, deletion MISSING |
+| NFR-002 M/P1 privacy | PII tidak direspons publik; tujuan persetujuan dan retensi terbit; delete/export diuji principal; enkripsi HTTPS dan akses penyimpanan minimum; buku kontak tidak diunggah | FR-017. Redaksi dan penghapusan akun teruji lokal. Kebijakan retensi dan operasional tersedia setelah ditetapkan. |
 | NFR-003 M/P0 resilience | Callback Telecom total < 5 detik atau allow; API 800 ms bukan deadline total; timeout/cache miss/stale tidak menghasilkan klaim aman palsu; cancellation tidak menghilangkan respons | FR-003; PARTIAL |
 | NFR-004 M/P1 durability | Report/dispute yang diterima tetap ada setelah restart; insert/aggregate/journal recovery konsisten; upgrade Room mempertahankan data pending; uji restore DB berhasil | B03/B05/B10/B14; PARTIAL |
-| NFR-005 S/P2 performance | Laporkan p50/p95 pada device/dataset/beban bernama; cache 20 ms/API 150 ms target awal, bukan hasil; jangan pakai latensi pembacaan lokal sebagai waktu API keseluruhan | Fixture benchmark; belum terukur |
+| NFR-005 S/P2 performance | Laporkan p50/p95 pada device/dataset/beban bernama; cache 20 ms/API 150 ms target awal, bukan hasil; jangan pakai latensi pembacaan lokal sebagai waktu API keseluruhan | Benchmark fixture Tahap 8 tersedia. Latensi perangkat dan staging masih terbuka. |
 | NFR-006 M/P1 accessibility | Target sentuh utama 56 dp/darurat 64 dp sesuai DESIGN; TalkBack memberi label; font 130%/mode terang-gelap/izin ditolak tidak menutup aksi utama | FR-001/009/014; PARTIAL |
 | NFR-007 M/P1 provenance | Seluruh kontak pilot mempunyai source URL/reviewer/verifiedAt nyata; fixture terisolasi dan setiap render menampilkan sumber/freshness yang benar | FR-009/011; PARTIAL |
 | NFR-008 M/P1 maintainability | Pemeriksaan Go/kontrak, kompilasi Android dan jalur kegagalan UI di CI; correlation ID dan kelas error tanpa PII; migrasi berversi; operator dapat mendeteksi kegagalan sync | B08/B14; PARTIAL |
@@ -641,29 +645,28 @@ flowchart TD
     ROLE -->|Tidak| AL[Allow dan tidak mengklaim aman]
     ROLE -->|Ya| CA[(Room cache)]
     CA -->|Cache miss| API[Lookup API maksimal 800 ms]
-    CA -->|Hit AS-IS tanpa TTL| PO[Policy auto-block AS-IS]
+    CA -->|Cache reputasi tersedia| PO[Evaluasi level, asal data, umur cache, dan whitelist]
     API -->|Gagal atau kosong| AL
     API -->|Hasil| PO
     PO -->|Toggle ON dan policy true| BL[Reject call lalu log dan notifier]
     PO -->|Lainnya| WA[Allow lalu warning jika berisiko]
-    CA -.->|PROPOSED freshness dan whitelist gate| SAFE[Hanya bukti valid untuk blokir]
 ```
 
-AS-IS policy masih dapat memblokir SPAM/kategori berisiko dan cache tidak TTL; diagram menunjukkan lokasi perbaikan, bukan klaim target konservatif sudah aktif. Panggilan nyata belum diuji. Batas total callback Android 5 detik mengikuti [referensi Android](https://developer.android.com/reference/android/telecom/CallScreeningService).
+Android mengizinkan panggilan jika evaluasi belum selesai dalam 4,2 detik. T-605 mengukur waktu callback dan perilaku notifikasi pada perangkat fisik. [Referensi Android](https://developer.android.com/reference/android/telecom/CallScreeningService), [checklist HP](docs/workspace/CHECKLIST_TESTING_HP.md).
 
 ```mermaid
 flowchart TD
-    FORM[Form report] --> POST[POST reports]
+    FORM[Form report] --> OUT[(Outbox Room)]
+    OUT --> POST[POST reports dengan Idempotency-Key]
     POST -->|Mongo mode sukses| SR[(spam_reports)]
     SR --> AG[Aggregate phone_tags]
     AG --> ACK[201 dan cache respons]
-    POST -->|Network atau HTTP error AS-IS| LOC[Agregat lokal dan ID lokal]
-    LOC --> UI[UI tersimpan di perangkat - bukan server]
-    FORM -.->|PROPOSED offline payload durable| OUT[(Room outbox)]
-    OUT -.->|PROPOSED retry idempotent| POST
+    POST -->|Gangguan sementara| WAIT[Tandai pending dan kirim ulang dengan kunci yang sama]
+    WAIT --> OUT
+    POST -->|Penolakan permanen| ERROR[Tampilkan laporan ditolak]
 ```
 
-Outbox dan replay adalah target belum ada. Insert dan agregasi Mongo belum atomik; 500 dapat terjadi setelah insert. UI sudah membedakan ID laporan lokal, tetapi record komentar offline belum persisten. Sequence, ERD, use case, moderation/state, onboarding, lookup, sync, directory, DFD dan deployment lengkap pada [FLOWS_AND_DIAGRAMS](docs/FLOWS_AND_DIAGRAMS.md), [DATABASE_DESIGN](docs/DATABASE_DESIGN.md), [SYSTEM_ARCHITECTURE](docs/SYSTEM_ARCHITECTURE.md).
+Outbox menyimpan payload dan status per laporan. Logout menjeda laporan yang belum dikirim. Uji Tahap 5B mencakup retry pada akun pemilik dan Tahap 8 mencakup idempotensi backend. [Bukti Tahap 5B](docs/verification/2026-11-16-stage-5b.md), [QA Test Plan](docs/QA_TEST_PLAN.md).
 
 ### 8.4 Test, traceability dan release gate
 
@@ -683,7 +686,7 @@ Keputusan/konsekuensi dan alternatif tercatat di [ARCHITECTURE_DECISIONS](docs/A
 
 ## 10. MASTER PLAN 1.2.0 (DISETUJUI): KEPUTUSAN RANCANGAN DAN KEBUTUHAN TAMBAHAN
 
-Bagian ini telah **DISETUJUI pada 14 November 2026** (lihat [17-KEPUTUSAN-ARSITEKTUR](docs/planning/17-KEPUTUSAN-ARSITEKTUR.md)) sebagai spesifikasi target implementasi (kode produk belum diubah). Dokumen rinci: [indeks planning](docs/planning/README.md) dan katalog 17 diagram di [13-DIAGRAM-SISTEM](docs/planning/13-DIAGRAM-SISTEM.md).
+Bagian ini merekam spesifikasi target yang disetujui pada **14 November 2026**. Status implementasi terbaru ada di bagian 1.4 dan 8. [Keputusan arsitektur](docs/planning/17-KEPUTUSAN-ARSITEKTUR.md), [indeks planning](docs/planning/README.md), [katalog diagram](docs/planning/13-DIAGRAM-SISTEM.md).
 
 ### 10.1 Keputusan yang mengubah atau memperjelas bagian 1 sampai 9
 

@@ -112,7 +112,7 @@ backend/
 ├── config/
 │   ├── config.go           # Membaca environment variable: MONGOSTRING, DB_NAME, PORT. Berisi nama-nama koleksi MongoDB.
 │   └── db.go               # Koneksi ke MongoDB, membuat index, seed data awal, dan semua query (lookup, simpan laporan, statistik).
-│                           # Kalau MongoDB tidak bisa dihubungi, otomatis pindah ke mode "in-memory" (data hilang saat server mati).
+│                           # Backend berhenti saat startup jika URI MongoDB diisi tetapi database gagal diakses.
 ├── controller/             # "Penerima pesanan": satu fungsi per endpoint.
 │   ├── auth.go             # POST /api/v1/auth/device (daftar perangkat, terbitkan token JWT)
 │   ├── lookup.go           # GET /api/v1/phones/{e164} dan GET /api/v1/phones/{e164}/reports
@@ -254,14 +254,15 @@ Kamu **tidak perlu membuat database atau koleksi manual**. Backend akan membuat 
 
 | Variabel | Fungsi | Default kalau tidak diisi |
 | :--- | :--- | :--- |
-| `MONGOSTRING` (atau `MONGODB_URI`) | Alamat MongoDB | kosong &rarr; **mode in-memory** (data tidak tersimpan permanen) |
+| `APP_ENV` | Mode backend | Wajib diisi dengan `dev`, `prod`, atau `production` |
+| `MONGOSTRING` (atau `MONGODB_URI`) | Alamat MongoDB | URI kosong mengaktifkan memori hanya pada `APP_ENV=dev` |
 | `DB_NAME` | Nama database | `calltag_db` |
 | `PORT` | Port server | `8080` |
 | `JWT_SECRET` | Kunci tanda tangan token login | nilai bawaan pengembangan |
 | `HASH_SALT` | Garam untuk hash nomor/perangkat | nilai bawaan pengembangan |
 
 > [!IMPORTANT]
-> Kalau `MONGOSTRING` tidak di-set, backend **tetap jalan** tapi memakai memori (data laporan hilang saat server dimatikan). Karena MongoDB kamu sudah terpasang, selalu jalankan dengan `MONGOSTRING`.
+> Untuk menyimpan data di MongoDB, isi URI saat menjalankan backend. Jika kedua URI kosong pada `APP_ENV=dev`, data demo disimpan di memori sampai proses berhenti.
 
 ### 5.2 Jalankan Unit Test (Opsional tapi Disarankan)
 
@@ -282,7 +283,7 @@ Masih di **Terminal 1**:
 ```bash
 cd ~/Documents/Kuliah/Semester5/CallTAG/backend
 
-export MONGOSTRING="mongodb://localhost:27017"
+export APP_ENV=dev MONGOSTRING="mongodb://localhost:27017"
 export DB_NAME="calltag_db"
 export PORT="8080"
 export JWT_SECRET="ganti-dengan-rahasia-kamu"
@@ -300,13 +301,13 @@ go run main.go
 [CallTag Backend gocroot] Server berjalan pada http://localhost:8080
 ```
 
-Kalau yang muncul `MONGOSTRING belum diset` atau `beralih ke fallback in-memory`, berarti backend **tidak** tersambung ke MongoDB. Lihat bagian [Troubleshooting](#11-troubleshooting-masalah-yang-sering-muncul).
+Cek `/readyz` dan pastikan `storage_mode` bernilai `mongodb-connected`. Jika startup berhenti karena MongoDB gagal, lihat bagian [Troubleshooting](#11-troubleshooting-masalah-yang-sering-muncul).
 
 > [!TIP]
 > Biar tidak mengetik `export` terus, buat file `backend/run-dev.sh`:
 > ```bash
 > #!/usr/bin/env bash
-> export MONGOSTRING="mongodb://localhost:27017"
+> export APP_ENV=dev MONGOSTRING="mongodb://localhost:27017"
 > export DB_NAME="calltag_db"
 > export PORT="8080"
 > export JWT_SECRET="ganti-dengan-rahasia-kamu"
@@ -692,7 +693,7 @@ Penjelasan singkat:
 | Gejala | Penyebab | Solusi |
 | :--- | :--- | :--- |
 | Log backend: `MONGOSTRING belum diset` | Lupa `export MONGOSTRING` di terminal yang sama | Jalankan ulang perintah `export` di [5.3](#53-nyalakan-server) di terminal tempat `go run` |
-| Log backend: `MongoDB tidak merespons ping` | Service MongoDB mati | `sudo systemctl start mongodb` lalu jalankan ulang backend |
+| Log backend: `Ping MongoDB gagal` | Service MongoDB mati | `sudo systemctl start mongodb` lalu jalankan ulang backend |
 | `listen tcp :8080: bind: address already in use` | Backend lama masih jalan | `ss -ltnp \| grep 8080` lihat PID, lalu `kill <PID>` |
 | `/health` menunjukkan `"storage_mode": "in-memory-seeded"` | Backend tidak tersambung MongoDB | Sama dengan dua baris pertama |
 | Website badge kuning `MODE DEMO` | Backend mati atau URL di **Konfigurasi API** salah | Nyalakan backend, set URL `http://localhost:8080`, klik **Simpan & Sinkronkan** |
@@ -718,7 +719,7 @@ Setiap mau ngoding/demo di VS Code atau Antigravity, buka terminal:
 # Terminal 1: Backend + MongoDB
 sudo systemctl start mongodb        # kalau belum enable
 cd ~/Documents/Kuliah/Semester5/CallTAG/backend
-export MONGOSTRING="mongodb://localhost:27017" DB_NAME="calltag_db" PORT="8080"
+export APP_ENV=dev MONGOSTRING="mongodb://localhost:27017" DB_NAME="calltag_db" PORT="8080"
 go run main.go
 
 # Terminal 2: apidocs

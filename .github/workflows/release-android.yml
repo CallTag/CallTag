@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'gradlew*'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/release-android.yml'
   workflow_dispatch:
     inputs:
       bump_type:
@@ -20,28 +28,26 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: android-release
+  cancel-in-progress: false
+
 jobs:
-  auto-tag:
-    name: Auto-Tag (Semantic Versioning)
+  build-and-release:
+    name: Build & Release APK + AAB
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    outputs:
-      tag_name: ${{ steps.semver.outputs.tag_name }}
-      version_name: ${{ steps.semver.outputs.version_name }}
-      version_code: ${{ steps.semver.outputs.version_code }}
     steps:
       - name: Checkout Repository (Full History & Tags)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Calculate & Push Next Semantic Version Tag
+      - name: Calculate Next Semantic Version
         id: semver
         env:
           INPUT_BUMP: ${{ github.event.inputs.bump_type || 'auto' }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           LATEST_TAG=$(git tag -l "v[0-9]*.[0-9]*.[0-9]*" --sort=-v:refname | head -n 1)
 
           if [ -z "$LATEST_TAG" ]; then
@@ -89,28 +95,10 @@ jobs:
             VERSION_CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
           fi
 
-          if git rev-parse "$NEXT_TAG" >/dev/null 2>&1; then
-            echo "Tag $NEXT_TAG sudah ada, melewati git tag push."
-          else
-            git tag -a "$NEXT_TAG" -m "Release $NEXT_TAG"
-            git push origin "$NEXT_TAG"
-          fi
-
           echo "tag_name=$NEXT_TAG" >> "$GITHUB_OUTPUT"
           echo "version_name=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
           echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
           echo "Berhasil menyiapkan rilis: $NEXT_TAG (versionName=$NEXT_VERSION, versionCode=$VERSION_CODE)"
-
-  build-and-release:
-    name: Build & Release APK + AAB
-    needs: auto-tag
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository at Release Tag
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.auto-tag.outputs.tag_name }}
-          fetch-depth: 0
 
       - name: Setup JDK 17 (Temurin)
         uses: actions/setup-java@v4
@@ -127,22 +115,23 @@ jobs:
       - name: Grant Execute Permission for gradlew
         run: chmod +x gradlew
 
-      - name: Decode Keystore from GitHub Secrets (With Fallback)
+      - name: Decode Release Keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "$KEYSTORE_BASE64" | base64 --decode > "${GITHUB_WORKSPACE}/release.keystore"
-            echo "KEYSTORE_FILE=${GITHUB_WORKSPACE}/release.keystore" >> "$GITHUB_ENV"
-            echo "Release keystore berhasil didekode untuk produksi."
-          else
-            echo "Secret KEYSTORE_BASE64 belum diatur. Build menggunakan fallback debug signing."
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::Secret KEYSTORE_BASE64 wajib diatur untuk rilis Android."
+            exit 1
           fi
+          umask 077
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/calltag-release.keystore"
+          echo "KEYSTORE_FILE=$RUNNER_TEMP/calltag-release.keystore" >> "$GITHUB_ENV"
 
       - name: Build Signed APK & AAB (assembleRelease & bundleRelease)
         env:
-          VERSION_NAME: ${{ needs.auto-tag.outputs.version_name }}
-          VERSION_CODE: ${{ needs.auto-tag.outputs.version_code }}
+          VERSION_NAME: ${{ steps.semver.outputs.version_name }}
+          VERSION_CODE: ${{ steps.semver.outputs.version_code }}
+          BASE_API_URL: ${{ vars.BASE_API_URL }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -155,23 +144,23 @@ jobs:
       - name: Prepare Release Artifacts (app-release.apk & app-release.aab)
         run: |
           mkdir -p release-assets
-          if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
-            cp "app/build/outputs/apk/release/app-release.apk" "release-assets/app-release.apk"
-          elif [ -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
-            cp "app/build/outputs/apk/release/app-release-unsigned.apk" "release-assets/app-release.apk"
-          fi
+          cp app/build/outputs/apk/release/app-release.apk release-assets/
+          cp app/build/outputs/bundle/release/app-release.aab release-assets/
 
-          if [ -f "app/build/outputs/bundle/release/app-release.aab" ]; then
-            cp "app/build/outputs/bundle/release/app-release.aab" "release-assets/app-release.aab"
-          fi
-
-          ls -lh release-assets/
+      - name: Push Release Tag
+        env:
+          RELEASE_TAG: ${{ steps.semver.outputs.tag_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$RELEASE_TAG" -m "Release $RELEASE_TAG"
+          git push origin "refs/tags/$RELEASE_TAG"
 
       - name: Create GitHub Release & Upload APK + AAB
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.auto-tag.outputs.tag_name }}
-          name: "CallTag Android ${{ needs.auto-tag.outputs.tag_name }}"
+          tag_name: ${{ steps.semver.outputs.tag_name }}
+          name: "CallTag Android ${{ steps.semver.outputs.tag_name }}"
           generate_release_notes: true
           files: |
             release-assets/app-release.apk

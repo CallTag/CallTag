@@ -1,3 +1,5 @@
+import java.net.URI
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -36,10 +38,37 @@ val resolvedKeystoreFile = keystoreFileEnv?.let { path ->
     }
 }
 
-val hasValidReleaseKeystore = resolvedKeystoreFile != null &&
+val hasValidReleaseKeystore = resolvedKeystoreFile?.isFile == true &&
     keystorePasswordEnv != null &&
     keyAliasEnv != null &&
     keyPasswordEnv != null
+
+val configuredApiUrl = providers.gradleProperty("baseApiUrl")
+    .orElse(providers.environmentVariable("BASE_API_URL"))
+    .orNull?.trim()?.takeIf { it.isNotEmpty() }
+val parsedApiUrl = configuredApiUrl?.let { runCatching { URI(it) }.getOrNull() }
+val releaseApiUrl = parsedApiUrl?.takeIf {
+    it.scheme == "https" && it.host != null && it.rawUserInfo == null &&
+        it.rawQuery == null && it.rawFragment == null && (it.port == -1 || it.port in 1..65535)
+}?.toASCIIString()
+
+fun apiUrlBuildConfigValue(url: String): String =
+    "\"${url.trimEnd('/').replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r")}/\""
+
+val validateReleaseConfiguration = tasks.register("validateReleaseConfiguration") {
+    doLast {
+        require(releaseApiUrl != null) {
+            "Build rilis memerlukan BASE_API_URL (atau -PbaseApiUrl) dengan URL HTTPS yang valid tanpa kredensial, query, atau fragmen."
+        }
+        require(hasValidReleaseKeystore) {
+            "Build rilis memerlukan file KEYSTORE_FILE serta KEYSTORE_PASSWORD, KEY_ALIAS dan KEY_PASSWORD."
+        }
+    }
+}
+
+tasks.matching { it.name == "preReleaseBuild" || it.name == "validateSigningRelease" }.configureEach {
+    dependsOn(validateReleaseConfiguration)
+}
 
 android {
     namespace = "id.calltag.app"
@@ -57,10 +86,6 @@ android {
             useSupportLibrary = true
         }
 
-        val apiUrl = (project.findProperty("baseApiUrl") as? String)
-            ?: System.getenv("BASE_API_URL")
-            ?: "http://10.0.2.2:8080/"
-        buildConfigField("String", "BASE_API_URL", "\"$apiUrl\"")
         val googleClientId = providers.gradleProperty("googleClientId")
             .orElse(providers.environmentVariable("GOOGLE_CLIENT_ID"))
             .orElse("23321394343-9vp7211b0tplpro2upuo0pvoj8s31tl7.apps.googleusercontent.com")
@@ -72,8 +97,8 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            if (hasValidReleaseKeystore) {
+        if (hasValidReleaseKeystore) {
+            create("release") {
                 storeFile = resolvedKeystoreFile
                 storePassword = keystorePasswordEnv
                 keyAlias = keyAliasEnv
@@ -83,13 +108,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "BASE_API_URL", apiUrlBuildConfigValue(configuredApiUrl ?: "http://10.0.2.2:8080/"))
+        }
         release {
             isMinifyEnabled = false
-            signingConfig = if (hasValidReleaseKeystore) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            buildConfigField("String", "BASE_API_URL", releaseApiUrl?.let(::apiUrlBuildConfigValue) ?: "\"\"")
+            signingConfig = signingConfigs.findByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

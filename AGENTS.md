@@ -11,14 +11,14 @@ Single-module Android app (`:app`), Jetpack Compose + Room + Retrofit. Package `
 
 ## Backend is NOT in this repo
 - The REST API (Go `gocroot` + MongoDB) and Swagger docs are separate repos. This repo is only the mobile client.
-- `BuildConfig.BASE_API_URL` defaults to `http://10.0.2.2:8080/` (emulator → host localhost). Override with `-PbaseApiUrl=...` or env `BASE_API_URL`.
+- Debug defaults to `http://10.0.2.2:8080/` (emulator → host localhost). Set `-PbaseApiUrl=...` or env `BASE_API_URL` to override it. Release requires an explicit HTTPS URL and blocks cleartext traffic.
 - All network calls are wrapped in `runCatching` + `withTimeoutOrNull`, and the app **degrades to offline seed data** (`data/local/OfflineSeedData.kt`) rather than throwing. Preserve this offline-first fallback when touching `CallTagRepository`.
 
 ## Architecture (where things are wired)
 - Wiring: `CallTagApplication` lazily builds `CallTagDatabase`, `CallTagPreferences`, `CallTagRepository`. No DI framework — add dependencies through `CallTagApplication` and pass down.
 - `data/remote/NetworkModule.kt` exposes **two** Retrofit clients on `ApiService`: a standard client (8s timeouts) and a `fastScreeningApiService` with **800ms timeouts** used only by the call-screening service. Use the fast one for anything on the incoming-call path.
 - Tahap 5B: login is explicit and optional. Legacy tokens do not grant account mode; never bootstrap guests through 401 handling. Session/outbox ownership and personal whitelist are local. Guest may still submit/track disputes. Account settings live in `AccountSettingsScreen`; theme persists in DataStore.
-- `ApiService` endpoint contracts are documented against `PRD.md` §5.3 (11 endpoints). `PRD.md` is the spec source of truth; `DESIGN.md` is the visual/design source of truth (colors, 4-tier `reputation_level`, monospace phone digits, 56dp/64dp touch targets). Consult them before changing DTOs, categories, or UI styling.
+- `PRD.md` §5.3 summarizes API groups. The wire contract is in the separate `apidocs` repository (`openapi.json`). `PRD.md` is the product spec and `DESIGN.md` is the visual design reference (colors, four reputation levels, monospace phone digits, 56dp/64dp touch targets). Consult them before changing DTOs, categories, or UI styling.
 - Call flow: `service/CallTagScreeningService` (a `CallScreeningService`) → `PhoneNormalizer.normalizeToE164` → `repository.screenIncomingPhone` (Room cache first, then 800ms API) → auto-block decision in `PhoneNormalizer.shouldAutoBlock` (gated by the DataStore `auto_block_scammer` toggle, default OFF (opt-in)) → `service/CallerIdNotifier` (heads-up notification + `TYPE_APPLICATION_OVERLAY` window). The overlay draws with `android.view` + `WindowManager`, not Compose.
 - Room DB is version 2 with explicit `Migration(1, 2)` for outbox/sync/provenance. Preserve existing data and add explicit migrations when changing schema.
 - UI: `MainScaffold` holds a 5-tab bottom nav (Cari / Darurat / Beri #Tag / Proteksi / Akun) driven by an integer index, no Navigation library. Screens live in `ui/screens/`; state via `CallTagMainViewModel` (`UiLoadState` sealed type: Idle/Loading/Success/Error).
@@ -53,7 +53,7 @@ All four screens (`HomeScreen`, `EmergencyScreen`, `ReportAndHubScreen`, `SpamGu
 - Many UI strings are hardcoded inline in Composables (not in `strings.xml`, which only holds the app name and notification channel). Match the surrounding file's style.
 
 ## Release / CI
-- `.github/workflows/release-android.yml` runs on **push to `main`** and on `workflow_dispatch` (with `bump_type`).
-- It auto-computes the next semver tag from the last `v*.*.*` tag and the **latest commit message** (conventional commits: `feat` → minor, `feat!`/`BREAKING CHANGE` → major, else patch), then builds `assembleRelease bundleRelease` and publishes a GitHub Release with APK + AAB.
-- So: commit prefixes on `main` directly control version numbers. `versionName`/`versionCode` may come from `-P` props or `VERSION_NAME`/`VERSION_CODE`/`GITHUB_REF_NAME` env. Release signing is optional — falls back to debug signing when keystore secrets are absent (see `app/build.gradle.kts`).
+- `.github/workflows/release-android.yml` runs for changes to Android build files on `main` and supports `workflow_dispatch` on `main` with `bump_type`.
+- The workflow computes the next semver from the latest `v*.*.*` tag and commit message, builds the signed APK and AAB, then tags the built commit and publishes both files.
+- Set the GitHub Actions variable `BASE_API_URL` and the secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`. Local release builds use `KEYSTORE_FILE` in place of `KEYSTORE_BASE64`. See [deployment and demo](docs/planning/16-DEPLOYMENT-DAN-DEMO.md).
 - `isMinifyEnabled = false` for release; don't assume R8/proguard runs.

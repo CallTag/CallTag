@@ -60,7 +60,7 @@ Jalankan hanya pada mesin pengembangan dan database baru. Pastikan port bebas, j
 mongod --dbpath /tmp/DIREKTORI_AUDIT_BARU --port 28018 --bind_ip 127.0.0.1 --nounixsocket
 
 # Terminal API, dari repo backend. Secret kuat harus diinjeksi privat.
-env MONGOSTRING=mongodb://127.0.0.1:28018 DB_NAME=calltag_audit PORT=8080 go run .
+env APP_ENV=dev MONGOSTRING=mongodb://127.0.0.1:28018 DB_NAME=calltag_audit PORT=8080 go run .
 
 # GET read-only ke lingkungan lokal.
 curl --fail --max-time 8 http://127.0.0.1:8080/health
